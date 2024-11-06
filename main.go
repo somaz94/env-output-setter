@@ -12,18 +12,30 @@ func setEnv(keys, values string) error {
 	if len(keyList) != len(valueList) {
 		return fmt.Errorf("env_key and env_value must have the same number of entries")
 	}
+
 	envPath := os.Getenv("GITHUB_ENV")
-	file, err := os.OpenFile(envPath, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	for i, key := range keyList {
-		_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, valueList[i]))
+	if envPath == "" {
+		fmt.Println("GITHUB_ENV is not set, skipping writing to GitHub Actions environment.")
+		// Local execution - print values
+		for i, key := range keyList {
+			fmt.Printf("Setting environment variable locally: %s=%s\n", key, valueList[i])
+		}
+	} else {
+		// GitHub Actions - write to GITHUB_ENV
+		file, err := os.OpenFile(envPath, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to open GITHUB_ENV file: %v", err)
+		}
+		defer file.Close()
+
+		for i, key := range keyList {
+			_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, valueList[i]))
+			if err != nil {
+				return fmt.Errorf("failed to write to GITHUB_ENV file: %v", err)
+			}
 		}
 	}
+
 	return nil
 }
 
@@ -33,21 +45,34 @@ func setOutput(keys, values string) (string, error) {
 	if len(keyList) != len(valueList) {
 		return "", fmt.Errorf("output_key and output_value must have the same number of entries")
 	}
-	outputPath := os.Getenv("GITHUB_OUTPUT")
-	file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
 
+	outputPath := os.Getenv("GITHUB_OUTPUT")
 	var outputSummary strings.Builder
-	for i, key := range keyList {
-		entry := fmt.Sprintf("%s=%s", key, valueList[i])
-		outputSummary.WriteString(entry + " ")
-		// Write each output key-value pair individually
-		_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, valueList[i]))
+
+	if outputPath == "" {
+		fmt.Println("GITHUB_OUTPUT is not set, skipping writing to GitHub Actions output.")
+		// Local execution - print values
+		for i, key := range keyList {
+			entry := fmt.Sprintf("%s=%s", key, valueList[i])
+			fmt.Printf("Setting output variable locally: %s\n", entry)
+			outputSummary.WriteString(entry + " ")
+		}
+	} else {
+		// GitHub Actions - write to GITHUB_OUTPUT
+		file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to open GITHUB_OUTPUT file: %v", err)
+		}
+		defer file.Close()
+
+		for i, key := range keyList {
+			entry := fmt.Sprintf("%s=%s", key, valueList[i])
+			outputSummary.WriteString(entry + " ")
+
+			_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, valueList[i]))
+			if err != nil {
+				return "", fmt.Errorf("failed to write to GITHUB_OUTPUT file: %v", err)
+			}
 		}
 	}
 
@@ -71,6 +96,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Print success message for GitHub Action output
-	fmt.Printf("success_message=Environment and outputs set successfully: %s\n", outputSummary)
+	if os.Getenv("GITHUB_ENV") == "" && os.Getenv("GITHUB_OUTPUT") == "" {
+		// Local execution - print the success message
+		fmt.Printf("Local Execution - Environment and outputs set successfully: %s\n", outputSummary)
+	} else {
+		// GitHub Actions - write success message
+		fmt.Printf("success_message=Environment and outputs set successfully: %s\n", outputSummary)
+	}
 }

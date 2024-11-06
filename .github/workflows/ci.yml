@@ -54,6 +54,8 @@ jobs:
           --env ENV_VALUE="${{ env.ENV_VALUE }}" \
           --env OUTPUT_KEY="${{ env.OUTPUT_KEY }}" \
           --env OUTPUT_VALUE="${{ env.OUTPUT_VALUE }}" \
+          --env GITHUB_ENV="$GITHUB_ENV" \
+          --env GITHUB_OUTPUT="$GITHUB_OUTPUT" \
           --volume ${{ github.workspace }}:/app \
           --rm ${{ env.TEST_TAG }} 
 
