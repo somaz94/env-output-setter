@@ -22,9 +22,15 @@ func setEnv(keys, values string) error {
 		}
 	} else {
 		// GitHub Actions - write to GITHUB_ENV
+		file, err := os.OpenFile(envPath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return fmt.Errorf("failed to open GITHUB_ENV file: %v", err)
+		}
+		defer file.Close()
+
 		for i, key := range keyList {
 			line := fmt.Sprintf("%s=%s\n", key, valueList[i])
-			if err := os.WriteFile(envPath, []byte(line), os.ModeAppend); err != nil {
+			if _, err := file.WriteString(line); err != nil {
 				return fmt.Errorf("failed to write to GITHUB_ENV file: %v", err)
 			}
 		}
@@ -52,9 +58,15 @@ func setOutput(keys, values string) (string, error) {
 		}
 	} else {
 		// GitHub Actions - write to GITHUB_OUTPUT
+		file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return "", fmt.Errorf("failed to open GITHUB_OUTPUT file: %v", err)
+		}
+		defer file.Close()
+
 		for i, key := range keyList {
 			line := fmt.Sprintf("%s=%s\n", key, valueList[i])
-			if err := os.WriteFile(outputPath, []byte(line), os.ModeAppend); err != nil {
+			if _, err := file.WriteString(line); err != nil {
 				return "", fmt.Errorf("failed to write to GITHUB_OUTPUT file: %v", err)
 			}
 			outputSummary.WriteString(line)
