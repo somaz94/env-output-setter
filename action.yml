@@ -14,9 +14,6 @@ inputs:
   output_value:
     description: "Comma-separated list of output values"
     required: true
-outputs:
-  success_message:
-    description: "Confirmation message indicating successful setting of environment and output variables."
 runs:
   using: "docker"
   image: "Dockerfile"

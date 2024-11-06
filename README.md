@@ -20,13 +20,6 @@ The **GitHub Environment/Output Setter** is a GitHub Action that allows you to s
 | `output_key`   | Yes      | Comma-separated list of output keys                           | `"GCP_OUTPUT,AWS_OUTPUT"`   |
 | `output_value` | Yes      | Comma-separated list of output values                         | `"gcp_success,aws_success"` |
 
-## Outputs
-
-| Output            | Description                                                                |
-|-------------------|----------------------------------------------------------------------------|
-| `success_message` | Confirmation message indicating successful setting of environment and output variables. |
-
-
 ### Example Workflow
 
 Below is an example of how to use the **GitHub Environment/Output Setter** action in a GitHub Actions workflow. This example sets environment variables and output variables and then prints the success message.
@@ -48,19 +41,10 @@ jobs:
           output_key: "GCP_OUTPUT,AWS_OUTPUT"
           output_value: "gcp_success,aws_success"
 
-      - name: Display Success Message
+      - name: Display Env and Output Variables
         run: |
-          echo "Success: ${{ steps.set_variables.outputs.success_message }}"
-
-    outputs:
-      GCP_REGION: ${{ steps.run.outputs.GCP_OUTPUT }}
-      AWS_OUTPUT: ${{ steps.run.outputs.AWS_OUTPUT }}
+          echo "GCP_REGION: ${{ env.GCP_REGION }}" # asis-northeast1
+          echo "AWS_REGION: ${{ env.AWS_REGION }}" # us-east-1
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
 ```
-
-### Additional Information
-
-- **Icon**: settings
-- **Color**: blue
-- **Author**: somaz94
-
-This action is packaged in a Docker container, making it portable and easy to run on any compatible GitHub Actions runner. 
