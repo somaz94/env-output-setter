@@ -70,7 +70,7 @@ jobs:
         run: git config --global --add safe.directory ${{ github.workspace }}
 
       - name: Test Local Action
-        id: run
+        id: set_variables
         uses: ./
         with:
           env_key: test1,test2 
@@ -87,7 +87,6 @@ jobs:
       - name: Display Success Message
         run: |
           echo "Success: ${{ steps.set_variables.outputs.success_message }}"
-  
-    outputs:
-      TEST1: ${{ steps.run.outputs.test1 }}
-      TEST2: ${{ steps.run.outputs.test2 }}
+          echo "TEST1: ${{ steps.set_variables.outputs.test1 }}"
+          echo "TEST2: ${{ steps.set_variables.outputs.test2 }}"
+
