@@ -42,7 +42,6 @@ jobs:
           tags: ${{ env.TEST_TAG }}
       
       - name: Run the Container 
-        id: run
         env: 
           ENV_KEY: test1,test2 
           ENV_VALUE: somaz,gomaz 
@@ -57,10 +56,32 @@ jobs:
           --volume ${{ github.workspace }}:/app \
           --rm ${{ env.TEST_TAG }} 
 
+  test-action:
+    name: Test env-output-setter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory ${{ github.workspace }}
+
+      - name: Test Local Action
+        id: run
+        uses: ./
+        with:
+          env_key: test1,test2 
+          env_value: somaz,gomaz 
+          output_key: test1,test2 
+          output_value: zomaz,xomae 
+
       - name: Display Individual Environment Variables
         run: |
           echo "Displaying individual environment variables:"
-          echo "test1: {{ env.test1 }}"
+          echo "test1: ${{ env.test1 }}"
           echo "test2: ${{ env.test2 }}"
 
       - name: Display Success Message
