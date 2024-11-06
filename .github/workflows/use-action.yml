@@ -31,6 +31,6 @@ jobs:
         run: |
           echo "GCP_REGION: ${{ env.GCP_REGION }}" # asis-northeast1
           echo "AWS_REGION: ${{ env.AWS_REGION }}" # us-east-1
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}" # gcp_success
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}" # aws_success
 
