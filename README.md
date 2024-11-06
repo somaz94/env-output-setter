@@ -1,9 +1,9 @@
 # GitHub Environment/Output Setter
 
-[![License](https://img.shields.io/github/license/somaz94/ienv-output-setter)](https://github.com/somaz94/container-action)
+[![License](https://img.shields.io/github/license/somaz94/env-output-setter)](https://github.com/somaz94/container-action)
 ![Latest Tag](https://img.shields.io/github/v/tag/somaz94/env-output-setter)
 ![Top Language](https://img.shields.io/github/languages/top/somaz94/env-output-setter?color=green&logo=go&logoColor=b)
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Environment/Output%20Setter-blue?logo=github)](https://github.com/marketplace/actions/env-output-setter)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Environment/Output%20Setter-blue?logo=github)](https://github.com/marketplace/actions/environment-output-setter)
 
 
 ## Overview
