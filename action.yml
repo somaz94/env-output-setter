@@ -1,4 +1,4 @@
-name: "GitHub Environment/Output Setter"
+name: "Environment/Output Setter"
 description: "Sets multiple key-value pairs in both $GITHUB_ENV and $GITHUB_OUTPUT"
 author: "somaz94"
 inputs:

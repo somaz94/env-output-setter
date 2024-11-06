@@ -1,0 +1,33 @@
+name: Example Workflow using Environment/Output Setter
+
+on:
+  workflow_dispatch:
+    inputs:
+      run:
+        description: 'workflow run'
+        required: true
+        default: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  acton-module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Environment and Output Variables
+        id: set_variables
+        uses: somaz94/github-env-output-setter@v1
+        with:
+          env_key: "GCP_REGION,AWS_REGION"
+          env_value: "asia-northeast1,us-east-1"
+          output_key: "GCP_OUTPUT,AWS_OUTPUT"
+          output_value: "gcp_success,aws_success"
+
+      - name: Display Env and Output Variables
+        run: |
+          echo "GCP_REGION: ${{ env.GCP_REGION }}" # asis-northeast1
+          echo "AWS_REGION: ${{ env.AWS_REGION }}" # us-east-1
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
+
