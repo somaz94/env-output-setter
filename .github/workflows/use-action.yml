@@ -22,10 +22,10 @@ jobs:
         id: set_variables
         uses: somaz94/env-output-setter@v1
         with:
-          env_key: "GCP_REGION,AWS_REGION,MULTI_REGION"
-          env_value: "asia-northeast1,us-east-1,asia"
-          output_key: "GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT"
-          output_value: "gcp_success,aws_success,multi_success"
+          env_key: 'GCP_REGION,AWS_REGION,MULTI_REGION'
+          env_value: 'asia-northeast1,us-east-1,asia'
+          output_key: 'GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT'
+          output_value: 'gcp_success,aws_success,multi_success'
 
       - name: Display Env and Output Variables
         run: |
@@ -35,4 +35,3 @@ jobs:
           echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}" # gcp_success
           echo "AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}" # aws_success
           echo "MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }}" # gcp_success
-

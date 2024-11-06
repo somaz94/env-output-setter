@@ -1,27 +1,28 @@
-name: "Environment/Output Setter"
-description: "Sets multiple key-value pairs in both $GITHUB_ENV and $GITHUB_OUTPUT"
-author: "somaz94"
+name: 'Environment/Output Setter'
+description:
+  'Sets multiple key-value pairs in both $GITHUB_ENV and $GITHUB_OUTPUT'
+author: 'somaz94'
 inputs:
   env_key:
-    description: "Comma-separated list of environment variable keys"
+    description: 'Comma-separated list of environment variable keys'
     required: true
   env_value:
-    description: "Comma-separated list of environment variable values"
+    description: 'Comma-separated list of environment variable values'
     required: true
   output_key:
-    description: "Comma-separated list of output keys"
+    description: 'Comma-separated list of output keys'
     required: true
   output_value:
-    description: "Comma-separated list of output values"
+    description: 'Comma-separated list of output values'
     required: true
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: 'docker'
+  image: 'Dockerfile'
   env:
     ENV_KEY: ${{ inputs.env_key }}
     ENV_VALUE: ${{ inputs.env_value }}
     OUTPUT_KEY: ${{ inputs.output_key }}
     OUTPUT_VALUE: ${{ inputs.output_value }}
 branding:
-  icon: "settings"
-  color: "blue"
+  icon: 'settings'
+  color: 'blue'
