@@ -1,11 +1,14 @@
-# Set the base image to use for subsequent instructions
-FROM alpine:3.20
+# Use an official Go runtime as a parent image
+FROM golang:1.20
 
-# Set the working directory inside the container
-WORKDIR /usr/src
+# Set the working directory
+WORKDIR /app
 
-# Copy any source file(s) required for the action
-COPY entrypoint.sh .
+# Copy the Go application files
+COPY . .
 
-# Configure the container to be run as an executable
-ENTRYPOINT ["/usr/src/entrypoint.sh"]
+# Compile the Go application
+RUN go build -o /env-output-setter main.go
+
+# Command to run the executable
+ENTRYPOINT ["/env-output-setter"]

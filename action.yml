@@ -1,21 +1,30 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
-
-# Define your inputs here.
+name: "GitHub Environment/Output Setter"
+description: "Sets multiple key-value pairs in both $GITHUB_ENV and $GITHUB_OUTPUT"
+author: "somaz94"
 inputs:
-  who-to-greet:
-    description: 'Your input description here'
+  env_key:
+    description: "Comma-separated list of environment variable keys"
     required: true
-    default: 'World'
-
-# Define your outputs here.
+  env_value:
+    description: "Comma-separated list of environment variable values"
+    required: true
+  output_key:
+    description: "Comma-separated list of output keys"
+    required: true
+  output_value:
+    description: "Comma-separated list of output values"
+    required: true
 outputs:
-  greeting:
-    description: 'Your output description here'
-
+  success_message:
+    description: "Confirmation message indicating successful setting of environment and output variables."
 runs:
-  using: docker
-  image: Dockerfile
+  using: "docker"
+  image: "Dockerfile"
   env:
-    INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
+    ENV_KEY: ${{ inputs.env_key }}
+    ENV_VALUE: ${{ inputs.env_value }}
+    OUTPUT_KEY: ${{ inputs.output_key }}
+    OUTPUT_VALUE: ${{ inputs.output_value }}
+branding:
+  icon: "settings"
+  color: "blue"

@@ -1,224 +1,66 @@
-# Container Action Template
+# GitHub Environment/Output Setter
 
-[![GitHub Super-Linter](https://github.com/actions/container-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/container-action/actions/workflows/ci.yml/badge.svg)
+[![License](https://img.shields.io/github/license/somaz94/ienv-output-setter)](https://github.com/somaz94/container-action)
+![Latest Tag](https://img.shields.io/github/v/tag/somaz94/env-output-setter)
+![Top Language](https://img.shields.io/github/languages/top/somaz94/env-output-setter?color=green&logo=go&logoColor=b)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Environment/Output%20Setter-blue?logo=github)](https://github.com/marketplace/actions/env-output-setter)
 
-Use this template to bootstrap the creation of a container action. :rocket:
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+## Overview
 
-If you are new, there's also a simpler introduction in the
-[Hello World Docker Action](https://github.com/actions/hello-world-docker-action)
-repository.
+The **GitHub Environment/Output Setter** is a GitHub Action that allows you to set multiple key-value pairs in both `$GITHUB_ENV` and `$GITHUB_OUTPUT`. This action is useful for workflows that need to dynamically define environment variables or output values that other steps can reference.
 
-If you would like to use the
-[GitHub Actions Toolkit](https://github.com/actions/toolkit) in your container
-action, see the
-[Container Toolkit Action](https://github.com/actions/container-toolkit-action)
-repository.
 
-## Create Your Own Action
+## Inputs
 
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
+| Input          | Required | Description                                                   | Example                     |
+|----------------|----------|---------------------------------------------------------------|-----------------------------|
+| `env_key`      | Yes      | Comma-separated list of environment variable keys             | `"GCP_REGION,AWS_REGION"`   |
+| `env_value`    | Yes      | Comma-separated list of environment variable values           | `"asia-northeast1,us-east-1"` |
+| `output_key`   | Yes      | Comma-separated list of output keys                           | `"GCP_OUTPUT,AWS_OUTPUT"`   |
+| `output_value` | Yes      | Comma-separated list of output values                         | `"gcp_success,aws_success"` |
 
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
+## Outputs
 
-> [!IMPORTANT]
->
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For
-> details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
+| Output            | Description                                                                |
+|-------------------|----------------------------------------------------------------------------|
+| `success_message` | Confirmation message indicating successful setting of environment and output variables. |
 
-## Initial Setup
 
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
+### Example Workflow
 
-> [!NOTE]
->
-> You'll need to have a reasonably modern version of
-> [Docker](https://www.docker.com/get-started/) handy (e.g. docker engine
-> version 20 or later).
-
-1. :hammer_and_wrench: Build the container
-
-   Make sure to replace `actions/container-action` with an appropriate label for
-   your container.
-
-   ```bash
-   docker build -t actions/container-action .
-   ```
-
-1. :white_check_mark: Test the container
-
-   You can pass individual environment variables using the `--env` or `-e` flag.
-
-   ```bash
-   $ docker run --env INPUT_WHO_TO_GREET="Mona Lisa Octocat" actions/container-action
-   ::notice file=entrypoint.sh,line=7::Hello, Mona Lisa Octocat!
-   ```
-
-   Or you can pass a file with environment variables using `--env-file`.
-
-   ```bash
-   $ cat ./.env.test
-   INPUT_WHO_TO_GREET="Mona Lisa Octocat"
-
-   $ docker run --env-file ./.env.test actions/container-action
-   ::notice file=entrypoint.sh,line=7::Hello, Mona Lisa Octocat!
-   ```
-
-## Update the Action Metadata
-
-The [`action.yml`](action.yml) file defines metadata about your action, such as
-input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
-
-When you copy this repository, update `action.yml` with the name, description,
-inputs, and outputs for your action.
-
-## Update the Action Code
-
-In this template, the container action runs a shell script,
-[`entrypoint.sh`](./entrypoint.sh), when the container is launched. Since you
-can choose any base Docker image and language you like, you can change this to
-suite your needs. There are a few main things to remember when writing code for
-container actions:
-
-- Inputs are accessed using argument identifiers or environment variables
-  (depending on what you set in your `action.yml`). For example, the first input
-  to this action, `who-to-greet`, can be accessed in the entrypoint script using
-  the `$INPUT_WHO_TO_GREET` environment variable.
-
-  ```bash
-  GREETING="Hello, $INPUT_WHO_TO_GREET!"
-  ```
-
-- GitHub Actions supports a number of different workflow commands such as
-  creating outputs, setting environment variables, and more. These are
-  accomplished by writing to different `GITHUB_*` environment variables. For
-  more information, see
-  [Workflow commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions).
-
-  | Scenario              | Example                                         |
-  | --------------------- | ----------------------------------------------- |
-  | Set environment vars  | `echo "MY_VAR=my-value" >> "$GITHUB_ENV"`       |
-  | Set outputs           | `echo "greeting=$GREETING" >> "$GITHUB_OUTPUT"` |
-  | Prepend to `PATH`     | `echo "$HOME/.local/bin" >> "$GITHUB_PATH"`     |
-  | Set `pre`/`post` vars | `echo "MY_VAR=my-value" >> "$GITHUB_STATE"`     |
-  | Set step summary      | `echo "{markdown}" >> "$GITHUB_STEP_SUMMARY"`   |
-
-  You can write multiline strings using the following syntax:
-
-  ```bash
-  {
-    echo "JSON_RESPONSE<<EOF"
-    curl https://example.com
-    echo "EOF"
-  } >> "$GITHUB_ENV"
-  ```
-
-- Make sure that the script being run is executable!
-
-  ```bash
-  git add entrypoint.sh
-  git update-index --chmod=+x entrypoint.sh
-  ```
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
-1. Create a new branch
-
-   ```bash
-   git checkout -b releases/v1
-   ```
-
-1. Replace the contents of `entrypoint.sh` with your action code
-1. Build and test the container
-
-   ```bash
-   docker build -t actions/container-action .
-   docker run actions/container-action "Mona Lisa Octocat"
-   ```
-
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
+Below is an example of how to use the **GitHub Environment/Output Setter** action in a GitHub Actions workflow. This example sets environment variables and output variables and then prints the success message.
 
 ```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v3
+name: Example Workflow
+on: [push]
 
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      who-to-greet: Mona Lisa Octocat
+jobs:
+  set-env-output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Environment and Output Variables
+        id: set_variables
+        uses: somaz94/github-env-output-setter@v1
+        with:
+          env_key: "GCP_REGION,AWS_REGION"
+          env_value: "asia-northeast1,us-east-1"
+          output_key: "GCP_OUTPUT,AWS_OUTPUT"
+          output_value: "gcp_success,aws_success"
 
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.greeting }}"
+      - name: Display Success Message
+        run: |
+          echo "Success: ${{ steps.set_variables.outputs.success_message }}"
+
+    outputs:
+      GCP_REGION: ${{ steps.run.outputs.GCP_OUTPUT }}
+      AWS_OUTPUT: ${{ steps.run.outputs.AWS_OUTPUT }}
 ```
 
-For example workflow runs, check out the
-[Actions tab](https://github.com/actions/container-action/actions)! :rocket:
+### Additional Information
 
-## Usage
+- **Icon**: settings
+- **Color**: blue
+- **Author**: somaz94
 
-After testing, you can create version tag(s) that developers can use to
-reference different stable versions of your action. For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-To include the action in a workflow in another repository, you can use the
-`uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v3
-
-  - name: Test Local Action
-    id: test-action
-    uses: actions/container-action@v1 # Commit with the `v1` tag
-    with:
-      who-to-greet: Mona Lisa Octocat
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.greeting }}"
-```
+This action is packaged in a Docker container, making it portable and easy to run on any compatible GitHub Actions runner. 
