@@ -21,16 +21,10 @@ func setEnv(keys, values string) error {
 			fmt.Printf("Setting environment variable locally: %s=%s\n", key, valueList[i])
 		}
 	} else {
-		// GitHub Actions - write to GITHUB_ENV
-		file, err := os.OpenFile(envPath, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			return fmt.Errorf("failed to open GITHUB_ENV file: %v", err)
-		}
-		defer file.Close()
-
+		// GitHub Actions - write directly to GITHUB_ENV file path
 		for i, key := range keyList {
 			line := fmt.Sprintf("%s=%s\n", key, valueList[i])
-			if _, err := file.WriteString(line); err != nil {
+			if err := appendToFile(envPath, line); err != nil {
 				return fmt.Errorf("failed to write to GITHUB_ENV file: %v", err)
 			}
 		}
@@ -57,16 +51,10 @@ func setOutput(keys, values string) (string, error) {
 			outputSummary.WriteString(entry + " ")
 		}
 	} else {
-		// GitHub Actions - write to GITHUB_OUTPUT
-		file, err := os.OpenFile(outputPath, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			return "", fmt.Errorf("failed to open GITHUB_OUTPUT file: %v", err)
-		}
-		defer file.Close()
-
+		// GitHub Actions - write directly to GITHUB_OUTPUT file path
 		for i, key := range keyList {
 			line := fmt.Sprintf("%s=%s\n", key, valueList[i])
-			if _, err := file.WriteString(line); err != nil {
+			if err := appendToFile(outputPath, line); err != nil {
 				return "", fmt.Errorf("failed to write to GITHUB_OUTPUT file: %v", err)
 			}
 			outputSummary.WriteString(line)
@@ -74,6 +62,19 @@ func setOutput(keys, values string) (string, error) {
 	}
 
 	return outputSummary.String(), nil
+}
+
+func appendToFile(filePath, text string) error {
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(text); err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
