@@ -32,6 +32,9 @@ jobs:
   set-env-output:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v4
+
       - name: Set Environment and Output Variables
         id: set_variables
         uses: somaz94/github-env-output-setter@v1

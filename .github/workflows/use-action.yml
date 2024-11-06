@@ -15,9 +15,12 @@ jobs:
   acton-module:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v4
+
       - name: Set Environment and Output Variables
         id: set_variables
-        uses: somaz94/github-env-output-setter@v1
+        uses: somaz94/env-output-setter@v1
         with:
           env_key: "GCP_REGION,AWS_REGION"
           env_value: "asia-northeast1,us-east-1"
