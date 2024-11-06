@@ -1,6 +1,5 @@
 # GitHub Environment/Output Setter
 
-[![GitHub Super-Linter](https://github.com/somaz94/env-output-setter/actions/workflows/linter.yml/badge.svg)](https://github.com/somaz94/env-output-setter)
 [![License](https://img.shields.io/github/license/somaz94/env-output-setter)](https://github.com/somaz94/container-action)
 ![Latest Tag](https://img.shields.io/github/v/tag/somaz94/env-output-setter)
 ![Top Language](https://img.shields.io/github/languages/top/somaz94/env-output-setter?color=green&logo=go&logoColor=b)
