@@ -60,7 +60,7 @@ jobs:
       - name: Display Individual Environment Variables
         run: |
           echo "Displaying individual environment variables:"
-          echo "test1={{ env.test1 }}"
+          echo "test1: {{ env.test1 }}"
           echo "test2: ${{ env.test2 }}"
 
       - name: Display Success Message
