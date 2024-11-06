@@ -1,12 +1,17 @@
 name: Lint Codebase
 
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       run:
+#         description: 'workflow run'
+#         required: true
+#         default: 'true'
 on:
-  workflow_dispatch:
-    inputs:
-      run:
-        description: 'workflow run'
-        required: true
-        default: 'true'
+  pull_request:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
