@@ -1,17 +1,8 @@
 # Changelog
 
-## [v1](https://github.com/somaz94/env-output-setter/tree/v1) (2025-02-03)
+## [v1.0.1](https://github.com/somaz94/env-output-setter/tree/v1.0.1) (2025-02-07)
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1...v1)
-
-**Merged pull requests:**
-
-- build\(deps\): bump janheinrichmerker/action-github-changelog-generator from 2.3 to 2.4 in the actions-minor group [\#2](https://github.com/somaz94/env-output-setter/pull/2) ([dependabot[bot]](https://github.com/apps/dependabot))
-- build\(deps\): bump golang from 1.20 to 1.23 in the docker-minor group [\#1](https://github.com/somaz94/env-output-setter/pull/1) ([dependabot[bot]](https://github.com/apps/dependabot))
-
-## [v1](https://github.com/somaz94/env-output-setter/tree/v1) (2024-11-06)
-
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/abab0ef25ededf0a967c0f5ad560df50e151a6c3...v1)
+[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.0...v1.0.1)
 
 
 
