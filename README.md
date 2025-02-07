@@ -54,3 +54,11 @@ jobs:
           echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
           echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
