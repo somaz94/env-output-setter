@@ -44,20 +44,20 @@ jobs:
           push: true
           tags: ${{ env.TEST_TAG }}
 
-      - name: Run the Container
-        env:
-          ENV_KEY: test1,test2
-          ENV_VALUE: somaz,gomaz
-          OUTPUT_KEY: test1,test2
-          OUTPUT_VALUE: zomaz,xomae
-        run: |
-          docker run \
-          --env ENV_KEY="${{ env.ENV_KEY }}" \
-          --env ENV_VALUE="${{ env.ENV_VALUE }}" \
-          --env OUTPUT_KEY="${{ env.OUTPUT_KEY }}" \
-          --env OUTPUT_VALUE="${{ env.OUTPUT_VALUE }}" \
-          --volume ${{ github.workspace }}:/app \
-          --rm ${{ env.TEST_TAG }}
+      # - name: Run the Container
+      #   env:
+      #     ENV_KEY: test1,test2
+      #     ENV_VALUE: somaz,gomaz
+      #     OUTPUT_KEY: test1,test2
+      #     OUTPUT_VALUE: zomaz,xomae
+      #   run: |
+      #     docker run \
+      #     --env ENV_KEY="${{ env.ENV_KEY }}" \
+      #     --env ENV_VALUE="${{ env.ENV_VALUE }}" \
+      #     --env OUTPUT_KEY="${{ env.OUTPUT_KEY }}" \
+      #     --env OUTPUT_VALUE="${{ env.OUTPUT_VALUE }}" \
+      #     --volume ${{ github.workspace }}:/app \
+      #     --rm ${{ env.TEST_TAG }}
 
   test-action:
     name: Test env-output-setter

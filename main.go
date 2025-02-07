@@ -97,6 +97,14 @@ func writeToFile(filePath string, keys, values []string, varType string) error {
 	return fmt.Errorf("failed to write after %d retries", maxRetries)
 }
 
+func printSection(title string) {
+	fmt.Printf("\n%s\n%s\n", strings.Repeat("=", 50), title)
+}
+
+func printSuccess(varType, key, value string) {
+	fmt.Printf("  • %s: %s = %s\n", varType, key, value)
+}
+
 func doWrite(filePath string, keys, values []string, varType string) error {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -104,21 +112,23 @@ func doWrite(filePath string, keys, values []string, varType string) error {
 	}
 	defer file.Close()
 
+	printSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))
+
 	for i, key := range keys {
 		line := fmt.Sprintf("%s=%s\n", strings.TrimSpace(key), strings.TrimSpace(values[i]))
 		if _, err := file.WriteString(line); err != nil {
 			return err
 		}
-		fmt.Printf(successMsg, varType, key, values[i])
+		printSuccess(varType, key, values[i])
 	}
+	fmt.Println()
 	return nil
 }
 
 func main() {
 	config := loadConfig()
 
-	// Print start message
-	fmt.Println("🚀 Starting GitHub Environment and Output Setter")
+	printSection("🚀 GitHub Environment and Output Setter")
 
 	// Set environment variables
 	if err := setEnv(config.envKeys, config.envValues); err != nil {
@@ -132,10 +142,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Print success message
+	// Print final status
+	printSection("✅ Execution Complete")
 	if config.githubEnv == "" && config.githubOutput == "" {
-		fmt.Println("✅ Local Execution - Environment and outputs simulated successfully.")
+		fmt.Println("Mode: Local Execution (Simulation)")
 	} else {
-		fmt.Println("✅ GitHub Actions - Environment and outputs set successfully.")
+		fmt.Println("Mode: GitHub Actions")
 	}
+	fmt.Println(strings.Repeat("=", 50))
 }
