@@ -33,6 +33,8 @@ variables or output values that other steps can reference.
 | `to_lower`         | No       | Convert values to lowercase                        | `false` | `"true"`                      |
 | `encode_url`       | No       | URL encode values                                  | `false` | `"true"`                      |
 
+<br/>
+
 ## Outputs
 
 | Output            | Description                           | Example        |
