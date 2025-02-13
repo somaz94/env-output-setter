@@ -11,27 +11,50 @@ import (
 
 func main() {
 	cfg := config.Load()
-
 	printer.PrintSection("🚀 GitHub Environment and Output Setter")
 
+	// Initialize counters
+	var envCount, outputCount int
+	var status = "success"
+	var errorMsg string
+
 	// Set environment variables
-	if err := writer.SetEnv(cfg.EnvKeys, cfg.EnvValues); err != nil {
-		fmt.Printf("❌ Error setting environment variables: %v\n", err)
-		os.Exit(1)
+	envCount, err := writer.SetEnv(cfg)
+	if err != nil {
+		errorMsg = fmt.Sprintf("❌ Error setting environment variables: %v", err)
+		printer.PrintError(errorMsg)
+		setOutputAndExit(0, 0, "failure", errorMsg)
 	}
 
 	// Set output variables
-	if err := writer.SetOutput(cfg.OutputKeys, cfg.OutputValues); err != nil {
-		fmt.Printf("❌ Error setting output variables: %v\n", err)
-		os.Exit(1)
+	outputCount, err = writer.SetOutput(cfg)
+	if err != nil {
+		errorMsg = fmt.Sprintf("❌ Error setting output variables: %v", err)
+		printer.PrintError(errorMsg)
+		setOutputAndExit(envCount, outputCount, "failure", errorMsg)
 	}
 
 	// Print final status
 	printer.PrintSection("✅ Execution Complete")
 	if cfg.GithubEnv == "" && cfg.GithubOutput == "" {
-		fmt.Println("Mode: Local Execution (Simulation)")
+		printer.PrintInfo("Mode: Local Execution (Simulation)")
 	} else {
-		fmt.Println("Mode: GitHub Actions")
+		printer.PrintInfo("Mode: GitHub Actions")
 	}
-	printer.PrintLine()
+
+	setOutputAndExit(envCount, outputCount, status, errorMsg)
+}
+
+func setOutputAndExit(envCount, outputCount int, status, errorMsg string) {
+	if os.Getenv("GITHUB_OUTPUT") != "" {
+		fmt.Printf("::set-output name=set_env_count::%d\n", envCount)
+		fmt.Printf("::set-output name=set_output_count::%d\n", outputCount)
+		fmt.Printf("::set-output name=status::%s\n", status)
+		fmt.Printf("::set-output name=error_message::%s\n", errorMsg)
+	}
+
+	if status == "failure" {
+		os.Exit(1)
+	}
+	os.Exit(0)
 }

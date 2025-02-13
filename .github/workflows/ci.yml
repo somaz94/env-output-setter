@@ -88,3 +88,56 @@ jobs:
           echo "test2: ${{ env.test2 }}"
           echo "TEST1: ${{ steps.set_variables.outputs.test1 }}"
           echo "TEST2: ${{ steps.set_variables.outputs.test2 }}"
+
+  test-action-v2:
+    name: Test env-output-setter v2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory ${{ github.workspace }}
+
+      - name: Set Environment and Output Variables
+        id: set_variables
+        uses: ./
+        with:
+          # 기본 키-값 설정
+          env_key: test1,test2
+          env_value: somaz,gomaz
+          output_key: test1,test2
+          output_value: zomaz,xomae
+          
+          # 새로운 옵션들 활용
+          delimiter: ',' # 기본값이지만 예시로 명시
+          fail_on_empty: true # 빈 값 있으면 실패
+          trim_whitespace: true # 자동으로 공백 제거
+          case_sensitive: true # 키 대소문자 구분
+          error_on_duplicate: true # 중복 키 에러
+
+      - name: Display Set Variables
+        run: |
+          echo "Environment Variables:"
+          echo "test1: ${{ env.test1 }}"
+          echo "test2: ${{ env.test2 }}"
+          
+          echo -e "\nOutputs:"
+          echo "test1: ${{ steps.set_variables.outputs.test1 }}"
+          echo "test2: ${{ steps.set_variables.outputs.test2 }}"
+          
+          echo -e "\nAction Results:"
+          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
+          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
+          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
+
+      # 에러 처리 예시
+      - name: Check for Errors
+        if: steps.set_variables.outputs.status == 'failure'
+        run: |
+          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
+          exit 1

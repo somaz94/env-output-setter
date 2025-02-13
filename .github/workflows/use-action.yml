@@ -27,16 +27,62 @@ jobs:
         id: set_variables
         uses: somaz94/env-output-setter@v1
         with:
-          env_key: 'GCP_REGION,AWS_REGION,MULTI_REGION'
-          env_value: 'asia-northeast1,us-east-1,asia'
-          output_key: 'GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT'
-          output_value: 'gcp_success,aws_success,multi_success'
+          env_key: GCP_REGION,AWS_REGION,MULTI_REGION
+          env_value: asia-northeast1,us-east-1,asia
+          output_key: GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT
+          output_value: gcp_success,aws_success,multi_success
 
       - name: Display Env and Output Variables
         run: |
-          echo "GCP_REGION: ${{ env.GCP_REGION }}" # asis-northeast1
-          echo "AWS_REGION: ${{ env.AWS_REGION }}" # us-east-1
-          echo "MULTI_REGION: ${{ env.MULTI_REGION }}" # us-east-1
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}" # gcp_success
-          echo "AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}" # aws_success
-          echo "MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }}" # gcp_success
+          echo GCP_REGION: ${{ env.GCP_REGION }} # asis-northeast1
+          echo AWS_REGION: ${{ env.AWS_REGION }} # us-east-1
+          echo MULTI_REGION: ${{ env.MULTI_REGION }} # us-east-1
+          echo GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
+          echo AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
+          echo MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }} # gcp_success
+
+  acton-module-v2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v4
+
+      - name: Set Environment and Output Variables
+        id: set_variables
+        uses: somaz94/env-output-setter@v1
+        with:
+          # Default Key-Value Settings
+          env_key: GCP_REGION,AWS_REGION,MULTI_REGION
+          env_value: asia-northeast1,us-east-1,asia
+          output_key: GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT
+          output_value: gcp_success,aws_success,multi_success
+          delimiter: ',' # Default, but specified as an example
+          fail_on_empty: true # If empty value, fail
+          trim_whitespace: true # Automatically remove whitespace
+          case_sensitive: true # Key case sensitivity
+          error_on_duplicate: true # Duplicate key error
+
+      - name: Display Set Variables
+        run: |
+          echo "Environment Variables:"
+          echo "GCP_REGION: ${{ env.GCP_REGION }}"
+          echo "AWS_REGION: ${{ env.AWS_REGION }}"
+          echo "MULTI_REGION: ${{ env.MULTI_REGION }}"
+          
+          echo -e "\nOutputs:"
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}"
+          echo "AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}"
+          echo "MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }}"
+          
+          echo -e "\nAction Results:"
+          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
+          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
+          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
+
+      # 에러 처리 예시
+      - name: Check for Errors
+        if: steps.set_variables.outputs.status == 'failure'
+        run: |
+          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
+          exit 1

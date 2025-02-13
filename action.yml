@@ -2,6 +2,7 @@ name: 'Environment/Output Setter'
 description:
   'Sets multiple key-value pairs in both $GITHUB_ENV and $GITHUB_OUTPUT'
 author: 'somaz94'
+
 inputs:
   env_key:
     description: 'Comma-separated list of environment variable keys'
@@ -15,6 +16,37 @@ inputs:
   output_value:
     description: 'Comma-separated list of output values'
     required: true
+  delimiter:
+    description: 'Delimiter for separating keys and values (default: comma)'
+    required: false
+    default: ','
+  fail_on_empty:
+    description: 'Fail if any key or value is empty'
+    required: false
+    default: 'true'
+  trim_whitespace:
+    description: 'Trim whitespace from keys and values'
+    required: false
+    default: 'true'
+  case_sensitive:
+    description: 'Treat keys as case sensitive'
+    required: false
+    default: 'true'
+  error_on_duplicate:
+    description: 'Error if duplicate keys are found'
+    required: false
+    default: 'true'
+
+outputs:
+  set_env_count:
+    description: 'Number of environment variables set'
+  set_output_count:
+    description: 'Number of outputs set'
+  status:
+    description: 'Status of the operation (success/failure)'
+  error_message:
+    description: 'Error message if any'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -23,6 +55,12 @@ runs:
     ENV_VALUE: ${{ inputs.env_value }}
     OUTPUT_KEY: ${{ inputs.output_key }}
     OUTPUT_VALUE: ${{ inputs.output_value }}
+    DELIMITER: ${{ inputs.delimiter }}
+    FAIL_ON_EMPTY: ${{ inputs.fail_on_empty }}
+    TRIM_WHITESPACE: ${{ inputs.trim_whitespace }}
+    CASE_SENSITIVE: ${{ inputs.case_sensitive }}
+    ERROR_ON_DUPLICATE: ${{ inputs.error_on_duplicate }}
+
 branding:
   icon: 'settings'
   color: 'blue'

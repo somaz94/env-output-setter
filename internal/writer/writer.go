@@ -6,77 +6,133 @@ import (
 	"strings"
 	"time"
 
+	"github.com/somaz94/env-output-setter/internal/config"
 	"github.com/somaz94/env-output-setter/internal/printer"
 )
 
 const (
 	errMismatchedPairs = "env_key and env_value must have the same number of entries"
 	errWriteFile       = "failed to write to %s file: %v"
+	errEmptyValue      = "empty value found for key: %s"
+	errDuplicateKey    = "duplicate key found: %s"
 	localExecMsg       = "Local Execution - %s is not set, skipping writing to GitHub Actions %s."
 )
 
-func SetEnv(keys, values string) error {
-	return setVariables(keys, values, "GITHUB_ENV", "environment variable")
+func SetEnv(cfg *config.Config) (int, error) {
+	return setVariables(cfg, "GITHUB_ENV", "environment variable")
 }
 
-func SetOutput(keys, values string) error {
-	return setVariables(keys, values, "GITHUB_OUTPUT", "output")
+func SetOutput(cfg *config.Config) (int, error) {
+	return setVariables(cfg, "GITHUB_OUTPUT", "output")
 }
 
-func setVariables(keys, values, envVar, varType string) error {
-	keyList := strings.Split(strings.TrimSpace(keys), ",")
-	valueList := strings.Split(strings.TrimSpace(values), ",")
+func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
+	var keys, values string
+	switch envVar {
+	case "GITHUB_ENV":
+		keys, values = cfg.EnvKeys, cfg.EnvValues
+	case "GITHUB_OUTPUT":
+		keys, values = cfg.OutputKeys, cfg.OutputValues
+	}
+
+	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
+	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
 
 	if len(keyList) != len(valueList) {
-		return fmt.Errorf(errMismatchedPairs)
+		return 0, fmt.Errorf(errMismatchedPairs)
+	}
+
+	if err := validateInputs(cfg, keyList, valueList); err != nil {
+		return 0, err
 	}
 
 	filePath := os.Getenv(envVar)
 	if filePath == "" {
 		fmt.Printf(localExecMsg, envVar, varType)
 		for i, key := range keyList {
-			printer.PrintSuccess(varType, strings.TrimSpace(key), strings.TrimSpace(valueList[i]))
+			printer.PrintSuccess(varType, key, valueList[i])
 		}
-		return nil
+		return len(keyList), nil
 	}
 
-	return writeToFile(filePath, keyList, valueList, varType)
+	count, err := writeToFile(cfg, filePath, keyList, valueList, varType)
+	if err != nil {
+		return count, err
+	}
+
+	return count, nil
 }
 
-func writeToFile(filePath string, keys, values []string, varType string) error {
+func validateInputs(cfg *config.Config, keys, values []string) error {
+	seenKeys := make(map[string]bool)
+
+	for i, key := range keys {
+		if cfg.TrimWhitespace {
+			key = strings.TrimSpace(key)
+			keys[i] = key
+		}
+
+		if !cfg.CaseSensitive {
+			key = strings.ToLower(key)
+		}
+
+		if cfg.FailOnEmpty && (key == "" || values[i] == "") {
+			return fmt.Errorf(errEmptyValue, key)
+		}
+
+		if cfg.ErrorOnDuplicate {
+			if seenKeys[key] {
+				return fmt.Errorf(errDuplicateKey, key)
+			}
+			seenKeys[key] = true
+		}
+	}
+
+	return nil
+}
+
+func writeToFile(cfg *config.Config, filePath string, keys, values []string, varType string) (int, error) {
 	maxRetries := 3
 	retryDelay := time.Second
 
 	for retry := 0; retry < maxRetries; retry++ {
-		if err := doWrite(filePath, keys, values, varType); err != nil {
+		count, err := doWrite(cfg, filePath, keys, values, varType)
+		if err != nil {
 			if retry < maxRetries-1 {
-				fmt.Printf("Retry %d/%d: Failed to write to file: %v\n", retry+1, maxRetries, err)
+				printer.PrintError(fmt.Sprintf("Retry %d/%d: Failed to write to file: %v", retry+1, maxRetries, err))
 				time.Sleep(retryDelay)
 				continue
 			}
-			return fmt.Errorf(errWriteFile, filePath, err)
+			return count, fmt.Errorf(errWriteFile, filePath, err)
 		}
-		return nil
+		return count, nil
 	}
-	return fmt.Errorf("failed to write after %d retries", maxRetries)
+	return 0, fmt.Errorf("failed to write after %d retries", maxRetries)
 }
 
-func doWrite(filePath string, keys, values []string, varType string) error {
+func doWrite(cfg *config.Config, filePath string, keys, values []string, varType string) (int, error) {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer file.Close()
 
 	printer.PrintSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))
 
+	count := 0
 	for i, key := range keys {
-		line := fmt.Sprintf("%s=%s\n", strings.TrimSpace(key), strings.TrimSpace(values[i]))
+		if cfg.TrimWhitespace {
+			key = strings.TrimSpace(key)
+			values[i] = strings.TrimSpace(values[i])
+		}
+
+		line := fmt.Sprintf("%s=%s\n", key, values[i])
 		if _, err := file.WriteString(line); err != nil {
-			return err
+			return count, err
 		}
 		printer.PrintSuccess(varType, key, values[i])
+		count++
 	}
 	fmt.Println()
-	return nil
+	return count, nil
 }
