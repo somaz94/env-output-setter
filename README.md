@@ -183,6 +183,21 @@ This action supports value transformation and masking of sensitive data:
     to_lower: 'false' # Convert to lowercase
     encode_url: 'false' # URL encode values
 ```
+
+#### Masking Behavior
+- When `mask_secrets` is enabled, sensitive values are masked in logs
+- Custom `mask_pattern` allows regex-based masking
+- Default masking shows first 2 characters followed by asterisks
+- Short values (<4 characters) are completely masked
+
+#### Value Transformations
+- `to_upper`: Converts values to uppercase
+- `to_lower`: Converts values to lowercase  
+- `encode_url`: Applies URL encoding to values
+- Transformations are applied in order: case conversion -> URL encoding
+
+Note: Masking only affects log output, not the actual values set in environment variables or outputs.
+
 ## Troubleshooting
 
 Common issues and solutions:
