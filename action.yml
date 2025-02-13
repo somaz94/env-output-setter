@@ -36,6 +36,26 @@ inputs:
     description: 'Error if duplicate keys are found'
     required: false
     default: 'true'
+  mask_secrets:
+    description: 'Mask sensitive values in logs'
+    required: false
+    default: 'false'
+  mask_pattern:
+    description: 'Custom pattern for identifying sensitive values (regex)'
+    required: false
+    default: ''
+  to_upper:
+    description: 'Convert values to uppercase'
+    required: false
+    default: 'false'
+  to_lower:
+    description: 'Convert values to lowercase'
+    required: false
+    default: 'false'
+  encode_url:
+    description: 'URL encode values'
+    required: false
+    default: 'false'
 
 outputs:
   set_env_count:
@@ -60,6 +80,11 @@ runs:
     TRIM_WHITESPACE: ${{ inputs.trim_whitespace }}
     CASE_SENSITIVE: ${{ inputs.case_sensitive }}
     ERROR_ON_DUPLICATE: ${{ inputs.error_on_duplicate }}
+    MASK_SECRETS: ${{ inputs.mask_secrets }}
+    MASK_PATTERN: ${{ inputs.mask_pattern }}
+    TO_UPPER: ${{ inputs.to_upper }}
+    TO_LOWER: ${{ inputs.to_lower }}
+    ENCODE_URL: ${{ inputs.encode_url }}
 
 branding:
   icon: 'settings'

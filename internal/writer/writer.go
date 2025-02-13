@@ -8,6 +8,7 @@ import (
 
 	"github.com/somaz94/env-output-setter/internal/config"
 	"github.com/somaz94/env-output-setter/internal/printer"
+	"github.com/somaz94/env-output-setter/internal/transformer"
 )
 
 const (
@@ -117,6 +118,14 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 	}
 	defer file.Close()
 
+	trans := transformer.New(
+		cfg.MaskSecrets,
+		cfg.MaskPattern,
+		cfg.ToUpper,
+		cfg.ToLower,
+		cfg.EncodeURL,
+	)
+
 	printer.PrintSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))
 
 	count := 0
@@ -126,11 +135,15 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 			values[i] = strings.TrimSpace(values[i])
 		}
 
-		line := fmt.Sprintf("%s=%s\n", key, values[i])
+		transformedValue := trans.TransformValue(values[i])
+
+		line := fmt.Sprintf("%s=%s\n", key, transformedValue)
 		if _, err := file.WriteString(line); err != nil {
 			return count, err
 		}
-		printer.PrintSuccess(varType, key, values[i])
+
+		maskedValue := trans.MaskValue(transformedValue)
+		printer.PrintSuccess(varType, key, maskedValue)
 		count++
 	}
 	fmt.Println()

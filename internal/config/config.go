@@ -19,6 +19,11 @@ type Config struct {
 	TrimWhitespace   bool
 	CaseSensitive    bool
 	ErrorOnDuplicate bool
+	MaskSecrets      bool
+	MaskPattern      string
+	ToUpper          bool
+	ToLower          bool
+	EncodeURL        bool
 }
 
 // Load loads configuration from environment variables
@@ -35,6 +40,11 @@ func Load() *Config {
 		TrimWhitespace:   getBoolEnv("INPUT_TRIM_WHITESPACE", true),
 		CaseSensitive:    getBoolEnv("INPUT_CASE_SENSITIVE", true),
 		ErrorOnDuplicate: getBoolEnv("INPUT_ERROR_ON_DUPLICATE", true),
+		MaskSecrets:      getBoolEnv("INPUT_MASK_SECRETS", false),
+		MaskPattern:      getEnvWithDefault("INPUT_MASK_PATTERN", ""),
+		ToUpper:          getBoolEnv("INPUT_TO_UPPER", false),
+		ToLower:          getBoolEnv("INPUT_TO_LOWER", false),
+		EncodeURL:        getBoolEnv("INPUT_ENCODE_URL", false),
 	}
 }
 

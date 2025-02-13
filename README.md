@@ -25,6 +25,11 @@ variables or output values that other steps can reference.
 | `trim_whitespace`  | No       | Trim whitespace from keys and values               | `true`  | `"true"`                      |
 | `case_sensitive`   | No       | Treat keys as case sensitive                       | `true`  | `"true"`                      |
 | `error_on_duplicate`| No      | Error if duplicate keys are found                  | `true`  | `"true"`                      |
+| `mask_secrets`     | No       | Mask sensitive values in logs                      | `false` | `"true"`                      |
+| `mask_pattern`     | No       | Custom pattern for masking (regex)                 | `""`    | `"(password\|secret).*"`      |
+| `to_upper`         | No       | Convert values to uppercase                        | `false` | `"true"`                      |
+| `to_lower`         | No       | Convert values to lowercase                        | `false` | `"true"`                      |
+| `encode_url`       | No       | URL encode values                                  | `false` | `"true"`                      |
 
 ## Outputs
 
@@ -156,6 +161,28 @@ jobs:
     output_value: 'success,passed'
 ```
 
+### Value Transformation and Masking
+
+This action supports value transformation and masking of sensitive data:
+
+#### Features
+- Mask sensitive values in logs
+- Convert values to uppercase/lowercase
+- URL encode values
+- Custom masking patterns using regex
+
+#### Example Usage
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'API_KEY,USERNAME,PASSWORD'
+    env_value: 'secret123,admin,pass123'
+    mask_secrets: 'true' # Masks sensitive values
+    mask_pattern: '(password|secret).' # Custom masking pattern
+    to_upper: 'true' # Convert to uppercase
+    to_lower: 'false' # Convert to lowercase
+    encode_url: 'false' # URL encode values
+```
 ## Troubleshooting
 
 Common issues and solutions:
