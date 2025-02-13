@@ -103,6 +103,75 @@ jobs:
 - Detailed operation status and error reporting
 - Retry mechanism for file operations
 
+## Advanced Usage
+
+### Error Handling Examples
+
+```yaml
+# Handle empty values
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'KEY1,KEY2'
+    env_value: ',value2'  # KEY1 is empty
+    fail_on_empty: 'true' # This will fail the action
+
+# Case sensitivity example
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'key1,Key1'
+    env_value: 'value1,value2'
+    case_sensitive: 'false' # This will treat key1 and Key1 as the same key
+
+# Custom delimiter
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'key1;key2'
+    env_value: 'value1;value2'
+    delimiter: ';'
+```
+
+### Common Use Cases
+
+1. **Multi-Region Deployment**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'GCP_REGION,AWS_REGION,AZURE_REGION'
+    env_value: 'asia-northeast1,us-east-1,eastasia'
+```
+
+2. **Environment Configuration**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'ENV,STAGE,VERSION'
+    env_value: 'production,prod,v1.0.0'
+```
+
+3. **Status Tracking**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    output_key: 'DEPLOY_STATUS,TEST_STATUS'
+    output_value: 'success,passed'
+```
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **Duplicate Keys**
+   - Error message: `duplicate key found: KEY_NAME`
+   - Solution: Ensure all keys are unique or set `error_on_duplicate: 'false'`
+
+2. **Empty Values**
+   - Error message: `empty value found for key: KEY_NAME`
+   - Solution: Provide values for all keys or set `fail_on_empty: 'false'`
+
+3. **File Write Issues**
+   - Error message: `failed to write to file`
+   - Solution: Action will automatically retry up to 3 times
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
