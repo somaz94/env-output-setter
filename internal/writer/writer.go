@@ -19,7 +19,7 @@ const (
 )
 
 func SetEnv(cfg *config.Config) (int, error) {
-	return setVariables(cfg, "GITHUB_ENV", "environment variable")
+	return setVariables(cfg, "GITHUB_ENV", "env")
 }
 
 func SetOutput(cfg *config.Config) (int, error) {
