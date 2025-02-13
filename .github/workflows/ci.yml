@@ -107,13 +107,13 @@ jobs:
         uses: ./
         with:
           # 기본 키-값 설정
-          env_key: test1,test2
-          env_value: somaz,gomaz
-          output_key: test1,test2
-          output_value: zomaz,xomae
+          env_key: test1:test2
+          env_value: somaz:gomaz
+          output_key: test1:test2
+          output_value: zomaz:xomae
           
           # 새로운 옵션들 활용
-          delimiter: ',' # 기본값이지만 예시로 명시
+          delimiter: ':' # 기본값이지만 예시로 명시
           fail_on_empty: true # 빈 값 있으면 실패
           trim_whitespace: true # 자동으로 공백 제거
           case_sensitive: true # 키 대소문자 구분
