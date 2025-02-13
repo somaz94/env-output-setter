@@ -121,7 +121,7 @@ jobs:
 
       - name: Display Set Variables
         run: |
-          echo "Environment Variables:"
+          echo "Env:"
           echo "test1: ${{ env.test1 }}"
           echo "test2: ${{ env.test2 }}"
           

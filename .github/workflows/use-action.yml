@@ -64,7 +64,7 @@ jobs:
 
       - name: Display Set Variables
         run: |
-          echo "Environment Variables:"
+          echo "Env:"
           echo "GCP_REGION: ${{ env.GCP_REGION }}"
           echo "AWS_REGION: ${{ env.AWS_REGION }}"
           echo "MULTI_REGION: ${{ env.MULTI_REGION }}"

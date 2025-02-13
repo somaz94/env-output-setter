@@ -14,18 +14,31 @@ variables or output values that other steps can reference.
 
 ## Inputs
 
-| Input          | Required | Description                                         | Example                       |
-| -------------- | -------- | --------------------------------------------------- | ----------------------------- |
-| `env_key`      | Yes      | Comma-separated list of environment variable keys   | `"GCP_REGION,AWS_REGION"`     |
-| `env_value`    | Yes      | Comma-separated list of environment variable values | `"asia-northeast1,us-east-1"` |
-| `output_key`   | Yes      | Comma-separated list of output keys                 | `"GCP_OUTPUT,AWS_OUTPUT"`     |
-| `output_value` | Yes      | Comma-separated list of output values               | `"gcp_success,aws_success"`   |
+| Input               | Required | Description                                         | Default | Example                       |
+| ------------------ | -------- | --------------------------------------------------- | ------- | ----------------------------- |
+| `env_key`          | Yes      | Comma-separated list of environment variable keys   | -       | `"GCP_REGION,AWS_REGION"`     |
+| `env_value`        | Yes      | Comma-separated list of environment variable values | -       | `"asia-northeast1,us-east-1"` |
+| `output_key`       | Yes      | Comma-separated list of output keys                 | -       | `"GCP_OUTPUT,AWS_OUTPUT"`     |
+| `output_value`     | Yes      | Comma-separated list of output values               | -       | `"gcp_success,aws_success"`   |
+| `delimiter`        | No       | Delimiter for separating keys and values            | `,`     | `","`                         |
+| `fail_on_empty`    | No       | Fail if any key or value is empty                  | `true`  | `"true"`                      |
+| `trim_whitespace`  | No       | Trim whitespace from keys and values               | `true`  | `"true"`                      |
+| `case_sensitive`   | No       | Treat keys as case sensitive                       | `true`  | `"true"`                      |
+| `error_on_duplicate`| No      | Error if duplicate keys are found                  | `true`  | `"true"`                      |
+
+## Outputs
+
+| Output            | Description                           | Example        |
+| ---------------- | ------------------------------------- | -------------- |
+| `set_env_count`  | Number of environment variables set   | `3`            |
+| `set_output_count`| Number of outputs set                | `3`            |
+| `status`         | Status of the operation               | `"success"`    |
+| `error_message`  | Error message if any                  | `""`           |
 
 ### Example Workflow
 
 Below is an example of how to use the **GitHub Environment/Output Setter**
-action in a GitHub Actions workflow. This example sets environment variables and
-output variables and then prints the success message.
+action in a GitHub Actions workflow with all available options:
 
 ```yaml
 name: Example Workflow
@@ -40,20 +53,55 @@ jobs:
 
       - name: Set Environment and Output Variables
         id: set_variables
-        uses: somaz94/github-env-output-setter@v1
+        uses: somaz94/env-output-setter@v1
         with:
+          # Required inputs
           env_key: 'GCP_REGION,AWS_REGION'
           env_value: 'asia-northeast1,us-east-1'
           output_key: 'GCP_OUTPUT,AWS_OUTPUT'
           output_value: 'gcp_success,aws_success'
+          
+          # Optional inputs with defaults
+          delimiter: ',' 
+          fail_on_empty: 'true'
+          trim_whitespace: 'true'
+          case_sensitive: 'true'
+          error_on_duplicate: 'true'
 
-      - name: Display Env and Output Variables
+      - name: Display Variables and Status
         run: |
-          echo "GCP_REGION: ${{ env.GCP_REGION }}" # asis-northeast1
-          echo "AWS_REGION: ${{ env.AWS_REGION }}" # us-east-1
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
+          # Environment Variables
+          echo "GCP_REGION: ${{ env.GCP_REGION }}"
+          echo "AWS_REGION: ${{ env.AWS_REGION }}"
+          
+          # Outputs
+          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}"
+          echo "AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}"
+          
+          # Action Results
+          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
+          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
+          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
+
+      # Error handling
+      - name: Check for Errors
+        if: steps.set_variables.outputs.status == 'failure'
+        run: |
+          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
+          exit 1
 ```
+
+## Features
+
+- Set multiple environment variables and outputs in one step
+- Configurable delimiter for key-value pairs
+- Whitespace trimming option
+- Case sensitivity control for keys
+- Duplicate key detection
+- Empty value validation
+- Detailed operation status and error reporting
+- Retry mechanism for file operations
 
 ## License
 
