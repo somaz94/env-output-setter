@@ -17,7 +17,8 @@ permissions:
   contents: read
 
 jobs:
-  acton-module:
+  action-module-v1:
+    name: Test env-output-setter v1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout infrastructure repository
@@ -42,6 +43,7 @@ jobs:
           echo MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }} # gcp_success
 
   acton-module-v2:
+    name: Test env-output-setter v2
     runs-on: ubuntu-latest
     steps:
       - name: Checkout infrastructure repository
@@ -81,6 +83,76 @@ jobs:
           echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
 
       # 에러 처리 예시
+      - name: Check for Errors
+        if: steps.set_variables.outputs.status == 'failure'
+        run: |
+          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
+          exit 1
+
+  action-module-v3:
+    name: Test env-output-setter v3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory ${{ github.workspace }}
+
+      - name: Test Value Transformation and Masking
+        id: set_variables
+        uses: somaz94/env-output-setter@v1
+        with:
+          # Basic key-value settings
+          env_key: API_KEY,USERNAME,PASSWORD,URL_PARAM
+          env_value: secret123,admin,pass123,hello world
+          output_key: STATUS,DEBUG_MODE,API_VERSION,ENCODED_URL
+          output_value: active,true,v1.0,hello world
+
+          # Value transformation options
+          to_upper: true
+          to_lower: false
+          encode_url: true
+
+          # Masking options
+          mask_secrets: true
+          mask_pattern: '(password|secret).*'
+
+          # Other options
+          delimiter: ','
+          fail_on_empty: true
+          trim_whitespace: true
+          case_sensitive: true
+          error_on_duplicate: true
+
+      - name: Display Environment Variables
+        run: |
+          echo "Environment Variables:"
+          echo "API_KEY: ${{ env.API_KEY }}"
+          echo "USERNAME: ${{ env.USERNAME }}"
+          echo "PASSWORD: ${{ env.PASSWORD }}"
+          echo "URL_PARAM: ${{ env.URL_PARAM }}"
+
+      - name: Display Outputs
+        run: |
+          echo "Outputs:"
+          echo "STATUS: ${{ steps.set_variables.outputs.STATUS }}"
+          echo "DEBUG_MODE: ${{ steps.set_variables.outputs.DEBUG_MODE }}"
+          echo "API_VERSION: ${{ steps.set_variables.outputs.API_VERSION }}"
+          echo "ENCODED_URL: ${{ steps.set_variables.outputs.ENCODED_URL }}"
+
+      - name: Display Action Results
+        run: |
+          echo "Action Results:"
+          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
+          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
+          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
+
+      # Error handling
       - name: Check for Errors
         if: steps.set_variables.outputs.status == 'failure'
         run: |
