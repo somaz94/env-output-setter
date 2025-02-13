@@ -1,14 +1,16 @@
-# Use an official Go runtime as a parent image
-FROM golang:1.23
+# Build stage
+FROM golang:1.23-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
-
-# Copy the Go application files
 COPY . .
 
-# Compile the Go application
 RUN go build -o /env-output-setter main.go
 
-# Command to run the executable
+# Final stage
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /env-output-setter /env-output-setter
+
 ENTRYPOINT ["/env-output-setter"]
