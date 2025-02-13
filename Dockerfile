@@ -4,7 +4,7 @@ FROM golang:1.23-alpine AS builder
 WORKDIR /app
 COPY . .
 
-RUN go build -o /env-output-setter main.go
+RUN go build -o /env-output-setter ./cmd/main.go
 
 # Final stage
 FROM alpine:latest
