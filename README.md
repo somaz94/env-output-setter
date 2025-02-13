@@ -12,6 +12,8 @@ set multiple key-value pairs in both `$GITHUB_ENV` and `$GITHUB_OUTPUT`. This
 action is useful for workflows that need to dynamically define environment
 variables or output values that other steps can reference.
 
+<br/>
+
 ## Inputs
 
 | Input               | Required | Description                                         | Default | Example                       |
@@ -39,6 +41,8 @@ variables or output values that other steps can reference.
 | `set_output_count`| Number of outputs set                | `3`            |
 | `status`         | Status of the operation               | `"success"`    |
 | `error_message`  | Error message if any                  | `""`           |
+
+<br/>
 
 ### Example Workflow
 
@@ -97,6 +101,8 @@ jobs:
           exit 1
 ```
 
+<br/>
+
 ## Features
 
 - Set multiple environment variables and outputs in one step
@@ -107,6 +113,8 @@ jobs:
 - Empty value validation
 - Detailed operation status and error reporting
 - Retry mechanism for file operations
+
+<br/>
 
 ## Advanced Usage
 
@@ -135,6 +143,8 @@ jobs:
     delimiter: ';'
 ```
 
+<br/>
+
 ### Common Use Cases
 
 1. **Multi-Region Deployment**
@@ -160,6 +170,8 @@ jobs:
     output_key: 'DEPLOY_STATUS,TEST_STATUS'
     output_value: 'success,passed'
 ```
+
+<br/>
 
 ### Value Transformation and Masking
 
@@ -198,6 +210,8 @@ This action supports value transformation and masking of sensitive data:
 
 Note: Masking only affects log output, not the actual values set in environment variables or outputs.
 
+<br/>
+
 ## Troubleshooting
 
 Common issues and solutions:
@@ -214,9 +228,13 @@ Common issues and solutions:
    - Error message: `failed to write to file`
    - Solution: Action will automatically retry up to 3 times
 
+<br/>
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<br/>
 
 ## Contributing
 
