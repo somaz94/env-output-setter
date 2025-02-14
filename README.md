@@ -32,6 +32,9 @@ variables or output values that other steps can reference.
 | `to_upper`         | No       | Convert values to uppercase                        | `false` | `"true"`                      |
 | `to_lower`         | No       | Convert values to lowercase                        | `false` | `"true"`                      |
 | `encode_url`       | No       | URL encode values                                  | `false` | `"true"`                      |
+| `escape_newlines`  | No       | Escape newlines in values                         | `true`  | `"true"`                      |
+| `max_length`       | No       | Maximum allowed length for values (0 for unlimited) | `0`     | `"10"`                        |
+| `allow_empty`      | No       | Allow empty values even when fail_on_empty is true  | `false` | `"true"`                      |
 
 <br/>
 
@@ -184,33 +187,90 @@ This action supports value transformation and masking of sensitive data:
 - Convert values to uppercase/lowercase
 - URL encode values
 - Custom masking patterns using regex
+- Escape newlines in values
+- Limit value lengths
+- Handle empty values
 
 #### Example Usage
 ```yaml
 - uses: somaz94/env-output-setter@v1
   with:
-    env_key: 'API_KEY,USERNAME,PASSWORD'
-    env_value: 'secret123,admin,pass123'
-    mask_secrets: 'true' # Masks sensitive values
-    mask_pattern: '(password|secret).' # Custom masking pattern
-    to_upper: 'true' # Convert to uppercase
-    to_lower: 'false' # Convert to lowercase
-    encode_url: 'false' # URL encode values
+    env_key: 'API_KEY,MULTILINE_TEXT,LONG_TEXT'
+    env_value: 'secret123,Hello\nWorld,ThisIsAVeryLongText'
+    mask_secrets: 'true'
+    mask_pattern: '(password|secret).*'
+    escape_newlines: 'true'
+    max_length: '10'
+    allow_empty: 'true'
 ```
 
-#### Masking Behavior
-- When `mask_secrets` is enabled, sensitive values are masked in logs
-- Custom `mask_pattern` allows regex-based masking
-- Default masking shows first 2 characters followed by asterisks
-- Short values (<4 characters) are completely masked
+#### Value Processing Behavior
+- When `escape_newlines` is enabled, newlines are converted to `\n`
+- `max_length` truncates values to specified length (0 for unlimited)
+- `allow_empty` permits empty values even when `fail_on_empty` is true
+- Transformations are applied in order:
+  1. Case conversion (upper/lower)
+  2. URL encoding
+  3. Newline escaping
+  4. Length limiting
 
-#### Value Transformations
-- `to_upper`: Converts values to uppercase
-- `to_lower`: Converts values to lowercase  
-- `encode_url`: Applies URL encoding to values
-- Transformations are applied in order: case conversion -> URL encoding
+- Note: Masking only affects log output, not the actual values set in environment variables or outputs.
 
-Note: Masking only affects log output, not the actual values set in environment variables or outputs.
+<br/>
+
+### Advanced Usage Examples
+
+1. **Handling Multiline Text**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'CONFIG_DATA'
+    env_value: 'line1\nline2\nline3'
+    escape_newlines: 'true'
+```
+
+2. **Length-Limited Values**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'DESCRIPTION'
+    env_value: 'This is a very long description text'
+    max_length: '20'
+```
+
+3. **Optional Values**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'OPTIONAL_VALUE,REQUIRED_VALUE'
+    env_value: ',important_data'
+    fail_on_empty: 'true'
+    allow_empty: 'true'
+```
+
+<br/>
+
+### Common Use Cases
+
+1. **Configuration File Processing**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'CONFIG_CONTENT'
+    env_value: ${{ steps.read_config.outputs.content }}
+    escape_newlines: 'true'
+    max_length: '1000'
+```
+
+2. **API Response Handling**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'API_RESPONSE'
+    env_value: ${{ steps.api_call.outputs.response }}
+    max_length: '500'
+    allow_empty: 'true'
+```
 
 <br/>
 
