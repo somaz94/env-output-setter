@@ -77,7 +77,7 @@ func validateInputs(cfg *config.Config, keys, values []string) error {
 			key = strings.ToLower(key)
 		}
 
-		if cfg.FailOnEmpty && (key == "" || values[i] == "") {
+		if cfg.FailOnEmpty && !cfg.AllowEmpty && (key == "" || values[i] == "") {
 			return fmt.Errorf(errEmptyValue, key)
 		}
 
@@ -124,6 +124,8 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 		cfg.ToUpper,
 		cfg.ToLower,
 		cfg.EncodeURL,
+		cfg.EscapeNewlines,
+		cfg.MaxLength,
 	)
 
 	printer.PrintSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))

@@ -56,6 +56,18 @@ inputs:
     description: 'URL encode values'
     required: false
     default: 'false'
+  escape_newlines:
+    description: 'Escape newlines in values'
+    required: false
+    default: 'true'
+  max_length:
+    description: 'Maximum allowed length for values (0 for unlimited)'
+    required: false
+    default: '0'
+  allow_empty:
+    description: 'Allow empty values even when fail_on_empty is true'
+    required: false
+    default: 'false'
 
 outputs:
   set_env_count:
@@ -85,6 +97,9 @@ runs:
     TO_UPPER: ${{ inputs.to_upper }}
     TO_LOWER: ${{ inputs.to_lower }}
     ENCODE_URL: ${{ inputs.encode_url }}
+    ESCAPE_NEWLINES: ${{ inputs.escape_newlines }}
+    MAX_LENGTH: ${{ inputs.max_length }}
+    ALLOW_EMPTY: ${{ inputs.allow_empty }}
 
 branding:
   icon: 'settings'

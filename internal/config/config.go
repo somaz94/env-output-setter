@@ -24,6 +24,9 @@ type Config struct {
 	ToUpper          bool
 	ToLower          bool
 	EncodeURL        bool
+	EscapeNewlines   bool
+	MaxLength        int
+	AllowEmpty       bool
 }
 
 // Load loads configuration from environment variables
@@ -45,6 +48,9 @@ func Load() *Config {
 		ToUpper:          getBoolEnv("INPUT_TO_UPPER", false),
 		ToLower:          getBoolEnv("INPUT_TO_LOWER", false),
 		EncodeURL:        getBoolEnv("INPUT_ENCODE_URL", false),
+		EscapeNewlines:   getBoolEnv("INPUT_ESCAPE_NEWLINES", true),
+		MaxLength:        getIntEnv("INPUT_MAX_LENGTH", 0),
+		AllowEmpty:       getBoolEnv("INPUT_ALLOW_EMPTY", false),
 	}
 }
 
@@ -65,4 +71,16 @@ func getBoolEnv(key string, defaultValue bool) bool {
 		return defaultValue
 	}
 	return b
+}
+
+func getIntEnv(key string, defaultValue int) int {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	i, err := strconv.Atoi(value)
+	if err != nil {
+		return defaultValue
+	}
+	return i
 }

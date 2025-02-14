@@ -212,3 +212,67 @@ jobs:
         run: |
           echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
           exit 1
+
+  test-action-v4:
+    name: Test env-output-setter v4
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory ${{ github.workspace }}
+
+      - name: Test New Features
+        id: set_variables
+        uses: ./
+        with:
+          # 멀티라인 및 특수문자 테스트
+          env_key: MULTILINE_TEXT,MAX_LENGTH_TEST,EMPTY_VALUE
+          env_value: "Hello\nWorld,ThisIsAVeryLongTextThatShouldBeTruncated,   "
+          output_key: PROCESSED_TEXT,TRUNCATED_TEXT,ALLOWED_EMPTY
+          output_value: "First Line\nSecond Line,AnotherLongTextToTest,   "
+
+          # 새로운 옵션들 테스트
+          escape_newlines: true        # \n을 \\n으로 변환
+          max_length: 10              # 값을 10자로 제한
+          allow_empty: true           # 빈 값 허용
+          
+          # 기본 옵션들
+          delimiter: ','
+          fail_on_empty: true
+          trim_whitespace: true
+          case_sensitive: true
+          error_on_duplicate: true
+
+      - name: Display Environment Variables
+        run: |
+          echo "Environment Variables:"
+          echo "MULTILINE_TEXT: ${{ env.MULTILINE_TEXT }}"
+          echo "MAX_LENGTH_TEST: ${{ env.MAX_LENGTH_TEST }}"
+          echo "EMPTY_VALUE: '${{ env.EMPTY_VALUE }}'"
+
+      - name: Display Outputs
+        run: |
+          echo "Outputs:"
+          echo "PROCESSED_TEXT: ${{ steps.set_variables.outputs.PROCESSED_TEXT }}"
+          echo "TRUNCATED_TEXT: ${{ steps.set_variables.outputs.TRUNCATED_TEXT }}"
+          echo "ALLOWED_EMPTY: '${{ steps.set_variables.outputs.ALLOWED_EMPTY }}'"
+
+      - name: Display Action Results
+        run: |
+          echo "Action Results:"
+          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
+          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
+          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
+
+      # Error handling
+      - name: Check for Errors
+        if: steps.set_variables.outputs.status == 'failure'
+        run: |
+          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
+          exit 1
