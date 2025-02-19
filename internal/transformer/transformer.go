@@ -34,30 +34,36 @@ func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool,
 }
 
 func (t *Transformer) TransformValue(value string) string {
+	if value == "" {
+		return value
+	}
+
+	result := value
+
 	if t.toUpper {
-		value = strings.ToUpper(value)
+		result = strings.ToUpper(result)
+	} else if t.toLower {
+		result = strings.ToLower(result)
 	}
-	if t.toLower {
-		value = strings.ToLower(value)
-	}
+
 	if t.encodeURL {
-		value = url.QueryEscape(value)
+		result = url.QueryEscape(result)
 	}
 
 	if t.escapeNewlines {
-		value = strings.ReplaceAll(value, "\n", "\\n")
-		value = strings.ReplaceAll(value, "\r", "\\r")
+		result = strings.ReplaceAll(result, "\n", "\\n")
+		result = strings.ReplaceAll(result, "\r", "\\r")
 	}
 
-	if t.maxLength > 0 && len(value) > t.maxLength {
-		value = value[:t.maxLength]
+	if t.maxLength > 0 && len(result) > t.maxLength {
+		result = result[:t.maxLength]
 	}
 
-	return value
+	return result
 }
 
 func (t *Transformer) MaskValue(value string) string {
-	if !t.maskSecrets {
+	if !t.maskSecrets || value == "" {
 		return value
 	}
 
@@ -65,9 +71,11 @@ func (t *Transformer) MaskValue(value string) string {
 		return "***"
 	}
 
-	// 기본 마스킹 로직 (예: 길이가 4 이상인 값)
-	if len(value) >= 4 {
-		return value[:2] + strings.Repeat("*", len(value)-2)
+	// Shorten the value to 4 characters
+	if len(value) <= 4 {
+		return "***"
 	}
-	return "***"
+
+	visibleChars := 2
+	return value[:visibleChars] + strings.Repeat("*", len(value)-visibleChars)
 }

@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,10 +14,11 @@ import (
 
 const (
 	errMismatchedPairs = "env_key and env_value must have the same number of entries"
-	errWriteFile       = "failed to write to %s file: %v"
+	errWriteFile       = "failed to write to %s file"
 	errEmptyValue      = "empty value found for key: %s"
 	errDuplicateKey    = "duplicate key found: %s"
-	localExecMsg       = "Local Execution - %s is not set, skipping writing to GitHub Actions %s."
+	errMaxRetries      = "failed to write after %d retries"
+	localExecMsg       = "Local Execution - %s is not set, skipping writing to GitHub Actions %s"
 )
 
 func SetEnv(cfg *config.Config) (int, error) {
@@ -40,7 +42,7 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
 
 	if len(keyList) != len(valueList) {
-		return 0, fmt.Errorf(errMismatchedPairs)
+		return 0, errors.New(errMismatchedPairs)
 	}
 
 	if err := validateInputs(cfg, keyList, valueList); err != nil {
@@ -104,17 +106,17 @@ func writeToFile(cfg *config.Config, filePath string, keys, values []string, var
 				time.Sleep(retryDelay)
 				continue
 			}
-			return count, fmt.Errorf(errWriteFile, filePath, err)
+			return count, fmt.Errorf("%s: %w", fmt.Sprintf(errWriteFile, filePath), err)
 		}
 		return count, nil
 	}
-	return 0, fmt.Errorf("failed to write after %d retries", maxRetries)
+	return 0, fmt.Errorf(errMaxRetries, maxRetries)
 }
 
 func doWrite(cfg *config.Config, filePath string, keys, values []string, varType string) (int, error) {
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -132,6 +134,10 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 
 	count := 0
 	for i, key := range keys {
+		if key == "" && !cfg.AllowEmpty {
+			continue
+		}
+
 		if cfg.TrimWhitespace {
 			key = strings.TrimSpace(key)
 			values[i] = strings.TrimSpace(values[i])
@@ -139,15 +145,15 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 
 		transformedValue := trans.TransformValue(values[i])
 
-		line := fmt.Sprintf("%s=%s\n", key, transformedValue)
+		// GitHub Actions New Line Format
+		line := fmt.Sprintf("%s<<%s\n%s\n%s\n", key, "EOF", transformedValue, "EOF")
 		if _, err := file.WriteString(line); err != nil {
-			return count, err
+			return count, fmt.Errorf("failed to write line: %w", err)
 		}
 
 		maskedValue := trans.MaskValue(transformedValue)
 		printer.PrintSuccess(varType, key, maskedValue)
 		count++
 	}
-	fmt.Println()
 	return count, nil
 }

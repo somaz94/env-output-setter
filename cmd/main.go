@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/somaz94/env-output-setter/internal/config"
 	"github.com/somaz94/env-output-setter/internal/printer"
@@ -47,18 +48,17 @@ func main() {
 
 func setOutputAndExit(envCount, outputCount int, status, errorMsg string) {
 	if outputFile := os.Getenv("GITHUB_OUTPUT"); outputFile != "" {
-		// 새로운 GITHUB_OUTPUT 파일 문법 사용
-		outputs := []string{
-			fmt.Sprintf("set_env_count=%d", envCount),
-			fmt.Sprintf("set_output_count=%d", outputCount),
-			fmt.Sprintf("status=%s", status),
-			fmt.Sprintf("error_message=%s", errorMsg),
+		outputs := map[string]string{
+			"set_env_count":    strconv.Itoa(envCount),
+			"set_output_count": strconv.Itoa(outputCount),
+			"status":           status,
+			"error_message":    errorMsg,
 		}
 
-		// 각 출력을 파일에 쓰기
-		for _, output := range outputs {
-			if err := appendToFile(outputFile, output); err != nil {
+		for key, value := range outputs {
+			if err := appendToFile(outputFile, fmt.Sprintf("%s=%s", key, value)); err != nil {
 				fmt.Printf("Error writing to GITHUB_OUTPUT: %v\n", err)
+				os.Exit(1)
 			}
 		}
 	}
@@ -69,16 +69,15 @@ func setOutputAndExit(envCount, outputCount int, status, errorMsg string) {
 	os.Exit(0)
 }
 
-// 파일에 출력을 추가하는 헬퍼 함수
 func appendToFile(filename, content string) error {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
 	}
 	defer f.Close()
 
-	if _, err := f.WriteString(content + "\n"); err != nil {
-		return err
+	if _, err := fmt.Fprintln(f, content); err != nil {
+		return fmt.Errorf("failed to write content: %w", err)
 	}
 	return nil
 }
