@@ -40,25 +40,35 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	// 디버그 로깅 추가
 	fmt.Printf("Raw keys: %q\n", keys)
 	fmt.Printf("Raw values: %q\n", values)
+	fmt.Printf("Using delimiter: %q\n", cfg.Delimiter)
 
 	// 멀티라인 처리를 위해 모든 whitespace를 정규화
-	keys = normalizeWhitespace(keys, cfg.Delimiter)
-	values = normalizeWhitespace(values, cfg.Delimiter)
+	keys = normalizeWhitespace(keys)
+	values = normalizeWhitespace(values)
 
 	// 디버그 로깅 추가
 	fmt.Printf("Normalized keys: %q\n", keys)
 	fmt.Printf("Normalized values: %q\n", values)
 
-	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
-	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
+	// 구분자로 분리
+	keyList := strings.Split(keys, cfg.Delimiter)
+	valueList := strings.Split(values, cfg.Delimiter)
 
-	// 디버그 로깅 추가
-	fmt.Printf("Key list: %v\n", keyList)
-	fmt.Printf("Value list: %v\n", valueList)
+	// 각 항목의 앞뒤 공백 제거
+	for i := range keyList {
+		keyList[i] = strings.TrimSpace(keyList[i])
+	}
+	for i := range valueList {
+		valueList[i] = strings.TrimSpace(valueList[i])
+	}
 
 	// 빈 항목 제거
 	keyList = removeEmptyEntries(keyList)
 	valueList = removeEmptyEntries(valueList)
+
+	// 디버그 로깅 추가
+	fmt.Printf("Key list: %v\n", keyList)
+	fmt.Printf("Value list: %v\n", valueList)
 
 	if len(keyList) != len(valueList) {
 		return 0, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
@@ -85,8 +95,8 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	return count, nil
 }
 
-// normalizeWhitespace normalizes all whitespace including newlines while preserving delimiters
-func normalizeWhitespace(s string, delimiter string) string {
+// normalizeWhitespace normalizes all whitespace including newlines
+func normalizeWhitespace(s string) string {
 	// 실제 줄바꿈을 공백으로 변환
 	s = strings.ReplaceAll(s, "\n", " ")
 	s = strings.ReplaceAll(s, "\r", " ")
@@ -94,12 +104,7 @@ func normalizeWhitespace(s string, delimiter string) string {
 	// 연속된 공백을 하나로 변환
 	s = strings.Join(strings.Fields(s), " ")
 
-	// 구분자 주변의 공백 처리
-	parts := strings.Split(s, delimiter)
-	for i, part := range parts {
-		parts[i] = strings.TrimSpace(part)
-	}
-	return strings.Join(parts, delimiter)
+	return s
 }
 
 // removeEmptyEntries removes empty entries from slice
