@@ -38,8 +38,16 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 		keys, values = cfg.OutputKeys, cfg.OutputValues
 	}
 
+	// 멀티라인 처리를 위해 모든 whitespace를 정규화
+	keys = normalizeWhitespace(keys)
+	values = normalizeWhitespace(values)
+
 	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
 	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
+
+	// 빈 항목 제거
+	keyList = removeEmptyEntries(keyList)
+	valueList = removeEmptyEntries(valueList)
 
 	if len(keyList) != len(valueList) {
 		return 0, errors.New(errMismatchedPairs)
@@ -64,6 +72,27 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	}
 
 	return count, nil
+}
+
+// normalizeWhitespace normalizes all whitespace including newlines
+func normalizeWhitespace(s string) string {
+	// 연속된 whitespace를 하나의 공백으로 변환
+	s = strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
+	// 쉼표 주변의 공백 정리
+	s = strings.ReplaceAll(s, " ,", ",")
+	s = strings.ReplaceAll(s, ", ", ",")
+	return s
+}
+
+// removeEmptyEntries removes empty entries from slice
+func removeEmptyEntries(entries []string) []string {
+	result := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if trimmed := strings.TrimSpace(entry); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
 
 func validateInputs(cfg *config.Config, keys, values []string) error {

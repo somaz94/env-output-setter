@@ -91,6 +91,46 @@ jobs:
           echo "TEST1: ${{ steps.set_variables.outputs.test1 }}"
           echo "TEST2: ${{ steps.set_variables.outputs.test2 }}"
 
+  test-multiline:
+    name: Test Multiline Input
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test Multiline
+        id: test_multi
+        uses: ./
+        with:
+          env_key: |
+            MULTI_KEY1,
+            MULTI_KEY2,
+            MULTI_KEY3
+          env_value: |
+            first value,
+            second value,
+            third value
+          output_key: |
+            OUT_MULTI1,
+            OUT_MULTI2,
+            OUT_MULTI3
+          output_value: |
+            output one,
+            output two,
+            output three
+
+      - name: Verify Multiline Results
+        run: |
+          echo "Environment Variables:"
+          echo "MULTI_KEY1: ${{ env.MULTI_KEY1 }}"
+          echo "MULTI_KEY2: ${{ env.MULTI_KEY2 }}"
+          echo "MULTI_KEY3: ${{ env.MULTI_KEY3 }}"
+          
+          echo "Outputs:"
+          echo "OUT_MULTI1: ${{ steps.test_multi.outputs.OUT_MULTI1 }}"
+          echo "OUT_MULTI2: ${{ steps.test_multi.outputs.OUT_MULTI2 }}"
+          echo "OUT_MULTI3: ${{ steps.test_multi.outputs.OUT_MULTI3 }}"
+
   test-action-v2:
     name: Test env-output-setter v2
     runs-on: ubuntu-latest
