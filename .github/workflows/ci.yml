@@ -271,11 +271,11 @@ jobs:
         id: set_variables
         uses: ./
         with:
-          # 멀티라인 및 특수문자 테스트
-          env_key: MULTILINE_TEXT,MAX_LENGTH_TEST,EMPTY_VALUE
-          env_value: "Hello\nWorld,ThisIsAVeryLongTextThatShouldBeTruncated,   "
-          output_key: PROCESSED_TEXT,TRUNCATED_TEXT,ALLOWED_EMPTY
-          output_value: "First Line\nSecond Line,AnotherLongTextToTest,   "
+          # 멀티라인 및 특수문자 테스트 (구분자를 '::'로 변경)
+          env_key: "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
+          env_value: "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
+          output_key: "PROCESSED_TEXT::TRUNCATED_TEXT::ALLOWED_EMPTY"
+          output_value: "First Line\nSecond Line::AnotherLongTextToTest::   "
 
           # 새로운 옵션들 테스트
           escape_newlines: true        # \n을 \\n으로 변환
@@ -283,11 +283,11 @@ jobs:
           allow_empty: true           # 빈 값 허용
           
           # 기본 옵션들
-          delimiter: ','
-          fail_on_empty: true
+          delimiter: '::'             # 쉼표 대신 '::'를 구분자로 사용
           trim_whitespace: true
           case_sensitive: true
           error_on_duplicate: true
+          fail_on_empty: true
 
       - name: Display Environment Variables
         run: |
