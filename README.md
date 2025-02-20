@@ -383,6 +383,59 @@ Common issues and solutions:
 
 <br/>
 
+### Debug Output Format
+
+When `debug_mode` is enabled, you'll see detailed information about how your inputs are being processed:
+
+```
+🔍 Debug Information (Env)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📥 Input Values:
+  • Keys:      "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
+  • Values:    "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
+  • Delimiter: "::"
+
+📋 Processed Values:
+  • Keys:   [MULTILINE_TEXT MAX_LENGTH_TEST EMPTY_VALUE]
+  • Values: [Hello World ThisIsAVeryLongTextThatShouldBeTruncated ]
+
+✍️  Writing Values:
+  • env: MULTILINE_TEXT = Hello Worl
+  • env: MAX_LENGTH_TEST = ThisIsAVer
+  • env: EMPTY_VALUE = 
+```
+
+Even without debug mode, you'll still see the basic operation output:
+
+```
+==================================================
+🚀 Setting Env Variables
+  • env: MULTILINE_TEXT = Hello Worl
+  • env: MAX_LENGTH_TEST = ThisIsAVer
+  • env: EMPTY_VALUE = 
+
+==================================================
+✅ Execution Complete
+Mode: GitHub Actions
+```
+
+This helps you understand:
+- How your inputs are being processed
+- What transformations are being applied
+- The final values being set
+- Any issues that might arise during processing
+
+### Output Colors
+
+The action uses colors in the console output to help distinguish different types of information:
+- 🔵 Blue: Information and section headers
+- 🟢 Green: Successful operations
+- 🔴 Red: Errors and warnings
+
+Note: Colors may not be visible in all CI environments or when output is redirected to a file.
+
+<br/>
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -392,3 +445,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
