@@ -272,14 +272,10 @@ jobs:
         uses: ./
         with:
           # 멀티라인 및 특수문자 테스트 (구분자를 '::'로 변경)
-          env_key: |
-            MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE
-          env_value: |
-            Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   
-          output_key: |
-            PROCESSED_TEXT::TRUNCATED_TEXT::ALLOWED_EMPTY
-          output_value: |
-            First Line\nSecond Line::AnotherLongTextToTest::   
+          env_key: "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
+          env_value: "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
+          output_key: "PROCESSED_TEXT::TRUNCATED_TEXT::ALLOWED_EMPTY"
+          output_value: "First Line\nSecond Line::AnotherLongTextToTest::   "
 
           # 새로운 옵션들 테스트
           escape_newlines: true        # \n을 \\n으로 변환

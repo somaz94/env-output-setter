@@ -1,7 +1,6 @@
 package writer
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -38,19 +37,31 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 		keys, values = cfg.OutputKeys, cfg.OutputValues
 	}
 
+	// 디버그 로깅 추가
+	fmt.Printf("Raw keys: %q\n", keys)
+	fmt.Printf("Raw values: %q\n", values)
+
 	// 멀티라인 처리를 위해 모든 whitespace를 정규화
 	keys = normalizeWhitespace(keys, cfg.Delimiter)
 	values = normalizeWhitespace(values, cfg.Delimiter)
 
+	// 디버그 로깅 추가
+	fmt.Printf("Normalized keys: %q\n", keys)
+	fmt.Printf("Normalized values: %q\n", values)
+
 	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
 	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
+
+	// 디버그 로깅 추가
+	fmt.Printf("Key list: %v\n", keyList)
+	fmt.Printf("Value list: %v\n", valueList)
 
 	// 빈 항목 제거
 	keyList = removeEmptyEntries(keyList)
 	valueList = removeEmptyEntries(valueList)
 
 	if len(keyList) != len(valueList) {
-		return 0, errors.New(errMismatchedPairs)
+		return 0, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
 	}
 
 	if err := validateInputs(cfg, keyList, valueList); err != nil {
@@ -76,22 +87,12 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 
 // normalizeWhitespace normalizes all whitespace including newlines while preserving delimiters
 func normalizeWhitespace(s string, delimiter string) string {
-	// 구분자를 임시 토큰으로 대체
-	tempToken := "___DELIMITER___"
-	s = strings.ReplaceAll(s, delimiter, tempToken)
+	// 실제 줄바꿈을 공백으로 변환
+	s = strings.ReplaceAll(s, "\n", " ")
+	s = strings.ReplaceAll(s, "\r", " ")
 
-	// 줄바꿈을 제거하고 연속된 공백을 하나로
-	lines := strings.Split(s, "\n")
-	for i, line := range lines {
-		line = strings.TrimSpace(line)
-		if line != "" {
-			lines[i] = line
-		}
-	}
-	s = strings.Join(lines, "")
-
-	// 임시 토큰을 다시 구분자로 변경
-	s = strings.ReplaceAll(s, tempToken, delimiter)
+	// 연속된 공백을 하나로 변환
+	s = strings.Join(strings.Fields(s), " ")
 
 	// 구분자 주변의 공백 처리
 	parts := strings.Split(s, delimiter)
