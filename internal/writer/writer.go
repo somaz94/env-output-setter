@@ -101,8 +101,10 @@ func normalizeWhitespace(s string) string {
 	s = strings.ReplaceAll(s, "\n", " ")
 	s = strings.ReplaceAll(s, "\r", " ")
 
-	// 연속된 공백을 하나로 변환
-	s = strings.Join(strings.Fields(s), " ")
+	// 연속된 공백을 하나의 공백으로 변환
+	for strings.Contains(s, "  ") {
+		s = strings.ReplaceAll(s, "  ", " ")
+	}
 
 	return s
 }
