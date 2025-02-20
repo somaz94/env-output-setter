@@ -274,6 +274,53 @@ This action supports value transformation and masking of sensitive data:
 
 <br/>
 
+### Multiline and Special Characters
+
+When working with multiline values or values containing commas, you need to consider the following:
+
+1. **Multiline Input**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: |
+      MULTI_KEY1,
+      MULTI_KEY2,
+      MULTI_KEY3
+    env_value: |
+      first value,
+      second value,
+      third value
+```
+
+2. **Values Containing Commas**
+If your values contain commas, you should use a different delimiter to avoid parsing issues:
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "KEY1::KEY2::KEY3"
+    env_value: "value1, with comma::value2::value3"
+    delimiter: "::"  # Use a different delimiter when values contain commas
+```
+
+3. **Multiline Values with Special Characters**
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "MULTILINE_TEXT::CONFIG_JSON"
+    env_value: |
+      Hello\nWorld::{"key": "value", "array": [1,2,3]}
+    delimiter: "::"
+    escape_newlines: true
+```
+
+#### Important Notes:
+- When values contain the default delimiter (comma), use a different delimiter like `::`
+- Multiline values are automatically normalized
+- Use `escape_newlines: true` to properly handle newline characters
+- The same delimiter must be used consistently for both keys and values
+
+<br/>
+
 ## Troubleshooting
 
 Common issues and solutions:

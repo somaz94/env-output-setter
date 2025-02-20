@@ -39,8 +39,8 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	}
 
 	// 멀티라인 처리를 위해 모든 whitespace를 정규화
-	keys = normalizeWhitespace(keys)
-	values = normalizeWhitespace(values)
+	keys = normalizeWhitespace(keys, cfg.Delimiter)
+	values = normalizeWhitespace(values, cfg.Delimiter)
 
 	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
 	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
@@ -74,14 +74,31 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	return count, nil
 }
 
-// normalizeWhitespace normalizes all whitespace including newlines
-func normalizeWhitespace(s string) string {
-	// 연속된 whitespace를 하나의 공백으로 변환
-	s = strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
-	// 쉼표 주변의 공백 정리
-	s = strings.ReplaceAll(s, " ,", ",")
-	s = strings.ReplaceAll(s, ", ", ",")
-	return s
+// normalizeWhitespace normalizes all whitespace including newlines while preserving delimiters
+func normalizeWhitespace(s string, delimiter string) string {
+	// 구분자를 임시 토큰으로 대체
+	tempToken := "___DELIMITER___"
+	s = strings.ReplaceAll(s, delimiter, tempToken)
+
+	// 줄바꿈을 제거하고 연속된 공백을 하나로
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			lines[i] = line
+		}
+	}
+	s = strings.Join(lines, "")
+
+	// 임시 토큰을 다시 구분자로 변경
+	s = strings.ReplaceAll(s, tempToken, delimiter)
+
+	// 구분자 주변의 공백 처리
+	parts := strings.Split(s, delimiter)
+	for i, part := range parts {
+		parts[i] = strings.TrimSpace(part)
+	}
+	return strings.Join(parts, delimiter)
 }
 
 // removeEmptyEntries removes empty entries from slice
