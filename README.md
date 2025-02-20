@@ -314,6 +314,39 @@ If your values contain commas, you should use a different delimiter to avoid par
     escape_newlines: true
 ```
 
+4. **Multiline Values with Special Characters (\n)**
+```yaml
+      - name: Run Performance Analysis
+        id: analysis
+        uses: somaz94/github-action-analyzer@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_file: ci.yml
+          repository: ${{ github.repository }}
+          analysis_depth: '20'
+          timeout: '15'
+          ignore_patterns: 'checkout,setup'
+
+      - name: Set Analysis Results
+        uses: somaz94/env-output-setter@v1
+        with:
+          env_key: |
+            METRICS_SUMMARY
+            PERFORMANCE_SUMMARY
+            CACHE_RECOMMENDATIONS
+            DOCKER_OPTIMIZATIONS
+            STATUS
+          env_value: |
+            ${{ steps.analysis.outputs.metrics_summary }}
+            ${{ steps.analysis.outputs.performance_summary }}
+            ${{ steps.analysis.outputs.cache_recommendations }}
+            ${{ steps.analysis.outputs.docker_optimizations }}
+            ${{ steps.analysis.outputs.status }}
+          delimiter: "\n"
+          trim_whitespace: true
+          debug_mode: true
+```
+
 #### Important Notes:
 - When values contain the default delimiter (comma), use a different delimiter like `::`
 - Multiline values are automatically normalized
