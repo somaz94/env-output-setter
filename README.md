@@ -35,6 +35,7 @@ variables or output values that other steps can reference.
 | `escape_newlines`  | No       | Escape newlines in values                         | `true`  | `"true"`                      |
 | `max_length`       | No       | Maximum allowed length for values (0 for unlimited) | `0`     | `"10"`                        |
 | `allow_empty`      | No       | Allow empty values even when fail_on_empty is true  | `false` | `"true"`                      |
+| `debug_mode`       | No       | Enable debug logging for troubleshooting           | `false` | `"true"`                      |
 
 <br/>
 
@@ -318,6 +319,49 @@ If your values contain commas, you should use a different delimiter to avoid par
 - Multiline values are automatically normalized
 - Use `escape_newlines: true` to properly handle newline characters
 - The same delimiter must be used consistently for both keys and values
+
+<br/>
+
+### Debugging and Troubleshooting
+
+#### Debug Mode
+You can enable debug mode to see detailed logging of how your inputs are being processed:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "KEY1::KEY2"
+    env_value: "value1::value2"
+    debug_mode: true
+```
+
+Debug output includes:
+- Raw input values
+- Normalized values after whitespace processing
+- Final key-value pairs
+- Delimiter being used
+
+#### Empty Values
+The action provides two ways to handle empty values:
+
+1. Using `fail_on_empty`:
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "KEY1,KEY2"
+    env_value: ",value2"
+    fail_on_empty: true  # This will fail
+```
+
+2. Using `allow_empty`:
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "KEY1,KEY2"
+    env_value: ",value2"
+    fail_on_empty: true
+    allow_empty: true  # This will allow empty values to pass
+```
 
 <br/>
 

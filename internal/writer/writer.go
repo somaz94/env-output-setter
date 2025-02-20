@@ -39,24 +39,26 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 
 	// 디버그 로깅
 	if cfg.DebugMode {
-		fmt.Printf("Raw keys: %q\n", keys)
-		fmt.Printf("Raw values: %q\n", values)
-		fmt.Printf("Using delimiter: %q\n", cfg.Delimiter)
+		fmt.Printf("\n🔍 Debug Information (%s)\n", strings.Title(varType))
+		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+		fmt.Printf("📥 Input Values:\n")
+		fmt.Printf("  • Keys:      %q\n", keys)
+		fmt.Printf("  • Values:    %q\n", values)
+		fmt.Printf("  • Delimiter: %q\n", cfg.Delimiter)
+		fmt.Printf("\n")
 	}
 
-	// 멀티라인 처리를 위해 모든 whitespace를 정규화
-	keys = normalizeWhitespace(keys)
-	values = normalizeWhitespace(values)
-
-	// 디버그 로깅
-	if cfg.DebugMode {
-		fmt.Printf("Normalized keys: %q\n", keys)
-		fmt.Printf("Normalized values: %q\n", values)
-	}
-
-	// 구분자로 분리
+	// 구분자로 먼저 분리
 	keyList := strings.Split(keys, cfg.Delimiter)
 	valueList := strings.Split(values, cfg.Delimiter)
+
+	// 각 항목별로 whitespace 정규화
+	for i := range keyList {
+		keyList[i] = normalizeWhitespace(keyList[i])
+	}
+	for i := range valueList {
+		valueList[i] = normalizeWhitespace(valueList[i])
+	}
 
 	// 각 항목의 앞뒤 공백 제거
 	for i := range keyList {
@@ -72,8 +74,10 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 
 	// 디버그 로깅
 	if cfg.DebugMode {
-		fmt.Printf("Key list: %v\n", keyList)
-		fmt.Printf("Value list: %v\n", valueList)
+		fmt.Printf("📋 Processed Values:\n")
+		fmt.Printf("  • Keys:   %v\n", keyList)
+		fmt.Printf("  • Values: %v\n", valueList)
+		fmt.Printf("\n")
 	}
 
 	if len(keyList) != len(valueList) {
@@ -194,7 +198,9 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 		cfg.MaxLength,
 	)
 
-	printer.PrintSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))
+	if cfg.DebugMode {
+		fmt.Printf("✍️  Writing Values:\n")
+	}
 
 	count := 0
 	for i, key := range keys {
@@ -216,8 +222,15 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 		}
 
 		maskedValue := trans.MaskValue(transformedValue)
-		printer.PrintSuccess(varType, key, maskedValue)
+		if cfg.DebugMode {
+			fmt.Printf("  • %s: %s = %s\n", varType, key, maskedValue)
+		}
 		count++
 	}
+
+	if cfg.DebugMode {
+		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+	}
+
 	return count, nil
 }
