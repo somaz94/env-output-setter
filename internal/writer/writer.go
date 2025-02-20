@@ -39,13 +39,11 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 
 	// 디버그 로깅
 	if cfg.DebugMode {
-		fmt.Printf("\n🔍 Debug Information (%s)\n", strings.Title(varType))
-		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-		fmt.Printf("📥 Input Values:\n")
-		fmt.Printf("  • Keys:      %q\n", keys)
-		fmt.Printf("  • Values:    %q\n", values)
-		fmt.Printf("  • Delimiter: %q\n", cfg.Delimiter)
-		fmt.Printf("\n")
+		printer.PrintDebugSection(strings.Title(varType))
+		printer.PrintDebugInfo("📥 Input Values:\n")
+		printer.PrintDebugInfo("  • Keys:      %q\n", keys)
+		printer.PrintDebugInfo("  • Values:    %q\n", values)
+		printer.PrintDebugInfo("  • Delimiter: %q\n\n", cfg.Delimiter)
 	}
 
 	// 구분자로 먼저 분리
@@ -74,10 +72,9 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 
 	// 디버그 로깅
 	if cfg.DebugMode {
-		fmt.Printf("📋 Processed Values:\n")
-		fmt.Printf("  • Keys:   %v\n", keyList)
-		fmt.Printf("  • Values: %v\n", valueList)
-		fmt.Printf("\n")
+		printer.PrintDebugInfo("📋 Processed Values:\n")
+		printer.PrintDebugInfo("  • Keys:   %v\n", keyList)
+		printer.PrintDebugInfo("  • Values: %v\n\n", valueList)
 	}
 
 	if len(keyList) != len(valueList) {
@@ -222,9 +219,7 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 		}
 
 		maskedValue := trans.MaskValue(transformedValue)
-		if cfg.DebugMode {
-			fmt.Printf("  • %s: %s = %s\n", varType, key, maskedValue)
-		}
+		printer.PrintSuccess(varType, key, maskedValue)
 		count++
 	}
 

@@ -13,7 +13,8 @@ const (
 )
 
 func PrintSection(title string) {
-	fmt.Printf("\n%s\n%s\n", strings.Repeat("=", 50), title)
+	fmt.Printf("\n%s==================================================\n", infoColor)
+	fmt.Printf("🚀 %s%s\n", title, resetColor)
 }
 
 func PrintSuccess(varType, key, value string) {
@@ -21,11 +22,26 @@ func PrintSuccess(varType, key, value string) {
 }
 
 func PrintError(message string) {
-	fmt.Printf("%s%s%s\n", errorColor, message, resetColor)
+	fmt.Printf("%s❌ %s%s\n", errorColor, message, resetColor)
 }
 
 func PrintInfo(message string) {
 	fmt.Printf("%s%s%s\n", infoColor, message, resetColor)
+}
+
+func PrintDebugSection(title string) {
+	fmt.Printf("\n%s🔍 Debug Information (%s)\n", infoColor, title)
+	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n%s", resetColor)
+}
+
+func PrintDebugInfo(format string, args ...interface{}) {
+	fmt.Printf(format, args...)
+}
+
+func PrintComplete() {
+	fmt.Printf("\n%s==================================================\n", infoColor)
+	fmt.Printf("✅ Execution Complete\n")
+	fmt.Printf("Mode: GitHub Actions%s\n", resetColor)
 }
 
 func PrintLine() {
