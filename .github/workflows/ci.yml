@@ -288,7 +288,7 @@ jobs:
           case_sensitive: true
           error_on_duplicate: true
           fail_on_empty: true
-
+          debug_mode: true
       - name: Display Environment Variables
         run: |
           echo "Environment Variables:"

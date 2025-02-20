@@ -27,6 +27,7 @@ type Config struct {
 	EscapeNewlines   bool
 	MaxLength        int
 	AllowEmpty       bool
+	DebugMode        bool
 }
 
 // Load loads configuration from environment variables
@@ -51,6 +52,7 @@ func Load() *Config {
 		EscapeNewlines:   getBoolEnv("INPUT_ESCAPE_NEWLINES", true),
 		MaxLength:        getIntEnv("INPUT_MAX_LENGTH", 0),
 		AllowEmpty:       getBoolEnv("INPUT_ALLOW_EMPTY", false),
+		DebugMode:        getBoolEnv("DEBUG_MODE", false),
 	}
 }
 

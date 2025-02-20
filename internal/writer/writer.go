@@ -37,18 +37,22 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 		keys, values = cfg.OutputKeys, cfg.OutputValues
 	}
 
-	// 디버그 로깅 추가
-	fmt.Printf("Raw keys: %q\n", keys)
-	fmt.Printf("Raw values: %q\n", values)
-	fmt.Printf("Using delimiter: %q\n", cfg.Delimiter)
+	// 디버그 로깅
+	if cfg.DebugMode {
+		fmt.Printf("Raw keys: %q\n", keys)
+		fmt.Printf("Raw values: %q\n", values)
+		fmt.Printf("Using delimiter: %q\n", cfg.Delimiter)
+	}
 
 	// 멀티라인 처리를 위해 모든 whitespace를 정규화
 	keys = normalizeWhitespace(keys)
 	values = normalizeWhitespace(values)
 
-	// 디버그 로깅 추가
-	fmt.Printf("Normalized keys: %q\n", keys)
-	fmt.Printf("Normalized values: %q\n", values)
+	// 디버그 로깅
+	if cfg.DebugMode {
+		fmt.Printf("Normalized keys: %q\n", keys)
+		fmt.Printf("Normalized values: %q\n", values)
+	}
 
 	// 구분자로 분리
 	keyList := strings.Split(keys, cfg.Delimiter)
@@ -62,13 +66,15 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 		valueList[i] = strings.TrimSpace(valueList[i])
 	}
 
-	// 빈 항목 제거
-	keyList = removeEmptyEntries(keyList)
-	valueList = removeEmptyEntries(valueList)
+	// 빈 항목 제거 (allow_empty가 true일 때는 제거하지 않음)
+	keyList = removeEmptyEntries(keyList, cfg.AllowEmpty)
+	valueList = removeEmptyEntries(valueList, cfg.AllowEmpty)
 
-	// 디버그 로깅 추가
-	fmt.Printf("Key list: %v\n", keyList)
-	fmt.Printf("Value list: %v\n", valueList)
+	// 디버그 로깅
+	if cfg.DebugMode {
+		fmt.Printf("Key list: %v\n", keyList)
+		fmt.Printf("Value list: %v\n", valueList)
+	}
 
 	if len(keyList) != len(valueList) {
 		return 0, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
@@ -109,12 +115,16 @@ func normalizeWhitespace(s string) string {
 	return s
 }
 
-// removeEmptyEntries removes empty entries from slice
-func removeEmptyEntries(entries []string) []string {
+// removeEmptyEntries removes empty entries from slice if allow_empty is false
+func removeEmptyEntries(entries []string, allowEmpty bool) []string {
+	if allowEmpty {
+		return entries
+	}
+
 	result := make([]string, 0, len(entries))
 	for _, entry := range entries {
 		if trimmed := strings.TrimSpace(entry); trimmed != "" {
-			result = append(result, trimmed)
+			result = append(result, entry)
 		}
 	}
 	return result

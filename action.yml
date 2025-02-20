@@ -68,6 +68,10 @@ inputs:
     description: 'Allow empty values even when fail_on_empty is true'
     required: false
     default: 'false'
+  debug_mode:
+    description: 'Enable debug logging'
+    required: false
+    default: 'false'
 
 outputs:
   set_env_count:
@@ -100,7 +104,7 @@ runs:
     ESCAPE_NEWLINES: ${{ inputs.escape_newlines }}
     MAX_LENGTH: ${{ inputs.max_length }}
     ALLOW_EMPTY: ${{ inputs.allow_empty }}
-
+    DEBUG_MODE: ${{ inputs.debug_mode }}
 branding:
   icon: 'settings'
   color: 'blue'
