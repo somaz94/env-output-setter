@@ -13,10 +13,11 @@ import (
 
 const (
 	errMismatchedPairs = "env_key and env_value must have the same number of entries"
-	errWriteFile       = "failed to write to %s file: %v"
+	errWriteFile       = "failed to write to %s file"
 	errEmptyValue      = "empty value found for key: %s"
 	errDuplicateKey    = "duplicate key found: %s"
-	localExecMsg       = "Local Execution - %s is not set, skipping writing to GitHub Actions %s."
+	errMaxRetries      = "failed to write after %d retries"
+	localExecMsg       = "Local Execution - %s is not set, skipping writing to GitHub Actions %s"
 )
 
 func SetEnv(cfg *config.Config) (int, error) {
@@ -36,11 +37,48 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 		keys, values = cfg.OutputKeys, cfg.OutputValues
 	}
 
-	keyList := strings.Split(strings.TrimSpace(keys), cfg.Delimiter)
-	valueList := strings.Split(strings.TrimSpace(values), cfg.Delimiter)
+	// 디버그 로깅
+	if cfg.DebugMode {
+		printer.PrintDebugSection(strings.Title(varType))
+		printer.PrintDebugInfo("📥 Input Values:\n")
+		printer.PrintDebugInfo("  • Keys:      %q\n", keys)
+		printer.PrintDebugInfo("  • Values:    %q\n", values)
+		printer.PrintDebugInfo("  • Delimiter: %q\n\n", cfg.Delimiter)
+	}
+
+	// 구분자로 먼저 분리
+	keyList := strings.Split(keys, cfg.Delimiter)
+	valueList := strings.Split(values, cfg.Delimiter)
+
+	// 각 항목별로 whitespace 정규화
+	for i := range keyList {
+		keyList[i] = normalizeWhitespace(keyList[i])
+	}
+	for i := range valueList {
+		valueList[i] = normalizeWhitespace(valueList[i])
+	}
+
+	// 각 항목의 앞뒤 공백 제거
+	for i := range keyList {
+		keyList[i] = strings.TrimSpace(keyList[i])
+	}
+	for i := range valueList {
+		valueList[i] = strings.TrimSpace(valueList[i])
+	}
+
+	// 빈 항목 제거 (allow_empty가 true일 때는 제거하지 않음)
+	keyList = removeEmptyEntries(keyList, cfg.AllowEmpty)
+	valueList = removeEmptyEntries(valueList, cfg.AllowEmpty)
+
+	// 디버그 로깅
+	if cfg.DebugMode {
+		printer.PrintDebugInfo("📋 Processed Values:\n")
+		printer.PrintDebugInfo("  • Keys:   %v\n", keyList)
+		printer.PrintDebugInfo("  • Values: %v\n\n", valueList)
+	}
 
 	if len(keyList) != len(valueList) {
-		return 0, fmt.Errorf(errMismatchedPairs)
+		return 0, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
 	}
 
 	if err := validateInputs(cfg, keyList, valueList); err != nil {
@@ -62,6 +100,35 @@ func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
 	}
 
 	return count, nil
+}
+
+// normalizeWhitespace normalizes all whitespace including newlines
+func normalizeWhitespace(s string) string {
+	// 실제 줄바꿈을 공백으로 변환
+	s = strings.ReplaceAll(s, "\n", " ")
+	s = strings.ReplaceAll(s, "\r", " ")
+
+	// 연속된 공백을 하나의 공백으로 변환
+	for strings.Contains(s, "  ") {
+		s = strings.ReplaceAll(s, "  ", " ")
+	}
+
+	return s
+}
+
+// removeEmptyEntries removes empty entries from slice if allow_empty is false
+func removeEmptyEntries(entries []string, allowEmpty bool) []string {
+	if allowEmpty {
+		return entries
+	}
+
+	result := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if trimmed := strings.TrimSpace(entry); trimmed != "" {
+			result = append(result, entry)
+		}
+	}
+	return result
 }
 
 func validateInputs(cfg *config.Config, keys, values []string) error {
@@ -104,17 +171,17 @@ func writeToFile(cfg *config.Config, filePath string, keys, values []string, var
 				time.Sleep(retryDelay)
 				continue
 			}
-			return count, fmt.Errorf(errWriteFile, filePath, err)
+			return count, fmt.Errorf("%s: %w", fmt.Sprintf(errWriteFile, filePath), err)
 		}
 		return count, nil
 	}
-	return 0, fmt.Errorf("failed to write after %d retries", maxRetries)
+	return 0, fmt.Errorf(errMaxRetries, maxRetries)
 }
 
 func doWrite(cfg *config.Config, filePath string, keys, values []string, varType string) (int, error) {
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
@@ -128,10 +195,16 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 		cfg.MaxLength,
 	)
 
-	printer.PrintSection(fmt.Sprintf("Setting %s Variables", strings.Title(varType)))
+	if cfg.DebugMode {
+		fmt.Printf("✍️  Writing Values:\n")
+	}
 
 	count := 0
 	for i, key := range keys {
+		if key == "" && !cfg.AllowEmpty {
+			continue
+		}
+
 		if cfg.TrimWhitespace {
 			key = strings.TrimSpace(key)
 			values[i] = strings.TrimSpace(values[i])
@@ -139,15 +212,20 @@ func doWrite(cfg *config.Config, filePath string, keys, values []string, varType
 
 		transformedValue := trans.TransformValue(values[i])
 
-		line := fmt.Sprintf("%s=%s\n", key, transformedValue)
+		// GitHub Actions New Line Format
+		line := fmt.Sprintf("%s<<%s\n%s\n%s\n", key, "EOF", transformedValue, "EOF")
 		if _, err := file.WriteString(line); err != nil {
-			return count, err
+			return count, fmt.Errorf("failed to write line: %w", err)
 		}
 
 		maskedValue := trans.MaskValue(transformedValue)
 		printer.PrintSuccess(varType, key, maskedValue)
 		count++
 	}
-	fmt.Println()
+
+	if cfg.DebugMode {
+		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+	}
+
 	return count, nil
 }
