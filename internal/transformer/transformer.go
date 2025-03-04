@@ -23,19 +23,19 @@ func (e *TransformationError) Error() string {
 
 // Transformer handles value transformations
 type Transformer struct {
-	// 마스킹 관련 설정
+	// Masking Related Settings
 	maskSecrets bool
 	maskPattern *regexp.Regexp
 
-	// 대소문자 변환 설정
+	// Case Conversion Settings
 	toUpper bool
 	toLower bool
 
-	// 인코딩 설정
+	// Encoding Settings
 	encodeURL      bool
 	escapeNewlines bool
 
-	// 길이 제한 설정
+	// Length Limitation Settings
 	maxLength int
 }
 
@@ -46,7 +46,7 @@ func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool,
 		var err error
 		pattern, err = regexp.Compile(maskPattern)
 		if err != nil {
-			// 정규식 컴파일 오류 시 로그만 출력하고 nil 패턴 사용
+			// Log only if there is an error in the regular expression compilation
 			fmt.Printf("Warning: Invalid mask pattern '%s': %v\n", maskPattern, err)
 		}
 	}
@@ -63,11 +63,11 @@ func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool,
 }
 
 // TransformValue applies all configured transformations to a value
-// 변환 순서:
-// 1. 대소문자 변환 (toUpper/toLower)
-// 2. URL 인코딩 (encodeURL)
-// 3. 줄바꿈 이스케이프 (escapeNewlines)
-// 4. 길이 제한 (maxLength)
+// Transformation Order:
+// 1. Case Conversion (toUpper/toLower)
+// 2. URL Encoding (encodeURL)
+// 3. Escape Newlines (escapeNewlines)
+// 4. Length Limitation (maxLength)
 func (t *Transformer) TransformValue(value string) string {
 	if value == "" {
 		return value
@@ -75,25 +75,25 @@ func (t *Transformer) TransformValue(value string) string {
 
 	result := value
 
-	// 1. 대소문자 변환 (상호 배타적)
+	// 1. Case Conversion (mutually exclusive)
 	if t.toUpper {
 		result = strings.ToUpper(result)
 	} else if t.toLower {
 		result = strings.ToLower(result)
 	}
 
-	// 2. URL 인코딩
+	// 2. URL Encoding
 	if t.encodeURL {
 		result = url.QueryEscape(result)
 	}
 
-	// 3. 줄바꿈 이스케이프
+	// 3. Escape Newlines
 	if t.escapeNewlines {
 		result = strings.ReplaceAll(result, "\n", "\\n")
 		result = strings.ReplaceAll(result, "\r", "\\r")
 	}
 
-	// 4. 길이 제한
+	// 4. Length Limitation
 	if t.maxLength > 0 && len(result) > t.maxLength {
 		result = result[:t.maxLength]
 	}
@@ -107,17 +107,17 @@ func (t *Transformer) MaskValue(value string) string {
 		return value
 	}
 
-	// 정규식 패턴이 있고 매치되면 전체 마스킹
+	// If there is a regular expression pattern and it matches, mask the entire value
 	if t.maskPattern != nil && t.maskPattern.MatchString(value) {
 		return "***"
 	}
 
-	// 짧은 값은 전체 마스킹
+	// Short values are fully masked
 	if len(value) <= 4 {
 		return "***"
 	}
 
-	// 기본 마스킹: 앞 2자리만 표시하고 나머지 마스킹
+	// Default masking: show the first 2 characters and mask the rest
 	visibleChars := 2
 	return value[:visibleChars] + strings.Repeat("*", len(value)-visibleChars)
 }

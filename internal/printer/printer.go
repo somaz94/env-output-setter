@@ -5,22 +5,22 @@ import (
 	"strings"
 )
 
-// 색상 상수
+// Color Constant
 const (
-	// 기본 색상
-	InfoColor    = "\033[1;34m" // 파란색
-	SuccessColor = "\033[1;32m" // 녹색
-	ErrorColor   = "\033[1;31m" // 빨간색
-	WarningColor = "\033[1;33m" // 노란색
-	DebugColor   = "\033[1;36m" // 청록색
-	ResetColor   = "\033[0m"    // 색상 초기화
+	// Basic Colors
+	InfoColor    = "\033[1;34m" // Blue
+	SuccessColor = "\033[1;32m" // Green
+	ErrorColor   = "\033[1;31m" // Red
+	WarningColor = "\033[1;33m" // Yellow
+	DebugColor   = "\033[1;36m" // Cyan
+	ResetColor   = "\033[0m"    // Reset Color
 
-	// 추가 색상
-	HeaderColor    = "\033[1;35m" // 보라색
-	HighlightColor = "\033[1;37m" // 밝은 흰색
+	// Additional Colors
+	HeaderColor    = "\033[1;35m" // Purple
+	HighlightColor = "\033[1;37m" // Light White
 )
 
-// 구분선 상수
+// Separator Constants
 const (
 	DoubleLine = "=================================================="
 	SingleLine = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -29,7 +29,7 @@ const (
 // PrintSection prints a section header
 func PrintSection(title string) {
 	fmt.Printf("\n%s%s\n", InfoColor, DoubleLine)
-	fmt.Printf("🚀 %s%s\n", title, ResetColor)
+	fmt.Printf("%s%s%s\n", InfoColor, title, ResetColor)
 }
 
 // PrintSuccess prints a success message for a variable
@@ -71,7 +71,7 @@ func PrintDebugHighlight(format string, args ...interface{}) {
 // PrintComplete prints a completion message
 func PrintComplete() {
 	fmt.Printf("\n%s%s\n", InfoColor, DoubleLine)
-	fmt.Printf("✅ Execution Complete\n")
+	fmt.Printf("%s✅ Execution Complete\n", InfoColor)
 	fmt.Printf("Mode: GitHub Actions%s\n", ResetColor)
 }
 

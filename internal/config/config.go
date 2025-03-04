@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-// 환경 변수 이름 상수
+// Environment Variable Names Constants
 const (
-	// 입력 환경 변수
+	// Input Environment Variables
 	EnvKeyInput           = "INPUT_ENV_KEY"
 	EnvValueInput         = "INPUT_ENV_VALUE"
 	OutputKeyInput        = "INPUT_OUTPUT_KEY"
@@ -28,12 +28,12 @@ const (
 	AllowEmptyInput       = "INPUT_ALLOW_EMPTY"
 	DebugModeInput        = "DEBUG_MODE"
 
-	// GitHub 환경 변수
+	// GitHub Environment Variables
 	GithubEnvVar    = "GITHUB_ENV"
 	GithubOutputVar = "GITHUB_OUTPUT"
 )
 
-// 기본값 상수
+// Default Values Constants
 const (
 	DefaultDelimiter        = ","
 	DefaultFailOnEmpty      = true
@@ -53,17 +53,17 @@ const (
 
 // Config holds the application configuration
 type Config struct {
-	// 입력/출력 키와 값
+	// Input/Output Keys and Values
 	EnvKeys      string
 	EnvValues    string
 	OutputKeys   string
 	OutputValues string
 
-	// GitHub 파일 경로
+	// GitHub File Paths
 	GithubEnv    string
 	GithubOutput string
 
-	// 입력 처리 옵션
+	// Input Processing Options
 	Delimiter        string
 	FailOnEmpty      bool
 	TrimWhitespace   bool
@@ -71,35 +71,35 @@ type Config struct {
 	ErrorOnDuplicate bool
 	AllowEmpty       bool
 
-	// 값 변환 옵션
+	// Value Transformation Options
 	ToUpper        bool
 	ToLower        bool
 	EncodeURL      bool
 	EscapeNewlines bool
 	MaxLength      int
 
-	// 보안 옵션
+	// Security Options
 	MaskSecrets bool
 	MaskPattern string
 
-	// 디버그 옵션
+	// Debug Options
 	DebugMode bool
 }
 
 // Load loads configuration from environment variables
 func Load() *Config {
 	return &Config{
-		// 입력/출력 키와 값
+		// Input/Output Keys and Values
 		EnvKeys:      os.Getenv(EnvKeyInput),
 		EnvValues:    os.Getenv(EnvValueInput),
 		OutputKeys:   os.Getenv(OutputKeyInput),
 		OutputValues: os.Getenv(OutputValueInput),
 
-		// GitHub 파일 경로
+		// GitHub File Paths
 		GithubEnv:    os.Getenv(GithubEnvVar),
 		GithubOutput: os.Getenv(GithubOutputVar),
 
-		// 입력 처리 옵션
+		// Input Processing Options
 		Delimiter:        getEnvWithDefault(DelimiterInput, DefaultDelimiter),
 		FailOnEmpty:      getBoolEnv(FailOnEmptyInput, DefaultFailOnEmpty),
 		TrimWhitespace:   getBoolEnv(TrimWhitespaceInput, DefaultTrimWhitespace),
@@ -107,18 +107,18 @@ func Load() *Config {
 		ErrorOnDuplicate: getBoolEnv(ErrorOnDuplicateInput, DefaultErrorOnDuplicate),
 		AllowEmpty:       getBoolEnv(AllowEmptyInput, DefaultAllowEmpty),
 
-		// 값 변환 옵션
+		// Value Transformation Options
 		ToUpper:        getBoolEnv(ToUpperInput, DefaultToUpper),
 		ToLower:        getBoolEnv(ToLowerInput, DefaultToLower),
 		EncodeURL:      getBoolEnv(EncodeURLInput, DefaultEncodeURL),
 		EscapeNewlines: getBoolEnv(EscapeNewlinesInput, DefaultEscapeNewlines),
 		MaxLength:      getIntEnv(MaxLengthInput, DefaultMaxLength),
 
-		// 보안 옵션
+		// Security Options
 		MaskSecrets: getBoolEnv(MaskSecretsInput, DefaultMaskSecrets),
 		MaskPattern: getEnvWithDefault(MaskPatternInput, DefaultMaskPattern),
 
-		// 디버그 옵션
+		// Debug Options
 		DebugMode: getBoolEnv(DebugModeInput, DefaultDebugMode),
 	}
 }
