@@ -32,33 +32,33 @@ func SetOutput(cfg *config.Config) (int, error) {
 
 // setVariables handles setting variables for both env and output files
 func setVariables(cfg *config.Config, envVar, varType string) (int, error) {
-	// 입력 값 가져오기
+	// Get input value
 	keys, values := getInputValues(cfg, envVar)
 
-	// 디버그 로깅 - 원본 입력 값
+	// Debug logging - original input values
 	logInputValues(cfg, varType, keys, values)
 
-	// 입력 값 처리
+	// Process input values
 	keyList, valueList, err := processInputValues(cfg, keys, values)
 	if err != nil {
 		return 0, err
 	}
 
-	// 디버그 로깅 - 처리된 입력 값
+	// Debug logging - processed input values
 	logProcessedValues(cfg, keyList, valueList)
 
-	// 입력 값 검증
+	// Validate input values
 	if err := validateInputs(cfg, keyList, valueList); err != nil {
 		return 0, err
 	}
 
-	// 파일 경로 확인 및 처리
+	// Check file path and process
 	filePath := os.Getenv(envVar)
 	if filePath == "" {
 		return handleLocalExecution(envVar, varType, keyList, valueList)
 	}
 
-	// 파일에 쓰기
+	// Write to file
 	return writeToFile(cfg, filePath, keyList, valueList, varType)
 }
 
@@ -87,11 +87,11 @@ func logInputValues(cfg *config.Config, varType, keys, values string) {
 
 // processInputValues processes the input strings into lists with proper formatting
 func processInputValues(cfg *config.Config, keys, values string) ([]string, []string, error) {
-	// 구분자로 먼저 분리
+	// Split by delimiter first
 	keyList := strings.Split(keys, cfg.Delimiter)
 	valueList := strings.Split(values, cfg.Delimiter)
 
-	// 각 항목별로 whitespace 정규화
+	// Normalize whitespace for each item
 	for i := range keyList {
 		keyList[i] = normalizeWhitespace(keyList[i])
 	}
@@ -99,7 +99,7 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 		valueList[i] = normalizeWhitespace(valueList[i])
 	}
 
-	// 각 항목의 앞뒤 공백 제거
+	// Remove whitespace from each item
 	for i := range keyList {
 		keyList[i] = strings.TrimSpace(keyList[i])
 	}
@@ -107,11 +107,11 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 		valueList[i] = strings.TrimSpace(valueList[i])
 	}
 
-	// 빈 항목 제거 (allow_empty가 true일 때는 제거하지 않음)
+	// Remove empty items (do not remove if allow_empty is true)
 	keyList = removeEmptyEntries(keyList, cfg.AllowEmpty)
 	valueList = removeEmptyEntries(valueList, cfg.AllowEmpty)
 
-	// 키와 값의 개수가 일치하는지 확인
+	// Check if the number of keys and values match
 	if len(keyList) != len(valueList) {
 		return nil, nil, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
 	}
@@ -139,11 +139,11 @@ func handleLocalExecution(envVar, varType string, keyList, valueList []string) (
 
 // normalizeWhitespace normalizes all whitespace including newlines
 func normalizeWhitespace(s string) string {
-	// 실제 줄바꿈을 공백으로 변환
+	// Convert actual line breaks to spaces
 	s = strings.ReplaceAll(s, "\n", " ")
 	s = strings.ReplaceAll(s, "\r", " ")
 
-	// 연속된 공백을 하나의 공백으로 변환
+	// Convert consecutive spaces to a single space
 	for strings.Contains(s, "  ") {
 		s = strings.ReplaceAll(s, "  ", " ")
 	}
@@ -176,18 +176,18 @@ func validateInputs(cfg *config.Config, keys, values []string) error {
 			keys[i] = key
 		}
 
-		// 대소문자 구분이 없는 경우 소문자로 변환하여 중복 검사
+		// Case-insensitive comparison if case_sensitive is false
 		lookupKey := key
 		if !cfg.CaseSensitive {
 			lookupKey = strings.ToLower(key)
 		}
 
-		// 빈 값 검사
+		// Check for empty values
 		if cfg.FailOnEmpty && !cfg.AllowEmpty && (key == "" || values[i] == "") {
 			return fmt.Errorf(errEmptyValue, key)
 		}
 
-		// 중복 키 검사
+		// Check for duplicate keys
 		if cfg.ErrorOnDuplicate {
 			if seenKeys[lookupKey] {
 				return fmt.Errorf(errDuplicateKey, key)
@@ -227,7 +227,7 @@ func performWrite(cfg *config.Config, filePath string, keys, values []string, va
 	}
 	defer file.Close()
 
-	// 값 변환기 생성
+	// Create value transformer
 	valueTransformer := transformer.New(
 		cfg.MaskSecrets,
 		cfg.MaskPattern,
@@ -253,15 +253,15 @@ func performWrite(cfg *config.Config, filePath string, keys, values []string, va
 			values[i] = strings.TrimSpace(values[i])
 		}
 
-		// 값 변환
+		// Transform value
 		transformedValue := valueTransformer.TransformValue(values[i])
 
-		// GitHub Actions 형식으로 파일에 쓰기
+		// Write in GitHub Actions format
 		if err := writeGitHubActionsFormat(file, key, transformedValue); err != nil {
 			return count, err
 		}
 
-		// 성공 메시지 출력 (마스킹 적용)
+		// Print success message (with masking applied)
 		maskedValue := valueTransformer.MaskValue(transformedValue)
 		printer.PrintSuccess(varType, key, maskedValue)
 		count++
