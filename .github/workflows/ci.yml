@@ -336,9 +336,9 @@ jobs:
         uses: ./
         with:
           env_key: CONFIG_JSON,SIMPLE_VALUE
-          env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}',simple_text
+          env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}},simple_text'
           output_key: config_data,simple_output
-          output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}',simple_text
+          output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}},simple_text'
           
           # 새로운 JSON 지원 기능 활성화
           json_support: true
@@ -354,10 +354,10 @@ jobs:
         run: |
           echo "Environment Variables:"
           echo "CONFIG_JSON: ${{ env.CONFIG_JSON }}"
-          echo "CONFIG_JSON_api_url: ${{ env.CONFIG_JSON_api_url }}"
-          echo "CONFIG_JSON_timeout: ${{ env.CONFIG_JSON_timeout }}"
-          echo "CONFIG_JSON_nested_key1: ${{ env.CONFIG_JSON_nested_key1 }}"
-          echo "CONFIG_JSON_nested_key2: ${{ env.CONFIG_JSON_nested_key2 }}"
+          echo "CONFIG_JSON_api_url: ${{ env.CONFIG_JSON_api_url || 'Not Set' }}"
+          echo "CONFIG_JSON_timeout: ${{ env.CONFIG_JSON_timeout || 'Not Set' }}"
+          echo "CONFIG_JSON_nested_key1: ${{ env.CONFIG_JSON_nested_key1 || 'Not Set' }}"
+          echo "CONFIG_JSON_nested_key2: ${{ env.CONFIG_JSON_nested_key2 || 'Not Set' }}"
           echo "SIMPLE_VALUE: ${{ env.SIMPLE_VALUE }}"
 
       - name: Display JSON Processed Outputs
@@ -399,13 +399,9 @@ jobs:
         uses: ./
         with:
           env_key: COMPLEX_CONFIG,API_SETTINGS
-          env_value: |
-            {"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},
-            {"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}
+          env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
           output_key: complex_output,api_output
-          output_value: |
-            {"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},
-            {"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}
+          output_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
           
           # 고급 기능 활성화
           json_support: true
