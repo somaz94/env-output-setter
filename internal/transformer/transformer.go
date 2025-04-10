@@ -84,6 +84,8 @@ func (t *Transformer) TransformValue(value string, supportJson bool) string {
 			// 유효한 JSON이면 그대로 반환
 			return result
 		}
+		// 유효하지 않은 JSON이지만 JSON 형식을 가장하는 경우
+		// 특별한 처리 없이 계속 진행 (프로세스 중에 실패 처리)
 	}
 
 	// 1. Case Conversion (mutually exclusive)

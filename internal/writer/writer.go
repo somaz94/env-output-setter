@@ -142,21 +142,28 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 			value := valueList[i]
 			key := keyList[i]
 
-			// 값이 JSON 객체인지 확인
-			if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
-				var jsonObj map[string]interface{}
-				if err := json.Unmarshal([]byte(value), &jsonObj); err == nil {
+			// 값이 JSON인지 확인 (객체 또는 배열)
+			if (strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")) ||
+				(strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]")) {
+
+				// JSON 유효성 검사 수행
+				var jsonData interface{}
+				err := json.Unmarshal([]byte(value), &jsonData)
+				if err != nil {
+					// JSON 파싱 오류에 대해 경고만 표시하고 계속 진행
+					printer.PrintWarning(fmt.Sprintf("Warning: Invalid JSON for key '%s': %v", key, err))
+					continue
+				}
+
+				// JSON 객체인 경우
+				if objMap, isObj := jsonData.(map[string]interface{}); isObj {
 					// 중첩된 JSON 속성을 평면화하고 환경 변수로 추가
-					extractedKeys, extractedValues := extractNestedJSON(key, jsonObj, cfg.GroupPrefix)
+					extractedKeys, extractedValues := extractNestedJSON(key, objMap, cfg.GroupPrefix)
 					keyList = append(keyList, extractedKeys...)
 					valueList = append(valueList, extractedValues...)
-				}
-			} else if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-				// JSON 배열 처리
-				var jsonArray []interface{}
-				if err := json.Unmarshal([]byte(value), &jsonArray); err == nil {
-					// 배열 항목을 환경 변수로 추가
-					for idx, item := range jsonArray {
+				} else if arrData, isArr := jsonData.([]interface{}); isArr {
+					// JSON 배열 처리
+					for idx, item := range arrData {
 						arrayKey := fmt.Sprintf("%s_%d", key, idx)
 						keyList = append(keyList, arrayKey)
 						valueList = append(valueList, fmt.Sprintf("%v", item))
@@ -318,19 +325,27 @@ func validateInputs(cfg *config.Config, keys, values []string) error {
 func writeToFile(cfg *config.Config, filePath string, keys, values []string, varType string) (int, error) {
 	maxRetries := 3
 	retryDelay := time.Second
+	var lastError error
 
 	for retry := 0; retry < maxRetries; retry++ {
 		count, err := performWrite(cfg, filePath, keys, values, varType)
 		if err != nil {
+			lastError = err
 			if retry < maxRetries-1 {
 				printer.PrintError(fmt.Sprintf("Retry %d/%d: Failed to write to file: %v", retry+1, maxRetries, err))
 				time.Sleep(retryDelay)
 				continue
 			}
+			// 실패 상태를 명시적으로 설정
+			_, _ = performWrite(cfg, filePath, []string{"status", "error_message"}, []string{"failure", err.Error()}, varType)
 			return count, fmt.Errorf("%s: %w", fmt.Sprintf(errWriteFile, filePath), err)
 		}
+		// 성공 상태를 명시적으로 설정
+		_, _ = performWrite(cfg, filePath, []string{"status"}, []string{"success"}, varType)
 		return count, nil
 	}
+	// 최대 재시도 횟수 초과 시 명시적으로 실패 상태 설정
+	_, _ = performWrite(cfg, filePath, []string{"status", "error_message"}, []string{"failure", lastError.Error()}, varType)
 	return 0, fmt.Errorf(errMaxRetries, maxRetries)
 }
 
