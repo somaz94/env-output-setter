@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -27,7 +28,28 @@ func SetEnv(cfg *config.Config) (int, error) {
 
 // SetOutput sets output variables in GitHub Actions output file
 func SetOutput(cfg *config.Config) (int, error) {
-	return setVariables(cfg, "GITHUB_OUTPUT", "output")
+	count, err := setVariables(cfg, "GITHUB_OUTPUT", "output")
+	if err != nil {
+		return count, err
+	}
+
+	// output 변수도 환경 변수로 내보내기 옵션이 활성화된 경우
+	if cfg.ExportAsEnv {
+		keys, values := getInputValues(cfg, "GITHUB_OUTPUT")
+		keyList, valueList, err := processInputValues(cfg, keys, values)
+		if err != nil {
+			return count, err
+		}
+
+		envCount, err := writeToFile(cfg, os.Getenv("GITHUB_ENV"), keyList, valueList, "env (from output)")
+		if err != nil {
+			return count, err
+		}
+
+		return count + envCount, nil
+	}
+
+	return count, nil
 }
 
 // setVariables handles setting variables for both env and output files
@@ -110,6 +132,25 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 	// Remove empty items (do not remove if allow_empty is true)
 	keyList = removeEmptyEntries(keyList, cfg.AllowEmpty)
 	valueList = removeEmptyEntries(valueList, cfg.AllowEmpty)
+
+	// JSON 지원이 활성화된 경우 JSON 객체를 처리
+	if cfg.JsonSupport {
+		for i, value := range valueList {
+			if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
+				// JSON 형식인지 확인
+				var jsonObj map[string]interface{}
+				if err := json.Unmarshal([]byte(value), &jsonObj); err == nil {
+					// 키가 그룹 접두사를 가지면 객체의 각 키-값 쌍을 추가
+					if cfg.GroupPrefix != "" && strings.HasPrefix(keyList[i], cfg.GroupPrefix) {
+						for jsonKey, jsonValue := range jsonObj {
+							keyList = append(keyList, fmt.Sprintf("%s_%s", keyList[i], jsonKey))
+							valueList = append(valueList, fmt.Sprintf("%v", jsonValue))
+						}
+					}
+				}
+			}
+		}
+	}
 
 	// Check if the number of keys and values match
 	if len(keyList) != len(valueList) {
@@ -254,7 +295,7 @@ func performWrite(cfg *config.Config, filePath string, keys, values []string, va
 		}
 
 		// Transform value
-		transformedValue := valueTransformer.TransformValue(values[i])
+		transformedValue := valueTransformer.TransformValue(values[i], cfg.JsonSupport)
 
 		// Write in GitHub Actions format
 		if err := writeGitHubActionsFormat(file, key, transformedValue); err != nil {

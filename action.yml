@@ -72,6 +72,18 @@ inputs:
     description: 'Enable debug logging'
     required: false
     default: 'false'
+  group_prefix:
+    description: 'Prefix to group related environment variables'
+    required: false
+    default: ''
+  json_support:
+    description: 'Enable JSON parsing for complex values'
+    required: false
+    default: 'false'
+  export_as_env:
+    description: 'Export output variables as environment variables too'
+    required: false
+    default: 'false'
 
 outputs:
   set_env_count:
@@ -105,6 +117,9 @@ runs:
     MAX_LENGTH: ${{ inputs.max_length }}
     ALLOW_EMPTY: ${{ inputs.allow_empty }}
     DEBUG_MODE: ${{ inputs.debug_mode }}
+    GROUP_PREFIX: ${{ inputs.group_prefix }}
+    JSON_SUPPORT: ${{ inputs.json_support }}
+    EXPORT_AS_ENV: ${{ inputs.export_as_env }}
 branding:
   icon: 'settings'
   color: 'blue'

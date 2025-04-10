@@ -14,6 +14,20 @@ func main() {
 	cfg := config.Load()
 	printer.PrintSection("🚀 GitHub Environment and Output Setter")
 
+	// 고급 기능 로그
+	if cfg.DebugMode {
+		printer.PrintInfo("📋 Advanced Features Status:")
+		if cfg.GroupPrefix != "" {
+			printer.PrintInfo(fmt.Sprintf("  • Group Prefix: %s", cfg.GroupPrefix))
+		}
+		if cfg.JsonSupport {
+			printer.PrintInfo("  • JSON Support: Enabled")
+		}
+		if cfg.ExportAsEnv {
+			printer.PrintInfo("  • Export Output as Env: Enabled")
+		}
+	}
+
 	// Initialize counters
 	var envCount, outputCount int
 	var status = "success"

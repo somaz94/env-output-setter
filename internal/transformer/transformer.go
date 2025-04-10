@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -68,12 +69,22 @@ func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool,
 // 2. URL Encoding (encodeURL)
 // 3. Escape Newlines (escapeNewlines)
 // 4. Length Limitation (maxLength)
-func (t *Transformer) TransformValue(value string) string {
+func (t *Transformer) TransformValue(value string, supportJson bool) string {
 	if value == "" {
 		return value
 	}
 
 	result := value
+
+	// JSON인 경우 특별한 처리를 건너뛰기
+	if supportJson && (strings.HasPrefix(result, "{") || strings.HasPrefix(result, "[")) {
+		// JSON 형식 검증
+		var jsonObj interface{}
+		if err := json.Unmarshal([]byte(result), &jsonObj); err == nil {
+			// 유효한 JSON이면 그대로 반환
+			return result
+		}
+	}
 
 	// 1. Case Conversion (mutually exclusive)
 	if t.toUpper {
@@ -140,4 +151,26 @@ func (t *Transformer) CustomMask(value string, visiblePrefix, visibleSuffix int)
 
 	maskedLength := len(value) - visiblePrefix - visibleSuffix
 	return prefix + strings.Repeat("*", maskedLength) + suffix
+}
+
+// TransformJSON converts a JSON string to a compact JSON string
+func (t *Transformer) TransformJSON(value string) (string, error) {
+	var data interface{}
+	if err := json.Unmarshal([]byte(value), &data); err != nil {
+		return "", &TransformationError{
+			Message: "Invalid JSON format",
+			Cause:   err,
+		}
+	}
+
+	// JSON 압축 (공백 제거)
+	compact, err := json.Marshal(data)
+	if err != nil {
+		return "", &TransformationError{
+			Message: "Failed to compact JSON",
+			Cause:   err,
+		}
+	}
+
+	return string(compact), nil
 }

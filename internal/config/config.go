@@ -27,6 +27,9 @@ const (
 	MaxLengthInput        = "INPUT_MAX_LENGTH"
 	AllowEmptyInput       = "INPUT_ALLOW_EMPTY"
 	DebugModeInput        = "DEBUG_MODE"
+	GroupPrefixInput      = "INPUT_GROUP_PREFIX"
+	JsonSupportInput      = "INPUT_JSON_SUPPORT"
+	ExportAsEnvInput      = "INPUT_EXPORT_AS_ENV"
 
 	// GitHub Environment Variables
 	GithubEnvVar    = "GITHUB_ENV"
@@ -49,6 +52,9 @@ const (
 	DefaultMaxLength        = 0
 	DefaultAllowEmpty       = false
 	DefaultDebugMode        = false
+	DefaultGroupPrefix      = ""
+	DefaultJsonSupport      = false
+	DefaultExportAsEnv      = false
 )
 
 // Config holds the application configuration
@@ -84,6 +90,11 @@ type Config struct {
 
 	// Debug Options
 	DebugMode bool
+
+	// New configuration fields
+	GroupPrefix string
+	JsonSupport bool
+	ExportAsEnv bool
 }
 
 // Load loads configuration from environment variables
@@ -120,6 +131,11 @@ func Load() *Config {
 
 		// Debug Options
 		DebugMode: getBoolEnv(DebugModeInput, DefaultDebugMode),
+
+		// New configuration fields
+		GroupPrefix: getEnvWithDefault(GroupPrefixInput, DefaultGroupPrefix),
+		JsonSupport: getBoolEnv(JsonSupportInput, DefaultJsonSupport),
+		ExportAsEnv: getBoolEnv(ExportAsEnvInput, DefaultExportAsEnv),
 	}
 }
 
