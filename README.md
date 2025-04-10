@@ -255,6 +255,8 @@ This will create the following environment variables:
 - `CONFIG_JSON_nested_key2`: "123"
 - `SIMPLE_VALUE`: "simple_text"
 
+<br/>
+
 #### JSON Arrays and Complex Nesting
 
 The action also fully supports JSON arrays and deeply nested structures:
@@ -275,6 +277,8 @@ This will create:
 - `API_SETTINGS_endpoints_1_name`: "products"
 - `API_SETTINGS_endpoints_1_path`: "/api/products"
 - `API_SETTINGS_version`: "2.0"
+
+<br/>
 
 #### Updated Group Prefix Behavior
 
@@ -300,6 +304,8 @@ Rather than:
 - `APP_COMPLEX_CONFIG_server_host`: "example.com"
 
 This change makes variable naming more intuitive and consistent with other environment variables.
+
+<br/>
 
 #### Best Practices for Working with JSON
 
@@ -455,6 +461,8 @@ If your values contain commas, you should use a different delimiter to avoid par
 
 ### Debugging and Troubleshooting
 
+<br/>
+
 #### Debug Mode
 You can enable debug mode to see detailed logging of how your inputs are being processed:
 
@@ -472,6 +480,8 @@ Debug output includes:
 - Final key-value pairs
 - Delimiter being used
 - JSON parsing results (if json_support is enabled)
+
+<br/>
 
 #### Empty Values
 The action provides two ways to handle empty values:
@@ -526,5 +536,3 @@ Common issues and solutions:
 ### Debug Output Format
 
 When `debug_mode` is enabled, you'll see detailed information about how your inputs are being processed:
-
-```
