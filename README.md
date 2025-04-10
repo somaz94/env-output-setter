@@ -536,3 +536,15 @@ Common issues and solutions:
 ### Debug Output Format
 
 When `debug_mode` is enabled, you'll see detailed information about how your inputs are being processed:
+
+<br/>
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) file for details.
+
+<br/>
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
