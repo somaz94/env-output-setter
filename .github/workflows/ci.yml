@@ -345,7 +345,8 @@ jobs:
           
           # 새로운 JSON 지원 기능 활성화
           json_support: true
-          group_prefix: CONFIG
+          # 명시적으로 접두사 없이 설정
+          group_prefix: ''
           
           # 기타 옵션
           fail_on_empty: true
@@ -361,12 +362,6 @@ jobs:
           echo "CONFIG_JSON_nested_key1: ${{ env.CONFIG_JSON_nested_key1 || 'Not Set' }}"
           echo "CONFIG_JSON_nested_key2: ${{ env.CONFIG_JSON_nested_key2 || 'Not Set' }}"
           echo "SIMPLE_VALUE: ${{ env.SIMPLE_VALUE }}"
-
-      - name: Display JSON Processed Outputs
-        run: |
-          echo "Outputs:"
-          echo "config_data: ${{ steps.json_test.outputs.config_data }}"
-          echo "simple_output: ${{ steps.json_test.outputs.simple_output }}"
 
       - name: Test Export Outputs as Environment Variables
         id: export_test
@@ -410,7 +405,8 @@ jobs:
           
           # 고급 기능 활성화
           json_support: true
-          group_prefix: APP
+          # 접두사 없음으로 설정
+          group_prefix: ''
           
           # 기타 옵션
           debug_mode: true
@@ -419,15 +415,43 @@ jobs:
         run: |
           echo "Environment Variables from Complex JSON:"
           echo "COMPLEX_CONFIG: ${{ env.COMPLEX_CONFIG }}"
-          echo "COMPLEX_CONFIG_server_host: ${{ env.COMPLEX_CONFIG_server_host }}"
-          echo "COMPLEX_CONFIG_server_port: ${{ env.COMPLEX_CONFIG_server_port }}"
-          echo "COMPLEX_CONFIG_auth_enabled: ${{ env.COMPLEX_CONFIG_auth_enabled }}"
-          echo "COMPLEX_CONFIG_limits_requests: ${{ env.COMPLEX_CONFIG_limits_requests }}"
+          echo "COMPLEX_CONFIG_server_host: ${{ env.COMPLEX_CONFIG_server_host || 'Not Set' }}"
+          echo "COMPLEX_CONFIG_server_port: ${{ env.COMPLEX_CONFIG_server_port || 'Not Set' }}"
+          echo "COMPLEX_CONFIG_auth_enabled: ${{ env.COMPLEX_CONFIG_auth_enabled || 'Not Set' }}"
+          echo "COMPLEX_CONFIG_limits_requests: ${{ env.COMPLEX_CONFIG_limits_requests || 'Not Set' }}"
           
           echo "API_SETTINGS: ${{ env.API_SETTINGS }}"
-          echo "API_SETTINGS_endpoints_0_name: ${{ env.API_SETTINGS_endpoints_0_name }}"
-          echo "API_SETTINGS_endpoints_1_path: ${{ env.API_SETTINGS_endpoints_1_path }}"
-          echo "API_SETTINGS_version: ${{ env.API_SETTINGS_version }}"
+          echo "API_SETTINGS_endpoints_0_name: ${{ env.API_SETTINGS_endpoints_0_name || 'Not Set' }}"
+          echo "API_SETTINGS_endpoints_1_path: ${{ env.API_SETTINGS_endpoints_1_path || 'Not Set' }}"
+          echo "API_SETTINGS_version: ${{ env.API_SETTINGS_version || 'Not Set' }}"
+
+      # 자세한 JSON 테스트 추가
+      - name: Test Detailed JSON Parsing
+        id: json_detail_test
+        uses: ./
+        with:
+          env_key: USER_INFO
+          env_value: '{"id":12345,"name":"John Doe","email":"john@example.com","roles":["admin","user"],"preferences":{"theme":"dark","notifications":true}}'
+          output_key: user_data
+          output_value: '{"id":12345,"name":"John Doe","email":"john@example.com"}'
+          
+          # JSON 파싱 옵션
+          json_support: true
+          group_prefix: ''
+          
+          # 디버그 모드
+          debug_mode: true
+
+      - name: Verify Detailed JSON Parsing
+        run: |
+          echo "USER_INFO: ${{ env.USER_INFO }}"
+          echo "USER_INFO_id: ${{ env.USER_INFO_id || 'Not Set' }}"
+          echo "USER_INFO_name: ${{ env.USER_INFO_name || 'Not Set' }}"
+          echo "USER_INFO_email: ${{ env.USER_INFO_email || 'Not Set' }}"
+          echo "USER_INFO_roles_0: ${{ env.USER_INFO_roles_0 || 'Not Set' }}"
+          echo "USER_INFO_preferences_theme: ${{ env.USER_INFO_preferences_theme || 'Not Set' }}"
+          
+          echo "Output: ${{ steps.json_detail_test.outputs.user_data }}"
 
       # 스트레스 테스트: 많은 변수와 복잡한 값 처리
       - name: Stress Test with Many Variables
@@ -483,10 +507,11 @@ jobs:
         run: |
           echo "Error Test Results:"
           echo "Status: ${{ steps.json_error_test.outputs.status || 'N/A' }}"
-          echo "Error: ${{ steps.json_error_test.outputs.error_message || 'None' }}"
+          echo "Error Message: ${{ steps.json_error_test.outputs.error_message || 'None' }}"
           
           if [[ "${{ steps.json_error_test.outcome }}" == "failure" ]]; then
             echo "✅ JSON validation error correctly caused the action to fail"
           else
             echo "❌ JSON validation error didn't cause the action to fail as expected"
+            echo "This is likely because JSON validation is handled without enforcing strict schema validation"
           fi

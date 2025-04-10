@@ -36,6 +36,9 @@ variables or output values that other steps can reference.
 | `max_length`       | No       | Maximum allowed length for values (0 for unlimited) | `0`     | `"10"`                        |
 | `allow_empty`      | No       | Allow empty values even when fail_on_empty is true  | `false` | `"true"`                      |
 | `debug_mode`       | No       | Enable debug logging for troubleshooting           | `false` | `"true"`                      |
+| `group_prefix`     | No       | Prefix to group related environment variables      | `""`    | `"CONFIG"`                    |
+| `json_support`     | No       | Enable JSON parsing for complex values             | `false` | `"true"`                      |
+| `export_as_env`    | No       | Export output variables as environment variables   | `false` | `"true"`                      |
 
 <br/>
 
@@ -119,6 +122,9 @@ jobs:
 - Empty value validation
 - Detailed operation status and error reporting
 - Retry mechanism for file operations
+- JSON support for complex data structures
+- Group related variables with common prefixes
+- Export output variables as environment variables
 
 <br/>
 
@@ -219,6 +225,102 @@ This action supports value transformation and masking of sensitive data:
 
 <br/>
 
+### JSON Support and Complex Data Structures
+
+This action now supports working with JSON values, allowing you to:
+- Parse JSON objects and extract individual properties
+- Create separate environment variables for nested JSON keys
+- Process complex data structures
+
+When using JSON, select a delimiter that doesn't appear in your JSON content:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'CONFIG_JSON|SIMPLE_VALUE'
+    env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
+    output_key: 'config_data|simple_output'
+    output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
+    
+    # Important: Use a different delimiter with JSON
+    delimiter: '|'
+    json_support: 'true'
+    group_prefix: 'CONFIG'
+```
+
+This will create:
+- `CONFIG_JSON`: The full JSON object
+- `CONFIG_JSON_api_url`: "https://api.example.com"
+- `CONFIG_JSON_timeout`: "30"
+- `CONFIG_JSON_nested`: (nested object)
+- `SIMPLE_VALUE`: "simple_text"
+
+Multiple levels of nesting are supported:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'COMPLEX_CONFIG|API_SETTINGS'
+    env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]}}|{"endpoints":[{"name":"users","path":"/api/users"}],"version":"2.0"}'
+    delimiter: '|'
+    json_support: 'true'
+    group_prefix: 'APP'
+```
+
+<br/>
+
+### Group Prefix and Variable Organization
+
+The `group_prefix` option helps organize related variables:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'DATABASE,API,CACHE'
+    env_value: 'postgres,graphql,redis'
+    group_prefix: 'SYS'
+```
+
+When combined with JSON support, it intelligently groups JSON properties under common prefixes:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'CONFIG_DATA'
+    env_value: '{"server":{"host":"example.com","port":8080}}'
+    json_support: 'true'
+    group_prefix: 'APP'
+```
+
+This creates variables with consistent naming:
+- `CONFIG_DATA`
+- `CONFIG_DATA_server_host`
+- `CONFIG_DATA_server_port`
+
+<br/>
+
+### Export Outputs as Environment Variables
+
+With `export_as_env: true`, output variables are also set as environment variables:
+
+```yaml
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: 'ENV_ONLY_VAR'
+    env_value: 'env_value'
+    output_key: 'OUTPUT_VAR1,OUTPUT_VAR2'
+    output_value: 'output_value1,output_value2'
+    export_as_env: 'true'
+```
+
+This creates:
+- Environment Variables: `ENV_ONLY_VAR`, `OUTPUT_VAR1`, `OUTPUT_VAR2`
+- Outputs: `OUTPUT_VAR1`, `OUTPUT_VAR2`
+
+This feature provides flexibility in how you access variables in subsequent steps.
+
+<br/>
+
 ### Advanced Usage Examples
 
 1. **Handling Multiline Text**
@@ -246,30 +348,6 @@ This action supports value transformation and masking of sensitive data:
     env_key: 'OPTIONAL_VALUE,REQUIRED_VALUE'
     env_value: ',important_data'
     fail_on_empty: 'true'
-    allow_empty: 'true'
-```
-
-<br/>
-
-### Common Use Cases
-
-1. **Configuration File Processing**
-```yaml
-- uses: somaz94/env-output-setter@v1
-  with:
-    env_key: 'CONFIG_CONTENT'
-    env_value: ${{ steps.read_config.outputs.content }}
-    escape_newlines: 'true'
-    max_length: '1000'
-```
-
-2. **API Response Handling**
-```yaml
-- uses: somaz94/env-output-setter@v1
-  with:
-    env_key: 'API_RESPONSE'
-    env_value: ${{ steps.api_call.outputs.response }}
-    max_length: '500'
     allow_empty: 'true'
 ```
 
@@ -303,52 +381,30 @@ If your values contain commas, you should use a different delimiter to avoid par
     delimiter: "::"  # Use a different delimiter when values contain commas
 ```
 
-3. **Multiline Values with Special Characters**
+3. **Working with JSON Data**
 ```yaml
 - uses: somaz94/env-output-setter@v1
   with:
-    env_key: "MULTILINE_TEXT::CONFIG_JSON"
-    env_value: |
-      Hello\nWorld::{"key": "value", "array": [1,2,3]}
-    delimiter: "::"
-    escape_newlines: true
+    env_key: "CONFIG_JSON|SETTINGS_JSON"
+    env_value: '{"server":"example.com","port":8080}|{"logging":true,"debug":false}'
+    delimiter: "|"  # Use a delimiter that's not in your JSON
+    json_support: "true"
 ```
 
-4. **Multiline Values with Special Characters (\n)**
+4. **Complex JSON Structures**
 ```yaml
-      - name: Run Performance Analysis
-        id: analysis
-        uses: somaz94/github-action-analyzer@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow_file: ci.yml
-          repository: ${{ github.repository }}
-          analysis_depth: '20'
-          timeout: '15'
-          ignore_patterns: 'checkout,setup'
-
-      - name: Set Analysis Results
-        uses: somaz94/env-output-setter@v1
-        with:
-          env_key: |
-            METRICS_SUMMARY
-            PERFORMANCE_SUMMARY
-            CACHE_RECOMMENDATIONS
-            DOCKER_OPTIMIZATIONS
-            STATUS
-          env_value: |
-            ${{ steps.analysis.outputs.metrics_summary }}
-            ${{ steps.analysis.outputs.performance_summary }}
-            ${{ steps.analysis.outputs.cache_recommendations }}
-            ${{ steps.analysis.outputs.docker_optimizations }}
-            ${{ steps.analysis.outputs.status }}
-          delimiter: "\n"
-          trim_whitespace: true
-          debug_mode: true
+- uses: somaz94/env-output-setter@v1
+  with:
+    env_key: "COMPLEX_JSON"
+    env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]}}'
+    json_support: "true"
+    group_prefix: "APP"
+    debug_mode: "true"
 ```
 
 #### Important Notes:
 - When values contain the default delimiter (comma), use a different delimiter like `::`
+- For JSON values, choose a delimiter that won't appear in your JSON data (e.g., `|`)
 - Multiline values are automatically normalized
 - Use `escape_newlines: true` to properly handle newline characters
 - The same delimiter must be used consistently for both keys and values
@@ -373,6 +429,7 @@ Debug output includes:
 - Normalized values after whitespace processing
 - Final key-value pairs
 - Delimiter being used
+- JSON parsing results (if json_support is enabled)
 
 #### Empty Values
 The action provides two ways to handle empty values:
@@ -414,6 +471,14 @@ Common issues and solutions:
    - Error message: `failed to write to file`
    - Solution: Action will automatically retry up to 3 times
 
+4. **JSON Parsing Errors**
+   - Error message: `Invalid JSON format`
+   - Solution: Ensure JSON strings are valid and properly escaped
+
+5. **Delimiter Conflicts in JSON**
+   - Error message: `env_key and env_value must have the same number of entries`
+   - Solution: Use a delimiter that doesn't appear in your JSON (e.g., `|`)
+
 <br/>
 
 ### Debug Output Format
@@ -421,61 +486,3 @@ Common issues and solutions:
 When `debug_mode` is enabled, you'll see detailed information about how your inputs are being processed:
 
 ```
-🔍 Debug Information (Env)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📥 Input Values:
-  • Keys:      "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
-  • Values:    "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
-  • Delimiter: "::"
-
-📋 Processed Values:
-  • Keys:   [MULTILINE_TEXT MAX_LENGTH_TEST EMPTY_VALUE]
-  • Values: [Hello World ThisIsAVeryLongTextThatShouldBeTruncated ]
-
-✍️  Writing Values:
-  • env: MULTILINE_TEXT = Hello Worl
-  • env: MAX_LENGTH_TEST = ThisIsAVer
-  • env: EMPTY_VALUE = 
-```
-
-Even without debug mode, you'll still see the basic operation output:
-
-```
-==================================================
-🚀 Setting Env Variables
-  • env: MULTILINE_TEXT = Hello Worl
-  • env: MAX_LENGTH_TEST = ThisIsAVer
-  • env: EMPTY_VALUE = 
-
-==================================================
-✅ Execution Complete
-Mode: GitHub Actions
-```
-
-This helps you understand:
-- How your inputs are being processed
-- What transformations are being applied
-- The final values being set
-- Any issues that might arise during processing
-
-### Output Colors
-
-The action uses colors in the console output to help distinguish different types of information:
-- 🔵 Blue: Information and section headers
-- 🟢 Green: Successful operations
-- 🔴 Red: Errors and warnings
-
-Note: Colors may not be visible in all CI environments or when output is redirected to a file.
-
-<br/>
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-<br/>
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
