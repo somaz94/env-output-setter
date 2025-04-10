@@ -135,16 +135,37 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 
 	// JSON 지원이 활성화된 경우 JSON 객체를 처리
 	if cfg.JsonSupport {
-		for i, value := range valueList {
+		// 원래 키와 값의 복사본을 만들어 새 항목 추가시 반복문에 영향을 주지 않도록 함
+		originalKeyCount := len(keyList)
+
+		for i := 0; i < originalKeyCount; i++ {
+			value := valueList[i]
+			key := keyList[i]
+
+			// 값이 JSON 객체인지 확인
 			if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
-				// JSON 형식인지 확인
 				var jsonObj map[string]interface{}
 				if err := json.Unmarshal([]byte(value), &jsonObj); err == nil {
-					// 키가 그룹 접두사를 가지면 객체의 각 키-값 쌍을 추가
-					if cfg.GroupPrefix != "" && strings.HasPrefix(keyList[i], cfg.GroupPrefix) {
-						for jsonKey, jsonValue := range jsonObj {
-							keyList = append(keyList, fmt.Sprintf("%s_%s", keyList[i], jsonKey))
-							valueList = append(valueList, fmt.Sprintf("%v", jsonValue))
+					// 중첩된 JSON 속성을 평면화하고 환경 변수로 추가
+					extractedKeys, extractedValues := extractNestedJSON(key, jsonObj, cfg.GroupPrefix)
+					keyList = append(keyList, extractedKeys...)
+					valueList = append(valueList, extractedValues...)
+				}
+			} else if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
+				// JSON 배열 처리
+				var jsonArray []interface{}
+				if err := json.Unmarshal([]byte(value), &jsonArray); err == nil {
+					// 배열 항목을 환경 변수로 추가
+					for idx, item := range jsonArray {
+						arrayKey := fmt.Sprintf("%s_%d", key, idx)
+						keyList = append(keyList, arrayKey)
+						valueList = append(valueList, fmt.Sprintf("%v", item))
+
+						// 배열 항목이 객체인 경우 재귀적으로 처리
+						if mapItem, ok := item.(map[string]interface{}); ok {
+							nestedKeys, nestedValues := extractNestedJSON(arrayKey, mapItem, cfg.GroupPrefix)
+							keyList = append(keyList, nestedKeys...)
+							valueList = append(valueList, nestedValues...)
 						}
 					}
 				}
@@ -152,12 +173,65 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 		}
 	}
 
+	// 이 시점에서 keyList와 valueList는 추가된 중첩 JSON 속성을 포함
 	// Check if the number of keys and values match
 	if len(keyList) != len(valueList) {
 		return nil, nil, fmt.Errorf("%s (keys: %d, values: %d)", errMismatchedPairs, len(keyList), len(valueList))
 	}
 
 	return keyList, valueList, nil
+}
+
+// extractNestedJSON은 중첩된 JSON 객체의 속성을 추출하여 평면화된 키-값 쌍을 반환합니다.
+func extractNestedJSON(prefix string, jsonObj map[string]interface{}, groupPrefix string) ([]string, []string) {
+	var keys []string
+	var values []string
+
+	// 그룹 접두사 적용
+	keyPrefix := prefix
+	if groupPrefix != "" {
+		if strings.HasPrefix(prefix, groupPrefix) {
+			// 이미 접두사가 있으면 그대로 사용
+			keyPrefix = prefix
+		} else {
+			// 접두사 추가
+			keyPrefix = fmt.Sprintf("%s_%s", groupPrefix, prefix)
+		}
+	}
+
+	// 객체의 각 속성을 평면화된 키-값 쌍으로 변환
+	for k, v := range jsonObj {
+		nestedKey := fmt.Sprintf("%s_%s", keyPrefix, k)
+
+		// 값 유형에 따라 처리
+		switch val := v.(type) {
+		case map[string]interface{}:
+			// 중첩된 객체는 재귀적으로 처리
+			nestedKeys, nestedValues := extractNestedJSON(nestedKey, val, "")
+			keys = append(keys, nestedKeys...)
+			values = append(values, nestedValues...)
+		case []interface{}:
+			// 배열은 인덱스를 키에 추가하여 처리
+			for i, item := range val {
+				arrayKey := fmt.Sprintf("%s_%d", nestedKey, i)
+				keys = append(keys, arrayKey)
+				values = append(values, fmt.Sprintf("%v", item))
+
+				// 배열 항목이 객체인 경우 재귀적으로 처리
+				if mapItem, ok := item.(map[string]interface{}); ok {
+					subKeys, subValues := extractNestedJSON(arrayKey, mapItem, "")
+					keys = append(keys, subKeys...)
+					values = append(values, subValues...)
+				}
+			}
+		default:
+			// 기본 값 유형은 직접 추가
+			keys = append(keys, nestedKey)
+			values = append(values, fmt.Sprintf("%v", val))
+		}
+	}
+
+	return keys, values
 }
 
 // logProcessedValues logs the processed values if debug mode is enabled
