@@ -158,7 +158,9 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 				// JSON 객체인 경우
 				if objMap, isObj := jsonData.(map[string]interface{}); isObj {
 					// 중첩된 JSON 속성을 평면화하고 환경 변수로 추가
-					extractedKeys, extractedValues := extractNestedJSON(key, objMap, cfg.GroupPrefix)
+					// 그룹 접두사를 빈 문자열로 변경하여 기본 변수 이름 형식 유지
+					// extractedKeys, extractedValues := extractNestedJSON(key, objMap, cfg.GroupPrefix)
+					extractedKeys, extractedValues := extractNestedJSON(key, objMap, "")
 					keyList = append(keyList, extractedKeys...)
 					valueList = append(valueList, extractedValues...)
 				} else if arrData, isArr := jsonData.([]interface{}); isArr {
@@ -170,7 +172,7 @@ func processInputValues(cfg *config.Config, keys, values string) ([]string, []st
 
 						// 배열 항목이 객체인 경우 재귀적으로 처리
 						if mapItem, ok := item.(map[string]interface{}); ok {
-							nestedKeys, nestedValues := extractNestedJSON(arrayKey, mapItem, cfg.GroupPrefix)
+							nestedKeys, nestedValues := extractNestedJSON(arrayKey, mapItem, "")
 							keyList = append(keyList, nestedKeys...)
 							valueList = append(valueList, nestedValues...)
 						}
