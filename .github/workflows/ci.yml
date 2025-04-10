@@ -335,17 +335,19 @@ jobs:
         id: json_test
         uses: ./
         with:
-          env_key: CONFIG_JSON,SIMPLE_VALUE
-          env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}},simple_text'
-          output_key: config_data,simple_output
-          output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}},simple_text'
+          env_key: CONFIG_JSON|SIMPLE_VALUE
+          env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
+          output_key: config_data|simple_output
+          output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
+          
+          # 구분자를 쉼표(,)에서 파이프(|)로 변경
+          delimiter: '|'
           
           # 새로운 JSON 지원 기능 활성화
           json_support: true
           group_prefix: CONFIG
           
           # 기타 옵션
-          delimiter: ','
           fail_on_empty: true
           trim_whitespace: true
           debug_mode: true
@@ -398,17 +400,19 @@ jobs:
         id: complex_json
         uses: ./
         with:
-          env_key: COMPLEX_CONFIG,API_SETTINGS
-          env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
-          output_key: complex_output,api_output
-          output_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}},{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
+          env_key: COMPLEX_CONFIG|API_SETTINGS
+          env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}}|{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
+          output_key: complex_output|api_output
+          output_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}}|{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
+          
+          # 구분자 변경
+          delimiter: '|'
           
           # 고급 기능 활성화
           json_support: true
           group_prefix: APP
           
           # 기타 옵션
-          delimiter: ','
           debug_mode: true
 
       - name: Verify Complex JSON Processing
@@ -470,6 +474,7 @@ jobs:
           output_key: invalid_output
           output_value: '{"also": "incomplete'
           
+          # 구분자 변경은 필요 없음 (단일 값이므로)
           json_support: true
           fail_on_empty: true
           debug_mode: true
