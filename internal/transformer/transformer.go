@@ -8,13 +8,15 @@ import (
 	"strings"
 )
 
-// TransformationError represents an error during transformation
+// TransformationError represents an error that occurs during value transformation.
+// It includes both an error message and an optional underlying cause.
 type TransformationError struct {
 	Message string
 	Cause   error
 }
 
-// Error implements the error interface
+// Error implements the error interface for TransformationError.
+// It returns a formatted error string that includes the underlying cause if present.
 func (e *TransformationError) Error() string {
 	if e.Cause != nil {
 		return fmt.Sprintf("%s: %v", e.Message, e.Cause)
@@ -22,32 +24,41 @@ func (e *TransformationError) Error() string {
 	return e.Message
 }
 
-// Transformer handles value transformations
+// Transformer handles various value transformations including casing,
+// encoding, masking and length limitations.
 type Transformer struct {
-	// Masking Related Settings
+	// Masking settings
 	maskSecrets bool
 	maskPattern *regexp.Regexp
 
-	// Case Conversion Settings
+	// Case conversion settings
 	toUpper bool
 	toLower bool
 
-	// Encoding Settings
+	// Encoding settings
 	encodeURL      bool
 	escapeNewlines bool
 
-	// Length Limitation Settings
+	// Length limitation settings
 	maxLength int
 }
 
-// New creates a new Transformer with the specified options
-func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool, escapeNewlines bool, maxLength int) *Transformer {
+// New creates a new Transformer with the specified configuration options.
+// It handles the compilation of regular expression patterns for masking.
+func New(
+	maskSecrets bool,
+	maskPattern string,
+	toUpper bool,
+	toLower bool,
+	encodeURL bool,
+	escapeNewlines bool,
+	maxLength int,
+) *Transformer {
 	var pattern *regexp.Regexp
 	if maskPattern != "" {
 		var err error
 		pattern, err = regexp.Compile(maskPattern)
 		if err != nil {
-			// Log only if there is an error in the regular expression compilation
 			fmt.Printf("Warning: Invalid mask pattern '%s': %v\n", maskPattern, err)
 		}
 	}
@@ -63,50 +74,41 @@ func New(maskSecrets bool, maskPattern string, toUpper, toLower, encodeURL bool,
 	}
 }
 
-// TransformValue applies all configured transformations to a value
-// Transformation Order:
-// 1. Case Conversion (toUpper/toLower)
-// 2. URL Encoding (encodeURL)
-// 3. Escape Newlines (escapeNewlines)
-// 4. Length Limitation (maxLength)
-func (t *Transformer) TransformValue(value string, supportJson bool) string {
+// TransformValue applies all configured transformations to a value in the following order:
+// 1. Case conversion (upper/lower)
+// 2. URL encoding
+// 3. Newline escaping
+// 4. Length limitation
+//
+// If JSON support is enabled and the value looks like JSON, it preserves the JSON format.
+func (t *Transformer) TransformValue(value string, supportJSON bool) string {
+	// Handle empty values early
 	if value == "" {
 		return value
 	}
 
+	// Check if value is JSON and JSON support is enabled
+	if supportJSON && isJSONValue(value) {
+		return t.handleJSONValue(value)
+	}
+
+	// Apply transformations in sequence
 	result := value
 
-	// JSON인 경우 특별한 처리를 건너뛰기
-	if supportJson && (strings.HasPrefix(result, "{") || strings.HasPrefix(result, "[")) {
-		// JSON 형식 검증
-		var jsonObj interface{}
-		if err := json.Unmarshal([]byte(result), &jsonObj); err == nil {
-			// 유효한 JSON이면 그대로 반환
-			return result
-		}
-		// 유효하지 않은 JSON이지만 JSON 형식을 가장하는 경우
-		// 특별한 처리 없이 계속 진행 (프로세스 중에 실패 처리)
-	}
+	// 1. Apply case conversion (mutually exclusive)
+	result = t.applyCaseConversion(result)
 
-	// 1. Case Conversion (mutually exclusive)
-	if t.toUpper {
-		result = strings.ToUpper(result)
-	} else if t.toLower {
-		result = strings.ToLower(result)
-	}
-
-	// 2. URL Encoding
+	// 2. Apply URL encoding if enabled
 	if t.encodeURL {
 		result = url.QueryEscape(result)
 	}
 
-	// 3. Escape Newlines
+	// 3. Escape newlines if enabled
 	if t.escapeNewlines {
-		result = strings.ReplaceAll(result, "\n", "\\n")
-		result = strings.ReplaceAll(result, "\r", "\\r")
+		result = t.escapeNewlineCharacters(result)
 	}
 
-	// 4. Length Limitation
+	// 4. Apply length limitation if configured
 	if t.maxLength > 0 && len(result) > t.maxLength {
 		result = result[:t.maxLength]
 	}
@@ -114,49 +116,116 @@ func (t *Transformer) TransformValue(value string, supportJson bool) string {
 	return result
 }
 
-// MaskValue applies masking to sensitive values
+// isJSONValue checks if a string appears to be JSON (object or array).
+func isJSONValue(value string) bool {
+	value = strings.TrimSpace(value)
+	return (strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")) ||
+		(strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]"))
+}
+
+// handleJSONValue processes a value that appears to be JSON.
+// It validates the JSON and returns it unchanged if valid.
+func (t *Transformer) handleJSONValue(value string) string {
+	// Verify the JSON is valid
+	var jsonObj interface{}
+	if err := json.Unmarshal([]byte(value), &jsonObj); err == nil {
+		// Valid JSON is returned as-is
+		return value
+	}
+
+	// If JSON is invalid, proceed with normal transformations
+	result := value
+	result = t.applyCaseConversion(result)
+
+	if t.encodeURL {
+		result = url.QueryEscape(result)
+	}
+
+	if t.escapeNewlines {
+		result = t.escapeNewlineCharacters(result)
+	}
+
+	if t.maxLength > 0 && len(result) > t.maxLength {
+		result = result[:t.maxLength]
+	}
+
+	return result
+}
+
+// applyCaseConversion applies upper or lower case conversion if enabled.
+// Upper case takes precedence over lower case if both are somehow enabled.
+func (t *Transformer) applyCaseConversion(value string) string {
+	if t.toUpper {
+		return strings.ToUpper(value)
+	} else if t.toLower {
+		return strings.ToLower(value)
+	}
+	return value
+}
+
+// escapeNewlineCharacters replaces newline characters with their escaped equivalents.
+func (t *Transformer) escapeNewlineCharacters(value string) string {
+	result := strings.ReplaceAll(value, "\n", "\\n")
+	result = strings.ReplaceAll(result, "\r", "\\r")
+	return result
+}
+
+// MaskValue applies masking to sensitive values to hide their content.
+// It uses different masking strategies based on the configuration and value length.
 func (t *Transformer) MaskValue(value string) string {
+	// Skip masking if disabled or value is empty
 	if !t.maskSecrets || value == "" {
 		return value
 	}
 
-	// If there is a regular expression pattern and it matches, mask the entire value
+	// Apply regex pattern masking if configured and matched
 	if t.maskPattern != nil && t.maskPattern.MatchString(value) {
 		return "***"
 	}
 
-	// Short values are fully masked
+	// Apply full masking for short values
 	if len(value) <= 4 {
 		return "***"
 	}
 
-	// Default masking: show the first 2 characters and mask the rest
-	visibleChars := 2
-	return value[:visibleChars] + strings.Repeat("*", len(value)-visibleChars)
+	// Default masking: show first 2 characters and mask the rest
+	const visiblePrefix = 2
+	return value[:visiblePrefix] + strings.Repeat("*", len(value)-visiblePrefix)
 }
 
-// CustomMask applies a custom masking pattern
+// CustomMask applies a custom masking pattern with configurable visible
+// prefix and suffix lengths. This allows for more precise control over
+// what parts of a value remain visible.
 func (t *Transformer) CustomMask(value string, visiblePrefix, visibleSuffix int) string {
+	// Handle empty strings or values too short for the requested visibility
 	if value == "" || len(value) <= (visiblePrefix+visibleSuffix) {
 		return "***"
 	}
 
+	// Extract visible prefix if requested
 	prefix := ""
 	if visiblePrefix > 0 {
 		prefix = value[:visiblePrefix]
 	}
 
+	// Extract visible suffix if requested
 	suffix := ""
 	if visibleSuffix > 0 {
 		suffix = value[len(value)-visibleSuffix:]
 	}
 
+	// Create mask string for the middle portion
 	maskedLength := len(value) - visiblePrefix - visibleSuffix
-	return prefix + strings.Repeat("*", maskedLength) + suffix
+	maskString := strings.Repeat("*", maskedLength)
+
+	// Combine the parts
+	return prefix + maskString + suffix
 }
 
-// TransformJSON converts a JSON string to a compact JSON string
+// TransformJSON converts a JSON string to a compact form by removing
+// unnecessary whitespace. It also validates that the input is valid JSON.
 func (t *Transformer) TransformJSON(value string) (string, error) {
+	// Parse the JSON to validate and normalize it
 	var data interface{}
 	if err := json.Unmarshal([]byte(value), &data); err != nil {
 		return "", &TransformationError{
@@ -165,7 +234,7 @@ func (t *Transformer) TransformJSON(value string) (string, error) {
 		}
 	}
 
-	// JSON 압축 (공백 제거)
+	// Re-marshal to get a compact representation
 	compact, err := json.Marshal(data)
 	if err != nil {
 		return "", &TransformationError{
