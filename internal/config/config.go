@@ -6,9 +6,8 @@ import (
 	"strings"
 )
 
-// Environment Variable Names Constants
+// Input environment variable names
 const (
-	// Input Environment Variables
 	EnvKeyInput           = "INPUT_ENV_KEY"
 	EnvValueInput         = "INPUT_ENV_VALUE"
 	OutputKeyInput        = "INPUT_OUTPUT_KEY"
@@ -30,13 +29,15 @@ const (
 	GroupPrefixInput      = "INPUT_GROUP_PREFIX"
 	JsonSupportInput      = "INPUT_JSON_SUPPORT"
 	ExportAsEnvInput      = "INPUT_EXPORT_AS_ENV"
+)
 
-	// GitHub Environment Variables
+// GitHub environment variables
+const (
 	GithubEnvVar    = "GITHUB_ENV"
 	GithubOutputVar = "GITHUB_OUTPUT"
 )
 
-// Default Values Constants
+// Default values for configuration parameters
 const (
 	DefaultDelimiter        = ","
 	DefaultFailOnEmpty      = true
@@ -57,47 +58,50 @@ const (
 	DefaultExportAsEnv      = false
 )
 
-// Config holds the application configuration
+// Config holds the application configuration settings loaded from environment variables.
+// It includes settings for input/output handling, value transformations, security options,
+// and debugging.
 type Config struct {
 	// Input/Output Keys and Values
-	EnvKeys      string
-	EnvValues    string
-	OutputKeys   string
-	OutputValues string
+	EnvKeys      string // Environment variable keys to process
+	EnvValues    string // Environment variable values to process
+	OutputKeys   string // Output keys for GitHub Actions
+	OutputValues string // Output values for GitHub Actions
 
 	// GitHub File Paths
-	GithubEnv    string
-	GithubOutput string
+	GithubEnv    string // Path to GITHUB_ENV file
+	GithubOutput string // Path to GITHUB_OUTPUT file
 
 	// Input Processing Options
-	Delimiter        string
-	FailOnEmpty      bool
-	TrimWhitespace   bool
-	CaseSensitive    bool
-	ErrorOnDuplicate bool
-	AllowEmpty       bool
+	Delimiter        string // Delimiter for splitting multiple keys/values
+	FailOnEmpty      bool   // Whether to fail when encountering empty values
+	TrimWhitespace   bool   // Whether to trim whitespace from values
+	CaseSensitive    bool   // Whether key comparisons are case sensitive
+	ErrorOnDuplicate bool   // Whether to error on duplicate keys
+	AllowEmpty       bool   // Whether empty values are allowed in the output
 
 	// Value Transformation Options
-	ToUpper        bool
-	ToLower        bool
-	EncodeURL      bool
-	EscapeNewlines bool
-	MaxLength      int
+	ToUpper        bool // Convert values to uppercase
+	ToLower        bool // Convert values to lowercase
+	EncodeURL      bool // URL-encode values
+	EscapeNewlines bool // Escape newlines in values
+	MaxLength      int  // Maximum length for values (0 = no limit)
 
 	// Security Options
-	MaskSecrets bool
-	MaskPattern string
+	MaskSecrets bool   // Whether to mask secret values in logs
+	MaskPattern string // Regex pattern for identifying values to mask
 
 	// Debug Options
-	DebugMode bool
+	DebugMode bool // Enable debug mode for verbose logging
 
-	// New configuration fields
-	GroupPrefix string
-	JsonSupport bool
-	ExportAsEnv bool
+	// Advanced Options
+	GroupPrefix string // Prefix for grouping related outputs
+	JsonSupport bool   // Support for JSON values
+	ExportAsEnv bool   // Whether to export values as environment variables
 }
 
-// Load loads configuration from environment variables
+// Load creates a new Config instance with values loaded from environment variables.
+// Default values are used for any settings not specified in the environment.
 func Load() *Config {
 	return &Config{
 		// Input/Output Keys and Values
@@ -132,27 +136,32 @@ func Load() *Config {
 		// Debug Options
 		DebugMode: getBoolEnv(DebugModeInput, DefaultDebugMode),
 
-		// New configuration fields
+		// Advanced Options
 		GroupPrefix: getEnvWithDefault(GroupPrefixInput, DefaultGroupPrefix),
 		JsonSupport: getBoolEnv(JsonSupportInput, DefaultJsonSupport),
 		ExportAsEnv: getBoolEnv(ExportAsEnvInput, DefaultExportAsEnv),
 	}
 }
 
-// getEnvWithDefault returns the value of the environment variable or the default value if not set
+// getEnvWithDefault retrieves an environment variable value or returns
+// the specified default value if the variable is not set or empty.
 func getEnvWithDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
 	}
-	return defaultValue
+	return value
 }
 
-// getBoolEnv parses a boolean environment variable
+// getBoolEnv retrieves a boolean environment variable value.
+// It parses the string value to a boolean, returning the default value
+// if the variable is not set, empty, or cannot be parsed as a boolean.
 func getBoolEnv(key string, defaultValue bool) bool {
 	value := os.Getenv(key)
 	if value == "" {
 		return defaultValue
 	}
+
 	b, err := strconv.ParseBool(strings.ToLower(value))
 	if err != nil {
 		return defaultValue
@@ -160,12 +169,15 @@ func getBoolEnv(key string, defaultValue bool) bool {
 	return b
 }
 
-// getIntEnv parses an integer environment variable
+// getIntEnv retrieves an integer environment variable value.
+// It parses the string value to an integer, returning the default value
+// if the variable is not set, empty, or cannot be parsed as an integer.
 func getIntEnv(key string, defaultValue int) int {
 	value := os.Getenv(key)
 	if value == "" {
 		return defaultValue
 	}
+
 	i, err := strconv.Atoi(value)
 	if err != nil {
 		return defaultValue
