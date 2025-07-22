@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-07-22)
+
+[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.4.1)
+
+**Merged pull requests:**
+
+- build\(deps\): bump super-linter/super-linter from 7 to 8 [\#4](https://github.com/somaz94/env-output-setter/pull/4) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-04-15)
 
 [Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.0...v1.4.1)
