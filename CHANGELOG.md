@@ -1,11 +1,13 @@
 # Changelog
 
-## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-07-22)
+## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-08-18)
 
 [Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.4.1)
 
 **Merged pull requests:**
 
+- build\(deps\): bump actions/checkout from 4 to 5 [\#6](https://github.com/somaz94/env-output-setter/pull/6) ([dependabot[bot]](https://github.com/apps/dependabot))
+- build\(deps\): bump golang from 1.24-alpine to 1.25-alpine in the docker-minor group [\#5](https://github.com/somaz94/env-output-setter/pull/5) ([dependabot[bot]](https://github.com/apps/dependabot))
 - build\(deps\): bump super-linter/super-linter from 7 to 8 [\#4](https://github.com/somaz94/env-output-setter/pull/4) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-04-15)
