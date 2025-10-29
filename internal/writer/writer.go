@@ -239,9 +239,11 @@ func (w *Writer) performWrite(filePath string, keys, values []string, varType st
 			return count, err
 		}
 
-		// Print success message with masking
-		maskedValue := valueTransformer.MaskValue(transformedValue)
-		printer.PrintSuccess(varType, key, maskedValue)
+		// Print success message with masking (skip internal status variables)
+		if key != "action_status" && key != "error_message" {
+			maskedValue := valueTransformer.MaskValue(transformedValue)
+			printer.PrintSuccess(varType, key, maskedValue)
+		}
 		count++
 	}
 
