@@ -58,7 +58,7 @@ func SetEnv(cfg *config.Config) (int, error) {
 // If export_as_env is enabled, it also exports the output variables as environment variables.
 func SetOutput(cfg *config.Config) (int, error) {
 	w := NewWriter(cfg)
-	
+
 	// Set output variables
 	count, err := w.setVariables(githubOutputVar, outputFileType)
 	if err != nil {
@@ -170,8 +170,8 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 	for retry := 0; retry < maxRetries; retry++ {
 		count, err := w.performWrite(filePath, keys, values, varType)
 		if err == nil {
-			// Success - write status
-			_, _ = w.performWrite(filePath, []string{"status"}, []string{"success"}, varType)
+			// Success - write action status
+			_, _ = w.performWrite(filePath, []string{"action_status"}, []string{"success"}, varType)
 			return count, nil
 		}
 
@@ -186,7 +186,7 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 
 	// Write failure status after exhausting retries
 	_, _ = w.performWrite(filePath,
-		[]string{"status", "error_message"},
+		[]string{"action_status", "error_message"},
 		[]string{"failure", lastError.Error()},
 		varType)
 

@@ -90,7 +90,7 @@ outputs:
     description: 'Number of environment variables set'
   set_output_count:
     description: 'Number of outputs set'
-  status:
+  action_status:
     description: 'Status of the operation (success/failure)'
   error_message:
     description: 'Error message if any'
