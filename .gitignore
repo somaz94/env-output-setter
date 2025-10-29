@@ -23,3 +23,24 @@ Thumbs.db
 .idea
 .vscode
 *.code-workspace
+
+# Go build artifacts
+env-output-setter
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go test binary, built with `go test -c`
+*.test
+
+# Go coverage files
+*.out
+coverage.txt
+
+# Go dependency directories
+vendor/
+
+# Temporary test files
+/tmp/test_github_env
+/tmp/test_github_output

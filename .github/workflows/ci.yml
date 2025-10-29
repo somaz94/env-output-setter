@@ -14,9 +14,25 @@ permissions:
   contents: write
   
 jobs:
+  test-local:
+    name: Run Local Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run Local Test Suite
+        run: go run tests/test_local.go
+
   build-and-push-docker:
     name: Build and Push Docker
     runs-on: ubuntu-latest
+    needs: test-local
     services:
       registry:
         image: registry:2
