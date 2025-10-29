@@ -12,7 +12,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	printer.PrintSection("🚀 GitHub Environment and Output Setter")
+	printer.PrintSection("▶️ GitHub Environment and Output Setter")
 
 	// 고급 기능 로그
 	if cfg.DebugMode {
