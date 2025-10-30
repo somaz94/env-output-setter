@@ -1,8 +1,8 @@
 # Changelog
 
-## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-08-18)
+## [v1.5.0](https://github.com/somaz94/env-output-setter/tree/v1.5.0) (2025-10-30)
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.4.1)
+[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.5.0)
 
 **Merged pull requests:**
 
