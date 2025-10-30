@@ -17,6 +17,21 @@ permissions:
   contents: read
 
 jobs:
+  test-local:
+    name: Run Local Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Run Local Test Suite
+        run: go run tests/test_local.go
+
   action-module-v1:
     name: Test env-output-setter v1
     runs-on: ubuntu-latest
@@ -79,12 +94,12 @@ jobs:
           echo -e "\nAction Results:"
           echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
           echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
           echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
 
       # 에러 처리 예시
       - name: Check for Errors
-        if: steps.set_variables.outputs.status == 'failure'
+        if: steps.set_variables.outputs.action_status == 'failure'
         run: |
           echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
           exit 1
@@ -149,12 +164,12 @@ jobs:
           echo "Action Results:"
           echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
           echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
           echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
 
       # Error handling
       - name: Check for Errors
-        if: steps.set_variables.outputs.status == 'failure'
+        if: steps.set_variables.outputs.action_status == 'failure'
         run: |
           echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
           exit 1
@@ -214,12 +229,12 @@ jobs:
           echo "Action Results:"
           echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
           echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.status }}"
+          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
           echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
 
       # Error handling
       - name: Check for Errors
-        if: steps.set_variables.outputs.status == 'failure'
+        if: steps.set_variables.outputs.action_status == 'failure'
         run: |
           echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
           exit 1
@@ -428,7 +443,7 @@ jobs:
       - name: Check JSON Error Handling
         run: |
           echo "Error Test Results:"
-          echo "Status: ${{ steps.json_error_test.outputs.status || 'N/A' }}"
+          echo "Status: ${{ steps.json_error_test.outputs.action_status || 'N/A' }}"
           echo "Error: ${{ steps.json_error_test.outputs.error_message || 'None' }}"
           
           if [[ "${{ steps.json_error_test.outcome }}" == "failure" ]]; then
