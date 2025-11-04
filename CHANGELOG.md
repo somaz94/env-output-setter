@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.5.0](https://github.com/somaz94/env-output-setter/tree/v1.5.0) (2025-11-04)
+
+[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.5.0...v1.5.0)
+
+**Merged pull requests:**
+
+- build\(deps\): bump actions/setup-go from 5 to 6 [\#7](https://github.com/somaz94/env-output-setter/pull/7) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v1.5.0](https://github.com/somaz94/env-output-setter/tree/v1.5.0) (2025-10-30)
 
 [Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.5.0)
