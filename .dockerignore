@@ -1,0 +1,34 @@
+# Test files
+*_test.go
+tests/
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+docs/
+
+# GitHub workflows
+.github/
+
+# Development files
+.vscode/
+.idea/
+.devcontainer/
+
+# Backup files
+backup/
+
+# Build artifacts
+env-output-setter
+main
+
+# OS files
+.DS_Store
+Thumbs.db
