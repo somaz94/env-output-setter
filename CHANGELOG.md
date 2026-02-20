@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.5.1](https://github.com/somaz94/env-output-setter/tree/v1.5.1) (2026-02-20)
+
+[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.5.1...v1.5.1)
+
+**Merged pull requests:**
+
+- build\(deps\): bump golang from 1.25-alpine to 1.26-alpine in the docker-minor group [\#9](https://github.com/somaz94/env-output-setter/pull/9) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v1.5.1](https://github.com/somaz94/env-output-setter/tree/v1.5.1) (2025-11-27)
 
 [Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.5.0...v1.5.1)
