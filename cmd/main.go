@@ -14,7 +14,7 @@ func main() {
 	cfg := config.Load()
 	printer.PrintSection("▶️ GitHub Environment and Output Setter")
 
-	// 고급 기능 로그
+	// Log advanced feature status
 	if cfg.DebugMode {
 		printer.PrintInfo("📋 Advanced Features Status:")
 		if cfg.GroupPrefix != "" {

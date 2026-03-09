@@ -54,18 +54,9 @@ func (p *Processor) processWhitespace(entries []string) []string {
 }
 
 // normalizeWhitespace converts all whitespace sequences to a single space.
-// It handles newlines, carriage returns, and multiple consecutive spaces.
+// It handles newlines, carriage returns, tabs, and multiple consecutive spaces.
 func (p *Processor) normalizeWhitespace(s string) string {
-	// Convert line breaks to spaces
-	s = strings.ReplaceAll(s, "\n", " ")
-	s = strings.ReplaceAll(s, "\r", " ")
-
-	// Condense multiple spaces to a single space
-	for strings.Contains(s, "  ") {
-		s = strings.ReplaceAll(s, "  ", " ")
-	}
-
-	return s
+	return strings.Join(strings.Fields(s), " ")
 }
 
 // removeEmptyEntries filters out empty strings from a slice.
@@ -90,7 +81,7 @@ func (p *Processor) LogInputValues(varType, keys, values string) {
 		return
 	}
 
-	printer.PrintDebugSection(strings.Title(varType))
+	printer.PrintDebugSection(strings.ToUpper(varType[:1]) + varType[1:])
 	printer.PrintDebugInfo("📥 Input Values:\n")
 	printer.PrintDebugInfo("  • Keys:      %q\n", keys)
 	printer.PrintDebugInfo("  • Values:    %q\n", values)

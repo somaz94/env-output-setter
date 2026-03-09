@@ -70,6 +70,23 @@ For more examples, see the [Usage Guide](docs/USAGE.md).
 
 <br/>
 
+## Development
+
+```bash
+make build        # Build the binary
+make test         # Run unit tests with coverage
+make test-local   # Run local integration tests
+make test-all     # Run all tests
+make cover        # Generate coverage report
+make cover-html   # Open coverage in browser
+make bench        # Run benchmarks
+make lint         # Run go vet
+make fmt          # Format code
+make clean        # Remove build artifacts
+```
+
+<br/>
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

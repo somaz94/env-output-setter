@@ -80,21 +80,6 @@ jobs:
           push: true
           tags: ${{ env.TEST_TAG }}
 
-      # - name: Run the Container
-      #   env:
-      #     ENV_KEY: test1,test2
-      #     ENV_VALUE: somaz,gomaz
-      #     OUTPUT_KEY: test1,test2
-      #     OUTPUT_VALUE: zomaz,xomae
-      #   run: |
-      #     docker run \
-      #     --env ENV_KEY="${{ env.ENV_KEY }}" \
-      #     --env ENV_VALUE="${{ env.ENV_VALUE }}" \
-      #     --env OUTPUT_KEY="${{ env.OUTPUT_KEY }}" \
-      #     --env OUTPUT_VALUE="${{ env.OUTPUT_VALUE }}" \
-      #     --volume ${{ github.workspace }}:/app \
-      #     --rm ${{ env.TEST_TAG }}
-
   test-action:
     name: Test env-output-setter
     runs-on: ubuntu-latest
@@ -182,18 +167,18 @@ jobs:
         id: set_variables
         uses: ./
         with:
-          # 기본 키-값 설정
+          # Basic key-value settings
           env_key: test1:test2
           env_value: somaz:gomaz
           output_key: test1:test2
           output_value: zomaz:xomae
-          
-          # 새로운 옵션들 활용
-          delimiter: ':' # 기본값이지만 예시로 명시
-          fail_on_empty: true # 빈 값 있으면 실패
-          trim_whitespace: true # 자동으로 공백 제거
-          case_sensitive: true # 키 대소문자 구분
-          error_on_duplicate: true # 중복 키 에러
+
+          # Option settings
+          delimiter: ':'
+          fail_on_empty: true
+          trim_whitespace: true
+          case_sensitive: true
+          error_on_duplicate: true
 
       - name: Display Set Variables
         run: |
@@ -211,7 +196,7 @@ jobs:
           echo "Status: ${{ steps.set_variables.outputs.action_status }}"
           echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
 
-      # 에러 처리 예시
+      # Error handling
       - name: Check for Errors
         if: steps.set_variables.outputs.action_status == 'failure'
         run: |
@@ -305,19 +290,19 @@ jobs:
         id: set_variables
         uses: ./
         with:
-          # 멀티라인 및 특수문자 테스트 (구분자를 '::'로 변경)
+          # Multiline and special character test (using '::' as delimiter)
           env_key: "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
           env_value: "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
           output_key: "PROCESSED_TEXT::TRUNCATED_TEXT::ALLOWED_EMPTY"
           output_value: "First Line\nSecond Line::AnotherLongTextToTest::   "
 
-          # 새로운 옵션들 테스트
-          escape_newlines: true        # \n을 \\n으로 변환
-          max_length: 10              # 값을 10자로 제한
-          allow_empty: true           # 빈 값 허용
-          
-          # 기본 옵션들
-          delimiter: '::'             # 쉼표 대신 '::'를 구분자로 사용
+          # Transformation options
+          escape_newlines: true
+          max_length: 10
+          allow_empty: true
+
+          # General options
+          delimiter: '::'
           trim_whitespace: true
           case_sensitive: true
           error_on_duplicate: true
@@ -374,14 +359,14 @@ jobs:
           output_key: config_data|simple_output
           output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
           
-          # 구분자를 쉼표(,)에서 파이프(|)로 변경
+          # Use pipe delimiter to avoid conflicts with JSON commas
           delimiter: '|'
-          
-          # 새로운 JSON 지원 기능 활성화
+
+          # Enable JSON support
           json_support: true
           group_prefix: CONFIG
-          
-          # 기타 옵션
+
+          # Other options
           fail_on_empty: true
           trim_whitespace: true
           debug_mode: true
@@ -411,10 +396,10 @@ jobs:
           output_key: OUTPUT_VAR1,OUTPUT_VAR2
           output_value: output_value1,output_value2
           
-          # 출력값을 환경 변수로 내보내기
+          # Export output values as environment variables
           export_as_env: true
-          
-          # 기타 옵션
+
+          # Other options
           delimiter: ','
           fail_on_empty: true
           debug_mode: true
@@ -439,14 +424,14 @@ jobs:
           output_key: complex_output|api_output
           output_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}}|{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
           
-          # 구분자 변경
+          # Use pipe delimiter
           delimiter: '|'
-          
-          # 고급 기능 활성화
+
+          # Enable advanced features
           json_support: true
           group_prefix: APP
           
-          # 기타 옵션
+          # Other options
           debug_mode: true
 
       - name: Verify Complex JSON Processing
@@ -463,7 +448,7 @@ jobs:
           echo "API_SETTINGS_endpoints_1_path: ${{ env.API_SETTINGS_endpoints_1_path }}"
           echo "API_SETTINGS_version: ${{ env.API_SETTINGS_version }}"
 
-      # 스트레스 테스트: 많은 변수와 복잡한 값 처리
+      # Stress test: many variables with complex values
       - name: Stress Test with Many Variables
         id: stress_test
         uses: ./
@@ -473,12 +458,12 @@ jobs:
           output_key: OUT1,OUT2,OUT3,OUT4,OUT5,OUT6,OUT7,OUT8,OUT9,OUT10
           output_value: out1,out2,out3,out4,out5,out6,out7,out8,out9,out10
           
-          # 동시에 여러 변환 옵션 활성화
+          # Enable multiple transformation options
           to_upper: true
           encode_url: true
           max_length: 5
           
-          # 디버그 모드 활성화
+          # Enable debug mode
           debug_mode: true
 
       - name: Verify Stress Test Results
@@ -497,7 +482,7 @@ jobs:
           echo "Variables Set: ${{ steps.stress_test.outputs.set_env_count }}"
           echo "Outputs Set: ${{ steps.stress_test.outputs.set_output_count }}"
 
-      # 에러 시나리오 테스트
+      # Error scenario test
       - name: Test JSON Validation Errors
         id: json_error_test
         uses: ./
@@ -508,7 +493,7 @@ jobs:
           output_key: invalid_output
           output_value: '{"also": "incomplete'
           
-          # 구분자 변경은 필요 없음 (단일 값이므로)
+          # No delimiter change needed (single value)
           json_support: true
           fail_on_empty: true
           debug_mode: true

@@ -171,7 +171,9 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 		count, err := w.performWrite(filePath, keys, values, varType)
 		if err == nil {
 			// Success - write action status
-			_, _ = w.performWrite(filePath, []string{"action_status"}, []string{"success"}, varType)
+			if _, err := w.performWrite(filePath, []string{"action_status"}, []string{"success"}, varType); err != nil {
+				printer.PrintWarning(fmt.Sprintf("Warning: failed to write success status: %v", err))
+			}
 			return count, nil
 		}
 
@@ -185,10 +187,12 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 	}
 
 	// Write failure status after exhausting retries
-	_, _ = w.performWrite(filePath,
+	if _, err := w.performWrite(filePath,
 		[]string{"action_status", "error_message"},
 		[]string{"failure", lastError.Error()},
-		varType)
+		varType); err != nil {
+		printer.PrintWarning(fmt.Sprintf("Warning: failed to write failure status: %v", err))
+	}
 
 	return 0, fmt.Errorf(errMaxRetries, maxRetries)
 }
