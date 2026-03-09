@@ -1,80 +1,174 @@
-# Changelog
 
-## [v1.5.1](https://github.com/somaz94/env-output-setter/tree/v1.5.1) (2026-02-20)
+### Build
+- bump golang in the docker-minor group by @dependabot[bot]
+- bump docker/build-push-action from 6 to 7 by @dependabot[bot]
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.5.1...v1.5.1)
+### Refactoring
+- modernize CI/CD workflows and simplify smoke tests by @somaz94
+- extract shared jsonutil package, simplify test helpers, and improve test coverage to 98% by @somaz94
 
-**Merged pull requests:**
+### Build
+- bump actions/setup-go from 5 to 6 by @dependabot[bot]
+- bump actions/checkout from 5 to 6 by @dependabot[bot]
 
-- build\(deps\): bump golang from 1.25-alpine to 1.26-alpine in the docker-minor group [\#9](https://github.com/somaz94/env-output-setter/pull/9) ([dependabot[bot]](https://github.com/apps/dependabot))
+### Chore
+- workflows by @somaz94
+- release.yml by @somaz94
+- dockerignore by @somaz94
+- stale-issues, issue-greeting by @somaz94
+- test code by @somaz94
 
-## [v1.5.1](https://github.com/somaz94/env-output-setter/tree/v1.5.1) (2025-11-27)
+### Build
+- bump super-linter/super-linter from 7 to 8 by @dependabot[bot]
+- bump golang in the docker-minor group by @dependabot[bot]
+- bump actions/checkout from 4 to 5 by @dependabot[bot]
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.5.0...v1.5.1)
+### Chore
+- writer.go by @somaz94
 
-**Merged pull requests:**
+### Refactoring
+- cmd/main.go by @somaz94
+- all by @somaz94
+- ci.yml,action.yml,writer.go by @somaz94
+- all by @somaz94
 
-- build\(deps\): bump actions/checkout from 5 to 6 [\#8](https://github.com/somaz94/env-output-setter/pull/8) ([dependabot[bot]](https://github.com/apps/dependabot))
-- build\(deps\): bump actions/setup-go from 5 to 6 [\#7](https://github.com/somaz94/env-output-setter/pull/7) ([dependabot[bot]](https://github.com/apps/dependabot))
+### Bug Fixes
+- writer.go by @somaz94
+- transformer.go by @somaz94
+- config.go, printer.go by @somaz94
 
-## [v1.5.0](https://github.com/somaz94/env-output-setter/tree/v1.5.0) (2025-10-30)
+### Documentation
+- README.md by @somaz94
+- README.md by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.5.0)
+### Bug Fixes
+- ci.yml, action.yml, config,go, transformer.go, writer.go by @somaz94
+- ci.yml by @somaz94
+- ci.yml by @somaz94
+- ci.yml, README.md by @somaz94
+- ci.yml, writer.go by @somaz94
+- transformer.go, writer.go by @somaz94
+- writer.go by @somaz94
 
-**Merged pull requests:**
+### Other Changes
+- Release v1.4.0 by @somaz94
 
-- build\(deps\): bump actions/checkout from 4 to 5 [\#6](https://github.com/somaz94/env-output-setter/pull/6) ([dependabot[bot]](https://github.com/apps/dependabot))
-- build\(deps\): bump golang from 1.24-alpine to 1.25-alpine in the docker-minor group [\#5](https://github.com/somaz94/env-output-setter/pull/5) ([dependabot[bot]](https://github.com/apps/dependabot))
-- build\(deps\): bump super-linter/super-linter from 7 to 8 [\#4](https://github.com/somaz94/env-output-setter/pull/4) ([dependabot[bot]](https://github.com/apps/dependabot))
+### Bug Fixes
+- changelog-generator.yml by @somaz94
+- backup/writer.go by @somaz94
+- writer.go by @somaz94
+- writer.go by @somaz94
+- backup/config, printer, transformer by @somaz94
+- config, printer, transformer.go by @somaz94
+- config, printer, transformer.go by @somaz94
 
-## [v1.4.1](https://github.com/somaz94/env-output-setter/tree/v1.4.1) (2025-04-15)
+### Documentation
+- README.md by @somaz94
+- README.md by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.4.0...v1.4.1)
+### Other Changes
+- gitlab-mirror.yml by @somaz94
 
-## [v1.4.0](https://github.com/somaz94/env-output-setter/tree/v1.4.0) (2025-04-10)
+### Bug Fixes
+- writer.go by @somaz94
+- ci.yml by @somaz94
+- wrtier.go, README.md by @somaz94
+- ci.yml by @somaz94
+- ci.yml, writer.go by @somaz94
+- writer.go by @somaz94
+- writer.go by @somaz94
+- ci.yml, action.yml, config.go, writer.go by @somaz94
+- writer.go by @somaz94
+- printer.go, writer,go, use-action.yml by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.3.1...v1.4.0)
+### Bug Fixes
+- changelog-generator.yml by @somaz94
+- dependabot.yml by @somaz94
+- backup/*, ci.yml by @somaz94
+- main.go, transformer.go, writer.go by @somaz94
 
-## [v1.3.1](https://github.com/somaz94/env-output-setter/tree/v1.3.1) (2025-03-04)
+### Build
+- bump golang in the docker-minor group by @dependabot[bot]
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.3.0...v1.3.1)
+### Documentation
+- README.md by @somaz94
 
-## [v1.3.0](https://github.com/somaz94/env-output-setter/tree/v1.3.0) (2025-02-20)
+### Bug Fixes
+- action.yml, ci.yml, config.go, transformer.go, writer.go by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.2.1...v1.3.0)
+### Other Changes
+- Release v1.2.0 by @somaz94
 
-## [v1.2.1](https://github.com/somaz94/env-output-setter/tree/v1.2.1) (2025-02-19)
+### Bug Fixes
+- use-action.yml by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.2.0...v1.2.1)
+### Documentation
+- README.md by @somaz94
+- README.md by @somaz94
+- README.md by @somaz94
 
-**Merged pull requests:**
+### Other Changes
+- transformer.go by @somaz94
 
-- build\(deps\): bump golang from 1.23-alpine to 1.24-alpine in the docker-minor group [\#3](https://github.com/somaz94/env-output-setter/pull/3) ([dependabot[bot]](https://github.com/apps/dependabot))
+### Bug Fixes
+- file structure by @somaz94
+- main.go by @somaz94
+- writer.go by @somaz94
+- ci.yml by @somaz94
+- README.md , ci.yml by @somaz94
 
-## [v1.2.0](https://github.com/somaz94/env-output-setter/tree/v1.2.0) (2025-02-14)
+### Other Changes
+- Release v1.0.4 by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.1.0...v1.2.0)
+### Bug Fixes
+- file-structure by @somaz94
 
-## [v1.1.0](https://github.com/somaz94/env-output-setter/tree/v1.1.0) (2025-02-13)
+### Bug Fixes
+- Dockerfile by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.4...v1.1.0)
+### Documentation
+- README.md by @somaz94
 
-## [v1.0.4](https://github.com/somaz94/env-output-setter/tree/v1.0.4) (2025-02-13)
+### Bug Fixes
+- main.go by @somaz94
+- use-action.yml by @somaz94
+- main.go by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.3...v1.0.4)
+### Bug Fixes
+- main.go by @somaz94
+- main.go by @somaz94
+- Dockerfile & main.go by @somaz94
+- ci.yml & Dockerfile by @somaz94
+- ci.yml & Dockerfile by @somaz94
+- Dockerfile by @somaz94
+- ci.yml & main.go by @somaz94
+- ci.yml by @somaz94
+- action.yml by @somaz94
+- action.yml by @somaz94
+- use-action.yml by @somaz94
+- Dockerfile by @somaz94
+- Dockerfile by @somaz94
+- linter.yml & use-action.yml by @somaz94
+- .github/* & README.md & action.yml by @somaz94
+- linter.yml & README.md by @somaz94
+- ci.yml by @somaz94
+- ci.yml by @somaz94
 
-## [v1.0.3](https://github.com/somaz94/env-output-setter/tree/v1.0.3) (2025-02-13)
+### Build
+- bump golang from 1.20 to 1.23 in the docker-minor group by @dependabot[bot]
+- bump janheinrichmerker/action-github-changelog-generator by @dependabot[bot]
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.2...v1.0.3)
+### Chore
+- add changelog workflow by @somaz94
+- fix changelog workflow by @somaz94
+- fix changelog-generator.yml by @somaz94
 
-## [v1.0.2](https://github.com/somaz94/env-output-setter/tree/v1.0.2) (2025-02-13)
+### Documentation
+- README.md by @somaz94
+- README.md by @somaz94
+- CODEOWNERS by @somaz94
 
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.1...v1.0.2)
-
-## [v1.0.1](https://github.com/somaz94/env-output-setter/tree/v1.0.1) (2025-02-07)
-
-[Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.0.0...v1.0.1)
-
-
-
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
+### Other Changes
+- Initial commit by @somaz94
+- first commit by @somaz94
+- update code by @somaz94
