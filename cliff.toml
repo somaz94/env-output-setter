@@ -2,26 +2,8 @@
 # https://git-cliff.org/docs/configuration
 
 [changelog]
-header = """
-# Changelog\n
-"""
 body = """
-{%- macro remote_url() -%}
-  https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
-{%- endmacro -%}
-
-{% if version -%}
-## [{{ version }}]({{ self::remote_url() }}/tree/{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
-
-{% if previous and previous.version -%}
-[Full Changelog]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }})
-
-{% endif -%}
-{% else -%}
-## [Unreleased]
-
-{% endif -%}
-{% for group, commits in commits | group_by(attribute="group") %}
+{%- for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {%- for commit in commits %}
 - {{ commit.message | split(pat="\n") | first | trim }}\

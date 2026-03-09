@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+
+### Chore
+- update cliff.toml for version-based changelog format
 ## [v1.6.1](https://github.com/somaz94/env-output-setter/tree/v1.6.1) (2026-03-09)
 
 [Full Changelog](https://github.com/somaz94/env-output-setter/compare/v1.6.0...v1.6.1)
