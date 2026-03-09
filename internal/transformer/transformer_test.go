@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/somaz94/env-output-setter/internal/jsonutil"
 )
 
 func TestNew(t *testing.T) {
@@ -572,7 +574,7 @@ func TestEscapeNewlineCharacters(t *testing.T) {
 	}
 }
 
-func TestIsJSONValue(t *testing.T) {
+func TestIsJSONLike(t *testing.T) {
 	tests := []struct {
 		name     string
 		value    string
@@ -612,9 +614,59 @@ func TestIsJSONValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isJSONValue(tt.value)
+			result := jsonutil.IsJSONLike(tt.value)
 			if result != tt.expected {
-				t.Errorf("isJSONValue() = %v, want %v", result, tt.expected)
+				t.Errorf("IsJSONLike() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestHandleJSONValueInvalidWithAllTransforms(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    string
+		toUpper  bool
+		encode   bool
+		escape   bool
+		maxLen   int
+		expected string
+	}{
+		{
+			name:     "Invalid JSON with URL encoding",
+			value:    `{invalid json}`,
+			encode:   true,
+			expected: "%7Binvalid+json%7D",
+		},
+		{
+			name:     "Invalid JSON with newline escaping",
+			value:    "{invalid\njson}",
+			escape:   true,
+			expected: "{invalid\\njson}",
+		},
+		{
+			name:     "Invalid JSON with max length",
+			value:    `{invalid json value here}`,
+			maxLen:   10,
+			expected: `{invalid j`,
+		},
+		{
+			name:     "Invalid JSON with all transforms",
+			value:    `{bad}`,
+			toUpper:  true,
+			encode:   true,
+			escape:   true,
+			maxLen:   20,
+			expected: "%7BBAD%7D",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := New(false, "", tt.toUpper, false, tt.encode, tt.escape, tt.maxLen)
+			result := tr.TransformValue(tt.value, true)
+			if result != tt.expected {
+				t.Errorf("TransformValue() = %q, want %q", result, tt.expected)
 			}
 		})
 	}

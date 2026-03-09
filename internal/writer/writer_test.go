@@ -412,6 +412,240 @@ func TestSetOutputEmptyInput(t *testing.T) {
 	}
 }
 
+func TestSetEnvWithDebugMode(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:        "KEY1,KEY2",
+		EnvValues:      "VALUE1,VALUE2",
+		Delimiter:      ",",
+		FailOnEmpty:    true,
+		TrimWhitespace: true,
+		DebugMode:      true,
+		GithubEnv:      envFile,
+	}
+
+	count, err := SetEnv(cfg)
+
+	if err != nil {
+		t.Errorf("SetEnv() with debug mode unexpected error: %v", err)
+	}
+
+	if count != 2 {
+		t.Errorf("SetEnv() count = %d, want 2", count)
+	}
+}
+
+func TestSetEnvWithJsonSupport(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:        "CONFIG",
+		EnvValues:      `{"host":"localhost"}`,
+		Delimiter:      "|",
+		TrimWhitespace: true,
+		JsonSupport:    true,
+		GithubEnv:      envFile,
+	}
+
+	count, err := SetEnv(cfg)
+
+	if err != nil {
+		t.Errorf("SetEnv() with JSON support unexpected error: %v", err)
+	}
+
+	if count < 1 {
+		t.Errorf("SetEnv() count = %d, want at least 1", count)
+	}
+
+	content, err := os.ReadFile(envFile)
+	if err != nil {
+		t.Fatalf("Failed to read env file: %v", err)
+	}
+
+	contentStr := string(content)
+	if !contains(contentStr, "CONFIG") {
+		t.Error("SetEnv() file missing CONFIG key")
+	}
+}
+
+func TestSetEnvWithAllowEmpty(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:        ",KEY2",
+		EnvValues:      "VALUE1,VALUE2",
+		Delimiter:      ",",
+		FailOnEmpty:    false,
+		AllowEmpty:     true,
+		TrimWhitespace: true,
+		GithubEnv:      envFile,
+	}
+
+	count, err := SetEnv(cfg)
+
+	if err != nil {
+		t.Errorf("SetEnv() with allow empty unexpected error: %v", err)
+	}
+
+	if count < 1 {
+		t.Errorf("SetEnv() count = %d, want at least 1", count)
+	}
+}
+
+func TestWriteToFileInvalidPath(t *testing.T) {
+	cfg := &config.Config{
+		EnvKeys:        "KEY1",
+		EnvValues:      "VALUE1",
+		Delimiter:      ",",
+		TrimWhitespace: true,
+		GithubEnv:      "/nonexistent/path/file",
+	}
+
+	os.Setenv(githubEnvVar, "/nonexistent/path/file")
+	defer os.Unsetenv(githubEnvVar)
+
+	_, err := SetEnv(cfg)
+
+	if err == nil {
+		t.Error("SetEnv() expected error for invalid file path, got nil")
+	}
+}
+
+func TestSetOutputWithExportAsEnvLocalExecution(t *testing.T) {
+	// No GITHUB_OUTPUT or GITHUB_ENV set
+	os.Unsetenv(githubOutputVar)
+	os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		OutputKeys:     "STATUS",
+		OutputValues:   "SUCCESS",
+		Delimiter:      ",",
+		TrimWhitespace: true,
+		ExportAsEnv:    true,
+	}
+
+	count, err := SetOutput(cfg)
+
+	if err != nil {
+		t.Errorf("SetOutput() with export_as_env local execution unexpected error: %v", err)
+	}
+
+	if count < 1 {
+		t.Errorf("SetOutput() count = %d, want at least 1", count)
+	}
+}
+
+func TestSetEnvValidateInputsError(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:          "KEY1,KEY1",
+		EnvValues:        "VALUE1,VALUE2",
+		Delimiter:        ",",
+		TrimWhitespace:   true,
+		ErrorOnDuplicate: true,
+		CaseSensitive:    true,
+		GithubEnv:        envFile,
+	}
+
+	_, err := SetEnv(cfg)
+
+	if err == nil {
+		t.Error("SetEnv() expected error for duplicate keys, got nil")
+	}
+}
+
+func TestSetOutputValidationError(t *testing.T) {
+	tmpDir := t.TempDir()
+	outputFile := filepath.Join(tmpDir, "github_output")
+	os.Setenv(githubOutputVar, outputFile)
+	defer os.Unsetenv(githubOutputVar)
+
+	cfg := &config.Config{
+		OutputKeys:     "KEY1,KEY2",
+		OutputValues:   "VALUE1",
+		Delimiter:      ",",
+		TrimWhitespace: true,
+		GithubOutput:   outputFile,
+	}
+
+	count, err := SetOutput(cfg)
+
+	if err == nil {
+		t.Error("SetOutput() expected error for mismatched pairs, got nil")
+	}
+
+	if count != 0 {
+		t.Errorf("SetOutput() count = %d, want 0 on error", count)
+	}
+}
+
+func TestSetOutputWithExportAsEnvWriteError(t *testing.T) {
+	tmpDir := t.TempDir()
+	outputFile := filepath.Join(tmpDir, "github_output")
+
+	os.Setenv(githubOutputVar, outputFile)
+	os.Setenv(githubEnvVar, "/nonexistent/path/env_file")
+	defer os.Unsetenv(githubOutputVar)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		OutputKeys:     "STATUS",
+		OutputValues:   "SUCCESS",
+		Delimiter:      ",",
+		TrimWhitespace: true,
+		ExportAsEnv:    true,
+		GithubOutput:   outputFile,
+		GithubEnv:      "/nonexistent/path/env_file",
+	}
+
+	_, err := SetOutput(cfg)
+
+	if err == nil {
+		t.Error("SetOutput() with export_as_env expected error for invalid env path, got nil")
+	}
+}
+
+func TestSetEnvWithMasking(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:        "API_KEY,USERNAME",
+		EnvValues:      "secret123,admin",
+		Delimiter:      ",",
+		TrimWhitespace: true,
+		MaskSecrets:    true,
+		MaskPattern:    "secret.*",
+		GithubEnv:      envFile,
+	}
+
+	count, err := SetEnv(cfg)
+
+	if err != nil {
+		t.Errorf("SetEnv() with masking unexpected error: %v", err)
+	}
+
+	if count != 2 {
+		t.Errorf("SetEnv() count = %d, want 2", count)
+	}
+}
+
 func BenchmarkSetEnv(b *testing.B) {
 	tmpDir := b.TempDir()
 	envFile := filepath.Join(tmpDir, "github_env")

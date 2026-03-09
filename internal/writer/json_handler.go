@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/somaz94/env-output-setter/internal/jsonutil"
 	"github.com/somaz94/env-output-setter/internal/printer"
 )
 
@@ -32,7 +33,7 @@ func (h *JSONHandler) ProcessJSONValues(keyList, valueList []string) ([]string, 
 		key := keyList[i]
 
 		// Check if value looks like JSON
-		if !h.isJSONLike(value) {
+		if !jsonutil.IsJSONLike(value) {
 			continue
 		}
 
@@ -68,13 +69,6 @@ func (h *JSONHandler) ProcessJSONValues(keyList, valueList []string) ([]string, 
 	}
 
 	return resultKeys, resultValues
-}
-
-// isJSONLike checks if a string looks like JSON (object or array).
-func (h *JSONHandler) isJSONLike(value string) bool {
-	value = strings.TrimSpace(value)
-	return (strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")) ||
-		(strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]"))
 }
 
 // extractNestedJSON flattens a nested JSON object into key-value pairs.

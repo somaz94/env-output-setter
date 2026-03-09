@@ -1,7 +1,10 @@
 package writer
 
 import (
+	"strings"
 	"testing"
+
+	"github.com/somaz94/env-output-setter/internal/jsonutil"
 )
 
 func TestNewJSONHandler(t *testing.T) {
@@ -62,11 +65,10 @@ func TestIsJSONLike(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handler := NewJSONHandler()
-			result := handler.isJSONLike(tt.value)
+			result := jsonutil.IsJSONLike(tt.value)
 
 			if result != tt.expected {
-				t.Errorf("isJSONLike() = %v, want %v", result, tt.expected)
+				t.Errorf("IsJSONLike() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
@@ -297,6 +299,47 @@ func TestProcessJSONValuesWithComplexStructures(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestExtractNestedJSONWithArrayOfObjects(t *testing.T) {
+	handler := NewJSONHandler()
+	jsonObj := map[string]interface{}{
+		"servers": []interface{}{
+			map[string]interface{}{"name": "s1", "port": 80},
+			map[string]interface{}{"name": "s2", "port": 443},
+		},
+	}
+
+	keys, values := handler.extractNestedJSON("APP", jsonObj, "")
+
+	if len(keys) < 4 {
+		t.Errorf("extractNestedJSON() expected at least 4 keys for array of objects, got %d: %v", len(keys), keys)
+	}
+
+	if len(keys) != len(values) {
+		t.Errorf("extractNestedJSON() keys/values length mismatch: %d vs %d", len(keys), len(values))
+	}
+}
+
+func TestExtractNestedJSONWithGroupPrefixAlreadyPresent(t *testing.T) {
+	handler := NewJSONHandler()
+	jsonObj := map[string]interface{}{
+		"key": "value",
+	}
+
+	// prefix already starts with groupPrefix
+	keys, values := handler.extractNestedJSON("GRP_CONFIG", jsonObj, "GRP")
+
+	if len(keys) != 1 {
+		t.Errorf("extractNestedJSON() expected 1 key, got %d: %v", len(keys), keys)
+	}
+
+	// Should not double-prefix
+	if len(keys) > 0 && strings.HasPrefix(keys[0], "GRP_GRP_") {
+		t.Errorf("extractNestedJSON() double-prefixed key: %s", keys[0])
+	}
+
+	_ = values
 }
 
 func BenchmarkProcessJSONValues(b *testing.B) {

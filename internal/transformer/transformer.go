@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/somaz94/env-output-setter/internal/jsonutil"
 )
 
 // TransformationError represents an error that occurs during value transformation.
@@ -88,7 +90,7 @@ func (t *Transformer) TransformValue(value string, supportJSON bool) string {
 	}
 
 	// Check if value is JSON and JSON support is enabled
-	if supportJSON && isJSONValue(value) {
+	if supportJSON && jsonutil.IsJSONLike(value) {
 		return t.handleJSONValue(value)
 	}
 
@@ -114,13 +116,6 @@ func (t *Transformer) TransformValue(value string, supportJSON bool) string {
 	}
 
 	return result
-}
-
-// isJSONValue checks if a string appears to be JSON (object or array).
-func isJSONValue(value string) bool {
-	value = strings.TrimSpace(value)
-	return (strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")) ||
-		(strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]"))
 }
 
 // handleJSONValue processes a value that appears to be JSON.

@@ -441,8 +441,9 @@ func runTest(test TestCase) TestResult {
 
 func setupTestEnv(test TestCase) {
 	// Create temporary files for GITHUB_ENV and GITHUB_OUTPUT
-	envFile := "/tmp/test_github_env"
-	outputFile := "/tmp/test_github_output"
+	tmpDir := os.TempDir()
+	envFile := fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid())
+	outputFile := fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid())
 
 	os.WriteFile(envFile, []byte{}, 0644)
 	os.WriteFile(outputFile, []byte{}, 0644)
@@ -452,8 +453,9 @@ func setupTestEnv(test TestCase) {
 }
 
 func cleanupTestEnv() {
-	os.Remove("/tmp/test_github_env")
-	os.Remove("/tmp/test_github_output")
+	tmpDir := os.TempDir()
+	os.Remove(fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid()))
+	os.Remove(fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid()))
 	os.Unsetenv("GITHUB_ENV")
 	os.Unsetenv("GITHUB_OUTPUT")
 }
@@ -492,8 +494,9 @@ func createTestConfig(test TestCase) *config.Config {
 
 func verifyResults(test TestCase) bool {
 	// Read the written files
-	envContent, _ := os.ReadFile("/tmp/test_github_env")
-	outputContent, _ := os.ReadFile("/tmp/test_github_output")
+	tmpDir := os.TempDir()
+	envContent, _ := os.ReadFile(fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid()))
+	outputContent, _ := os.ReadFile(fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid()))
 
 	// For now, just check if files were written
 	// Full verification would parse the EOF-delimited format

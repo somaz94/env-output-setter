@@ -8,10 +8,23 @@ Comprehensive test suite for validating the Environment/Output Setter functional
 
 <br/>
 
-### Go Test Suite (Comprehensive)
+### Unit Tests
 
 ```bash
-# Run all tests from project root
+# Run all unit tests with coverage
+go test ./internal/... -v -cover
+
+# Generate coverage profile
+go test ./internal/... -coverprofile=coverage.out
+go tool cover -func=coverage.out
+```
+
+<br/>
+
+### Integration Tests (Local)
+
+```bash
+# Run from project root
 go run tests/test_local.go
 
 # Or from tests directory
@@ -23,15 +36,15 @@ go run test_local.go
 
 ### Features
 
-- ✅ **Basic Tests**: Environment variables, custom delimiters
-- ✅ **Whitespace Tests**: Trimming, normalization
-- ✅ **Transformation Tests**: Uppercase, lowercase, URL encoding, length limits, newline escaping
-- ✅ **Validation Tests**: Duplicate keys, empty values
-- ✅ **JSON Tests**: Simple JSON, nested objects, arrays
-- ✅ **Combined Tests**: Multiple transformations at once
-- ✅ Color-coded output
-- ✅ Detailed error messages
-- ✅ Category organization
+- **Basic Tests**: Environment variables, custom delimiters
+- **Whitespace Tests**: Trimming, normalization
+- **Transformation Tests**: Uppercase, lowercase, URL encoding, length limits, newline escaping
+- **Validation Tests**: Duplicate keys, empty values
+- **JSON Tests**: Simple JSON, nested objects, arrays
+- **Combined Tests**: Multiple transformations at once
+- Color-coded output
+- Detailed error messages
+- Category organization
 
 <br/>
 
@@ -122,41 +135,6 @@ TestOptions{
 
 <br/>
 
-## Expected Output
-
-```
-🧪 Local Test Suite for Environment/Output Setter
-Working directory: /path/to/env-output-setter
-
-==================================================
-🔧 Creating Test Suite
-==================================================
-Created 14 test cases
-
-==================================================
-📋 Basic
-==================================================
-
-Testing: Basic environment variables
-✅ PASS: Basic environment variables
-
-Testing: Custom delimiter (::)
-✅ PASS: Custom delimiter (::)
-
-...
-
-==================================================
-📊 Test Summary
-==================================================
-Total Tests: 14
-Passed: 14
-Failed: 0
-
-✅ All tests passed!
-```
-
-<br/>
-
 ## Adding New Tests
 
 To add a new test, append to the `createTestSuite()` function:
@@ -186,25 +164,15 @@ cfg := &config.Config{
 
 <br/>
 
-## Test Coverage
-
-Current test coverage includes:
-
-- ✅ Basic functionality
-- ✅ Input validation
-- ✅ Value transformation
-- ✅ JSON support
-- ✅ Error handling
-- ✅ Edge cases
-
-<br/>
-
 ## CI/CD Integration
 
 Tests are automatically run in GitHub Actions:
 
 ```yaml
-- name: Run Tests
+- name: Run Go unit tests with coverage
+  run: go test ./internal/... -v -cover -coverprofile=coverage.out
+
+- name: Run Local Test Suite
   run: go run tests/test_local.go
 ```
 
