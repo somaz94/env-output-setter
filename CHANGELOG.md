@@ -1,5 +1,8 @@
 
 ### Bug Fixes
+- preserve JSON values with commas during delimiter split by @somaz94
+
+### Bug Fixes
 - use git switch in release workflow to avoid branch/file ambiguity by @somaz94
 
 ### Build
