@@ -290,6 +290,190 @@ func TestValidateInputsEdgeCases(t *testing.T) {
 	}
 }
 
+func TestParseValidationRules(t *testing.T) {
+	tests := []struct {
+		name      string
+		rulesJSON string
+		wantNil   bool
+		wantError bool
+		wantKeys  []string
+	}{
+		{
+			name:      "Empty string returns nil",
+			rulesJSON: "",
+			wantNil:   true,
+		},
+		{
+			name:      "Valid rules",
+			rulesJSON: `{"STATUS":{"pattern":"^(success|failure)$"},"VERSION":{"allowed_values":["v1","v2"]}}`,
+			wantKeys:  []string{"STATUS", "VERSION"},
+		},
+		{
+			name:      "Invalid JSON",
+			rulesJSON: `{invalid}`,
+			wantError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rules, err := ParseValidationRules(tt.rulesJSON)
+
+			if tt.wantError {
+				if err == nil {
+					t.Error("ParseValidationRules() expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ParseValidationRules() unexpected error: %v", err)
+			}
+			if tt.wantNil {
+				if rules != nil {
+					t.Errorf("ParseValidationRules() expected nil, got %v", rules)
+				}
+				return
+			}
+			for _, key := range tt.wantKeys {
+				if _, exists := rules[key]; !exists {
+					t.Errorf("ParseValidationRules() missing key %q", key)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateOutputs(t *testing.T) {
+	tests := []struct {
+		name            string
+		keys            []string
+		values          []string
+		validationRules string
+		wantError       bool
+		errorContains   string
+	}{
+		{
+			name:            "No rules - always passes",
+			keys:            []string{"KEY1"},
+			values:          []string{"value1"},
+			validationRules: "",
+			wantError:       false,
+		},
+		{
+			name:            "Pattern match success",
+			keys:            []string{"STATUS"},
+			values:          []string{"success"},
+			validationRules: `{"STATUS":{"pattern":"^(success|failure)$"}}`,
+			wantError:       false,
+		},
+		{
+			name:            "Pattern match failure",
+			keys:            []string{"STATUS"},
+			values:          []string{"unknown"},
+			validationRules: `{"STATUS":{"pattern":"^(success|failure)$"}}`,
+			wantError:       true,
+			errorContains:   "validation failed",
+		},
+		{
+			name:            "Allowed values success",
+			keys:            []string{"ENV"},
+			values:          []string{"production"},
+			validationRules: `{"ENV":{"allowed_values":["staging","production","development"]}}`,
+			wantError:       false,
+		},
+		{
+			name:            "Allowed values failure",
+			keys:            []string{"ENV"},
+			values:          []string{"testing"},
+			validationRules: `{"ENV":{"allowed_values":["staging","production"]}}`,
+			wantError:       true,
+			errorContains:   "not in allowed values",
+		},
+		{
+			name:            "Custom error message",
+			keys:            []string{"PORT"},
+			values:          []string{"abc"},
+			validationRules: `{"PORT":{"pattern":"^[0-9]+$","message":"PORT must be numeric"}}`,
+			wantError:       true,
+			errorContains:   "PORT must be numeric",
+		},
+		{
+			name:            "Key not in rules - passes",
+			keys:            []string{"UNCHECKED"},
+			values:          []string{"anything"},
+			validationRules: `{"OTHER":{"pattern":"^test$"}}`,
+			wantError:       false,
+		},
+		{
+			name:            "Invalid regex pattern",
+			keys:            []string{"KEY"},
+			values:          []string{"val"},
+			validationRules: `{"KEY":{"pattern":"[invalid"}}`,
+			wantError:       true,
+			errorContains:   "invalid regex",
+		},
+		{
+			name:            "Invalid JSON rules",
+			keys:            []string{"KEY"},
+			values:          []string{"val"},
+			validationRules: `{broken`,
+			wantError:       true,
+			errorContains:   "failed to parse",
+		},
+		{
+			name:            "Both pattern and allowed values",
+			keys:            []string{"VER"},
+			values:          []string{"v1"},
+			validationRules: `{"VER":{"pattern":"^v[0-9]+$","allowed_values":["v1","v2","v3"]}}`,
+			wantError:       false,
+		},
+		{
+			name:            "Pattern passes but allowed values fails",
+			keys:            []string{"VER"},
+			values:          []string{"v99"},
+			validationRules: `{"VER":{"pattern":"^v[0-9]+$","allowed_values":["v1","v2","v3"]}}`,
+			wantError:       true,
+			errorContains:   "not in allowed values",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &config.Config{
+				ValidationRules: tt.validationRules,
+			}
+			validator := NewValidator(cfg)
+			err := validator.ValidateOutputs(tt.keys, tt.values)
+
+			if tt.wantError {
+				if err == nil {
+					t.Error("ValidateOutputs() expected error, got nil")
+				} else if tt.errorContains != "" && !contains(err.Error(), tt.errorContains) {
+					t.Errorf("ValidateOutputs() error = %v, want to contain %q", err, tt.errorContains)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("ValidateOutputs() unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func BenchmarkValidateOutputs(b *testing.B) {
+	cfg := &config.Config{
+		ValidationRules: `{"STATUS":{"pattern":"^(success|failure)$"},"ENV":{"allowed_values":["prod","staging"]}}`,
+	}
+	validator := NewValidator(cfg)
+	keys := []string{"STATUS", "ENV", "OTHER"}
+	values := []string{"success", "prod", "anything"}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		validator.ValidateOutputs(keys, values)
+	}
+}
+
 func BenchmarkValidatePairs(b *testing.B) {
 	cfg := &config.Config{}
 	validator := NewValidator(cfg)

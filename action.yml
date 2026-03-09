@@ -84,6 +84,18 @@ inputs:
     description: 'Export output variables as environment variables too'
     required: false
     default: 'false'
+  enable_interpolation:
+    description: 'Enable variable interpolation with ${VAR:-default} syntax'
+    required: false
+    default: 'false'
+  file_encoding:
+    description: 'Encoding for file input values (raw, base64)'
+    required: false
+    default: 'raw'
+  validation_rules:
+    description: 'JSON validation rules for output values (regex patterns, allowed values)'
+    required: false
+    default: ''
 
 outputs:
   set_env_count:
@@ -120,6 +132,9 @@ runs:
     GROUP_PREFIX: ${{ inputs.group_prefix }}
     JSON_SUPPORT: ${{ inputs.json_support }}
     EXPORT_AS_ENV: ${{ inputs.export_as_env }}
+    ENABLE_INTERPOLATION: ${{ inputs.enable_interpolation }}
+    FILE_ENCODING: ${{ inputs.file_encoding }}
+    VALIDATION_RULES: ${{ inputs.validation_rules }}
 branding:
   icon: 'settings'
   color: 'blue'

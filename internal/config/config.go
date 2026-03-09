@@ -28,7 +28,10 @@ const (
 	DebugModeInput        = "DEBUG_MODE"
 	GroupPrefixInput      = "INPUT_GROUP_PREFIX"
 	JsonSupportInput      = "INPUT_JSON_SUPPORT"
-	ExportAsEnvInput      = "INPUT_EXPORT_AS_ENV"
+	ExportAsEnvInput         = "INPUT_EXPORT_AS_ENV"
+	EnableInterpolationInput = "INPUT_ENABLE_INTERPOLATION"
+	FileEncodingInput        = "INPUT_FILE_ENCODING"
+	ValidationRulesInput     = "INPUT_VALIDATION_RULES"
 )
 
 // GitHub environment variables
@@ -55,7 +58,10 @@ const (
 	DefaultDebugMode        = false
 	DefaultGroupPrefix      = ""
 	DefaultJsonSupport      = false
-	DefaultExportAsEnv      = false
+	DefaultExportAsEnv         = false
+	DefaultEnableInterpolation = false
+	DefaultFileEncoding        = "raw"
+	DefaultValidationRules     = ""
 )
 
 // Config holds the application configuration settings loaded from environment variables.
@@ -95,9 +101,12 @@ type Config struct {
 	DebugMode bool // Enable debug mode for verbose logging
 
 	// Advanced Options
-	GroupPrefix string // Prefix for grouping related outputs
-	JsonSupport bool   // Support for JSON values
-	ExportAsEnv bool   // Whether to export values as environment variables
+	GroupPrefix         string // Prefix for grouping related outputs
+	JsonSupport         bool   // Support for JSON values
+	ExportAsEnv         bool   // Whether to export values as environment variables
+	EnableInterpolation bool   // Enable ${VAR:-default} variable interpolation
+	FileEncoding        string // Encoding for file input values (raw, base64)
+	ValidationRules     string // JSON validation rules for output values
 }
 
 // Load creates a new Config instance with values loaded from environment variables.
@@ -139,7 +148,10 @@ func Load() *Config {
 		// Advanced Options
 		GroupPrefix: getEnvWithDefault(GroupPrefixInput, DefaultGroupPrefix),
 		JsonSupport: getBoolEnv(JsonSupportInput, DefaultJsonSupport),
-		ExportAsEnv: getBoolEnv(ExportAsEnvInput, DefaultExportAsEnv),
+		ExportAsEnv:         getBoolEnv(ExportAsEnvInput, DefaultExportAsEnv),
+		EnableInterpolation: getBoolEnv(EnableInterpolationInput, DefaultEnableInterpolation),
+		FileEncoding:        getEnvWithDefault(FileEncodingInput, DefaultFileEncoding),
+		ValidationRules:     getEnvWithDefault(ValidationRulesInput, DefaultValidationRules),
 	}
 }
 

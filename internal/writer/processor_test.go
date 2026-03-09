@@ -2,6 +2,7 @@ package writer
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/somaz94/env-output-setter/internal/config"
@@ -425,6 +426,99 @@ func TestProcessInputValuesWithJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestProcessInputValuesWithInterpolation(t *testing.T) {
+	t.Run("Interpolation enabled", func(t *testing.T) {
+		t.Setenv("MY_HOST", "localhost")
+
+		cfg := &config.Config{
+			Delimiter:           ",",
+			AllowEmpty:          false,
+			EnableInterpolation: true,
+			FileEncoding:        "raw",
+		}
+		processor := NewProcessor(cfg)
+		keyList, valueList, err := processor.ProcessInputValues("SERVER,PORT", "${MY_HOST},${UNSET_PORT:-8080}")
+		if err != nil {
+			t.Fatalf("ProcessInputValues() error = %v", err)
+		}
+		if len(valueList) != 2 {
+			t.Fatalf("expected 2 values, got %d", len(valueList))
+		}
+		if valueList[0] != "localhost" {
+			t.Errorf("valueList[0] = %q, want %q", valueList[0], "localhost")
+		}
+		if valueList[1] != "8080" {
+			t.Errorf("valueList[1] = %q, want %q", valueList[1], "8080")
+		}
+		_ = keyList
+	})
+
+	t.Run("Interpolation disabled", func(t *testing.T) {
+		cfg := &config.Config{
+			Delimiter:           ",",
+			AllowEmpty:          false,
+			EnableInterpolation: false,
+			FileEncoding:        "raw",
+		}
+		processor := NewProcessor(cfg)
+		_, valueList, err := processor.ProcessInputValues("KEY", "${SOME_VAR:-default}")
+		if err != nil {
+			t.Fatalf("ProcessInputValues() error = %v", err)
+		}
+		if valueList[0] != "${SOME_VAR:-default}" {
+			t.Errorf("expected raw value, got %q", valueList[0])
+		}
+	})
+
+	t.Run("Interpolation error propagated", func(t *testing.T) {
+		cfg := &config.Config{
+			Delimiter:           ",",
+			AllowEmpty:          false,
+			EnableInterpolation: true,
+			FileEncoding:        "raw",
+		}
+		processor := NewProcessor(cfg)
+		_, _, err := processor.ProcessInputValues("KEY", "${MISSING:?required var}")
+		if err == nil {
+			t.Error("expected error for missing required variable")
+		}
+	})
+}
+
+func TestProcessInputValuesWithFileReading(t *testing.T) {
+	t.Run("Read value from file", func(t *testing.T) {
+		tmpFile := filepath.Join(t.TempDir(), "val.txt")
+		os.WriteFile(tmpFile, []byte("from_file"), 0644)
+
+		cfg := &config.Config{
+			Delimiter:    ",",
+			AllowEmpty:   false,
+			FileEncoding: "raw",
+		}
+		processor := NewProcessor(cfg)
+		_, valueList, err := processor.ProcessInputValues("KEY", "file://"+tmpFile)
+		if err != nil {
+			t.Fatalf("ProcessInputValues() error = %v", err)
+		}
+		if valueList[0] != "from_file" {
+			t.Errorf("valueList[0] = %q, want %q", valueList[0], "from_file")
+		}
+	})
+
+	t.Run("File not found error", func(t *testing.T) {
+		cfg := &config.Config{
+			Delimiter:    ",",
+			AllowEmpty:   false,
+			FileEncoding: "raw",
+		}
+		processor := NewProcessor(cfg)
+		_, _, err := processor.ProcessInputValues("KEY", "file:///nonexistent/path.txt")
+		if err == nil {
+			t.Error("expected error for missing file")
+		}
+	})
 }
 
 func BenchmarkProcessInputValues(b *testing.B) {

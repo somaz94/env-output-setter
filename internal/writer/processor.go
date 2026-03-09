@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/somaz94/env-output-setter/internal/config"
+	"github.com/somaz94/env-output-setter/internal/filereader"
+	"github.com/somaz94/env-output-setter/internal/interpolator"
 	"github.com/somaz94/env-output-setter/internal/printer"
 )
 
@@ -31,6 +33,22 @@ func (p *Processor) ProcessInputValues(keys, values string) ([]string, []string,
 	// Filter out empty entries if not allowed
 	keyList = p.removeEmptyEntries(keyList)
 	valueList = p.removeEmptyEntries(valueList)
+
+	// Read values from files if any use file:// references
+	fileReader := filereader.New(p.cfg.FileEncoding)
+	valueList, err := fileReader.ReadValues(valueList)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Interpolate variables if enabled
+	if p.cfg.EnableInterpolation {
+		ip := interpolator.New()
+		valueList, err = ip.InterpolateList(valueList)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
 
 	// Process JSON values if enabled
 	if p.cfg.JsonSupport {

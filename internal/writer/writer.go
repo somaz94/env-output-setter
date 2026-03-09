@@ -124,6 +124,11 @@ func (w *Writer) setVariables(envVar, varType string) (int, error) {
 		return 0, err
 	}
 
+	// Validate output values against rules if configured
+	if err := w.validator.ValidateOutputs(keyList, valueList); err != nil {
+		return 0, err
+	}
+
 	// Get file path from environment variable
 	filePath := os.Getenv(envVar)
 
