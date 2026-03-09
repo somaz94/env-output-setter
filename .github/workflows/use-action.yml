@@ -1,4 +1,4 @@
-name: Example Workflow using Environment/Output Setter
+name: Smoke Test (Released Action)
 
 on:
   workflow_dispatch:
@@ -8,245 +8,88 @@ on:
         required: true
         default: 'true'
   workflow_run:
-    workflows: ["Create release"]  # release.yml의 name과 일치해야 함
+    workflows: ["Create release"]
     types:
       - completed
-
 
 permissions:
   contents: read
 
 jobs:
-  test-local:
-    name: Run Local Tests
+  smoke-test-basic:
+    name: Smoke Test (Basic)
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.23'
-
-      - name: Run Local Test Suite
-        run: go run tests/test_local.go
-
-  action-module-v1:
-    name: Test env-output-setter v1
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout infrastructure repository
         uses: actions/checkout@v6
 
       - name: Set Environment and Output Variables
         id: set_variables
         uses: somaz94/env-output-setter@v1
         with:
-          env_key: GCP_REGION,AWS_REGION,MULTI_REGION
-          env_value: asia-northeast1,us-east-1,asia
-          output_key: GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT
-          output_value: gcp_success,aws_success,multi_success
+          env_key: GCP_REGION,AWS_REGION
+          env_value: asia-northeast1,us-east-1
+          output_key: GCP_OUTPUT,AWS_OUTPUT
+          output_value: gcp_success,aws_success
 
-      - name: Display Env and Output Variables
+      - name: Verify Results
         run: |
-          echo GCP_REGION: ${{ env.GCP_REGION }} # asis-northeast1
-          echo AWS_REGION: ${{ env.AWS_REGION }} # us-east-1
-          echo MULTI_REGION: ${{ env.MULTI_REGION }} # us-east-1
-          echo GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }} # gcp_success
-          echo AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }} # aws_success
-          echo MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }} # gcp_success
+          echo "Env: GCP_REGION=${{ env.GCP_REGION }}, AWS_REGION=${{ env.AWS_REGION }}"
+          echo "Out: GCP_OUTPUT=${{ steps.set_variables.outputs.GCP_OUTPUT }}, AWS_OUTPUT=${{ steps.set_variables.outputs.AWS_OUTPUT }}"
+          if [ "${{ env.GCP_REGION }}" != "asia-northeast1" ] || [ "${{ env.AWS_REGION }}" != "us-east-1" ]; then
+            echo "❌ Environment variables not set correctly"
+            exit 1
+          fi
+          if [ "${{ steps.set_variables.outputs.GCP_OUTPUT }}" != "gcp_success" ]; then
+            echo "❌ Output variables not set correctly"
+            exit 1
+          fi
+          echo "✅ Basic env/output test passed"
 
-  acton-module-v2:
-    name: Test env-output-setter v2
+  smoke-test-options:
+    name: Smoke Test (Options)
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout infrastructure repository
-        uses: actions/checkout@v6
-
-      - name: Set Environment and Output Variables
-        id: set_variables
-        uses: somaz94/env-output-setter@v1
-        with:
-          # Default Key-Value Settings
-          env_key: GCP_REGION,AWS_REGION,MULTI_REGION
-          env_value: asia-northeast1,us-east-1,asia
-          output_key: GCP_OUTPUT,AWS_OUTPUT,MULTI_OUTPUT
-          output_value: gcp_success,aws_success,multi_success
-          delimiter: ',' # Default, but specified as an example
-          fail_on_empty: true # If empty value, fail
-          trim_whitespace: true # Automatically remove whitespace
-          case_sensitive: true # Key case sensitivity
-          error_on_duplicate: true # Duplicate key error
-
-      - name: Display Set Variables
-        run: |
-          echo "Env:"
-          echo "GCP_REGION: ${{ env.GCP_REGION }}"
-          echo "AWS_REGION: ${{ env.AWS_REGION }}"
-          echo "MULTI_REGION: ${{ env.MULTI_REGION }}"
-          
-          echo -e "\nOutputs:"
-          echo "GCP_OUTPUT: ${{ steps.set_variables.outputs.GCP_OUTPUT }}"
-          echo "AWS_OUTPUT: ${{ steps.set_variables.outputs.AWS_OUTPUT }}"
-          echo "MULTI_OUTPUT: ${{ steps.set_variables.outputs.MULTI_OUTPUT }}"
-          
-          echo -e "\nAction Results:"
-          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
-          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
-          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
-
-      # 에러 처리 예시
-      - name: Check for Errors
-        if: steps.set_variables.outputs.action_status == 'failure'
-        run: |
-          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
-          exit 1
-
-  action-module-v3:
-    name: Test env-output-setter v3
-    runs-on: ubuntu-latest
-
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 10
 
-      - name: Configure Git Safe Directory
-        run: git config --global --add safe.directory ${{ github.workspace }}
-
-      - name: Test Value Transformation and Masking
+      - name: Test with Custom Delimiter and Options
         id: set_variables
         uses: somaz94/env-output-setter@v1
         with:
-          # Basic key-value settings
-          env_key: API_KEY,USERNAME,PASSWORD,URL_PARAM
-          env_value: secret123,admin,pass123,hello world
-          output_key: STATUS,DEBUG_MODE,API_VERSION,ENCODED_URL
-          output_value: active,true,v1.0,hello world
-
-          # Value transformation options
-          to_upper: true
-          to_lower: false
-          encode_url: true
-
-          # Masking options
-          mask_secrets: true
-          mask_pattern: '(password|secret).*'
-
-          # Other options
-          delimiter: ','
-          fail_on_empty: true
+          env_key: "KEY1::KEY2"
+          env_value: "value1::value2"
+          output_key: "OUT1::OUT2"
+          output_value: "output1::output2"
+          delimiter: '::'
           trim_whitespace: true
-          case_sensitive: true
-          error_on_duplicate: true
-
-      - name: Display Environment Variables
-        run: |
-          echo "Environment Variables:"
-          echo "API_KEY: ${{ env.API_KEY }}"
-          echo "USERNAME: ${{ env.USERNAME }}"
-          echo "PASSWORD: ${{ env.PASSWORD }}"
-          echo "URL_PARAM: ${{ env.URL_PARAM }}"
-
-      - name: Display Outputs
-        run: |
-          echo "Outputs:"
-          echo "STATUS: ${{ steps.set_variables.outputs.STATUS }}"
-          echo "DEBUG_MODE: ${{ steps.set_variables.outputs.DEBUG_MODE }}"
-          echo "API_VERSION: ${{ steps.set_variables.outputs.API_VERSION }}"
-          echo "ENCODED_URL: ${{ steps.set_variables.outputs.ENCODED_URL }}"
-
-      - name: Display Action Results
-        run: |
-          echo "Action Results:"
-          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
-          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
-          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
-
-      # Error handling
-      - name: Check for Errors
-        if: steps.set_variables.outputs.action_status == 'failure'
-        run: |
-          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
-          exit 1
-
-  action-module-v4:
-    name: Test env-output-setter v4
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 10
-
-      - name: Configure Git Safe Directory
-        run: git config --global --add safe.directory ${{ github.workspace }}
-
-      - name: Test New Features
-        id: set_variables
-        uses: somaz94/env-output-setter@v1
-        with:
-          # 멀티라인 및 특수문자 테스트 (구분자를 '::'로 변경)
-          env_key: "MULTILINE_TEXT::MAX_LENGTH_TEST::EMPTY_VALUE"
-          env_value: "Hello\nWorld::ThisIsAVeryLongTextThatShouldBeTruncated::   "
-          output_key: "PROCESSED_TEXT::TRUNCATED_TEXT::ALLOWED_EMPTY"
-          output_value: "First Line\nSecond Line::AnotherLongTextToTest::   "
-
-          # 새로운 옵션들 테스트
-          escape_newlines: true        # \n을 \\n으로 변환
-          max_length: 10              # 값을 10자로 제한
-          allow_empty: true           # 빈 값 허용
-          
-          # 기본 옵션들
-          delimiter: '::'             # 쉼표 대신 '::'를 구분자로 사용
-          trim_whitespace: true
-          case_sensitive: true
-          error_on_duplicate: true
           fail_on_empty: true
-          debug_mode: true           # 디버그 모드 활성화
 
-      - name: Display Environment Variables
+      - name: Verify Results
         run: |
-          echo "Environment Variables:"
-          echo "MULTILINE_TEXT: ${{ env.MULTILINE_TEXT }}"
-          echo "MAX_LENGTH_TEST: ${{ env.MAX_LENGTH_TEST }}"
-          echo "EMPTY_VALUE: '${{ env.EMPTY_VALUE }}'"
+          if [ "${{ env.KEY1 }}" != "value1" ] || [ "${{ env.KEY2 }}" != "value2" ]; then
+            echo "❌ Custom delimiter test failed"
+            exit 1
+          fi
+          echo "✅ Custom delimiter test passed"
 
-      - name: Display Outputs
-        run: |
-          echo "Outputs:"
-          echo "PROCESSED_TEXT: ${{ steps.set_variables.outputs.PROCESSED_TEXT }}"
-          echo "TRUNCATED_TEXT: ${{ steps.set_variables.outputs.TRUNCATED_TEXT }}"
-          echo "ALLOWED_EMPTY: '${{ steps.set_variables.outputs.ALLOWED_EMPTY }}'"
-
-      - name: Display Action Results
-        run: |
-          echo "Action Results:"
-          echo "Variables Set: ${{ steps.set_variables.outputs.set_env_count }}"
-          echo "Outputs Set: ${{ steps.set_variables.outputs.set_output_count }}"
-          echo "Status: ${{ steps.set_variables.outputs.action_status }}"
-          echo "Error (if any): ${{ steps.set_variables.outputs.error_message }}"
-
-      # Error handling
-      - name: Check for Errors
-        if: steps.set_variables.outputs.action_status == 'failure'
-        run: |
-          echo "Error occurred: ${{ steps.set_variables.outputs.error_message }}"
-          exit 1
-
-  action-module-v5:
-    name: Test Multiline Input
+  smoke-test-multiline:
+    name: Smoke Test (Multiline)
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Test Multiline
+      - name: Test Multiline Input
         id: test_multi
         uses: somaz94/env-output-setter@v1
         with:
@@ -267,187 +110,66 @@ jobs:
             output two,
             output three
 
-      - name: Verify Multiline Results
+      - name: Verify Results
         run: |
-          echo "Environment Variables:"
-          echo "MULTI_KEY1: ${{ env.MULTI_KEY1 }}"
-          echo "MULTI_KEY2: ${{ env.MULTI_KEY2 }}"
-          echo "MULTI_KEY3: ${{ env.MULTI_KEY3 }}"
-          
-          echo "Outputs:"
-          echo "OUT_MULTI1: ${{ steps.test_multi.outputs.OUT_MULTI1 }}"
-          echo "OUT_MULTI2: ${{ steps.test_multi.outputs.OUT_MULTI2 }}"
-          echo "OUT_MULTI3: ${{ steps.test_multi.outputs.OUT_MULTI3 }}"
+          echo "MULTI_KEY1=${{ env.MULTI_KEY1 }}, MULTI_KEY2=${{ env.MULTI_KEY2 }}, MULTI_KEY3=${{ env.MULTI_KEY3 }}"
+          echo "OUT_MULTI1=${{ steps.test_multi.outputs.OUT_MULTI1 }}"
+          echo "✅ Multiline input test passed"
 
-  test-advanced-features:
-    name: Test Advanced Features
+  smoke-test-transform:
+    name: Smoke Test (Transform)
     runs-on: ubuntu-latest
-
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 10
 
-      - name: Configure Git Safe Directory
-        run: git config --global --add safe.directory ${{ github.workspace }}
+      - name: Test Value Transformation
+        id: set_variables
+        uses: somaz94/env-output-setter@v1
+        with:
+          env_key: URL_PARAM,UPPER_VAL
+          env_value: hello world,test
+          output_key: STATUS,VERSION
+          output_value: active,v1.0
+          to_upper: true
+          encode_url: true
+          mask_secrets: true
+          mask_pattern: '(password|secret).*'
+
+      - name: Verify Results
+        run: |
+          echo "URL_PARAM=${{ env.URL_PARAM }}"
+          echo "UPPER_VAL=${{ env.UPPER_VAL }}"
+          echo "STATUS=${{ steps.set_variables.outputs.STATUS }}"
+          echo "✅ Transform test passed"
+
+  smoke-test-json:
+    name: Smoke Test (JSON)
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Test JSON Support
         id: json_test
         uses: somaz94/env-output-setter@v1
         with:
-          env_key: CONFIG_JSON|SIMPLE_VALUE
-          env_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
-          output_key: config_data|simple_output
-          output_value: '{"api_url":"https://api.example.com","timeout":30,"nested":{"key1":"value1","key2":123}}|simple_text'
-          
-          # 구분자를 쉼표(,)에서 파이프(|)로 변경
-          delimiter: '|'
-          
-          # 새로운 JSON 지원 기능 활성화
+          env_key: CONFIG_JSON
+          env_value: '{"api_url":"https://api.example.com","timeout":30}'
+          output_key: config_data
+          output_value: '{"api_url":"https://api.example.com","timeout":30}'
           json_support: true
           group_prefix: CONFIG
-          
-          # 기타 옵션
-          fail_on_empty: true
-          trim_whitespace: true
           debug_mode: true
 
-      - name: Display JSON Processed Environment Variables
+      - name: Verify Results
         run: |
-          echo "Environment Variables:"
-          echo "CONFIG_JSON: ${{ env.CONFIG_JSON }}"
-          echo "CONFIG_JSON_api_url: ${{ env.CONFIG_JSON_api_url || 'Not Set' }}"
-          echo "CONFIG_JSON_timeout: ${{ env.CONFIG_JSON_timeout || 'Not Set' }}"
-          echo "CONFIG_JSON_nested_key1: ${{ env.CONFIG_JSON_nested_key1 || 'Not Set' }}"
-          echo "CONFIG_JSON_nested_key2: ${{ env.CONFIG_JSON_nested_key2 || 'Not Set' }}"
-          echo "SIMPLE_VALUE: ${{ env.SIMPLE_VALUE }}"
-
-      - name: Display JSON Processed Outputs
-        run: |
-          echo "Outputs:"
-          echo "config_data: ${{ steps.json_test.outputs.config_data }}"
-          echo "simple_output: ${{ steps.json_test.outputs.simple_output }}"
-
-      - name: Test Export Outputs as Environment Variables
-        id: export_test
-        uses: somaz94/env-output-setter@v1
-        with:
-          env_key: ENV_ONLY_VAR
-          env_value: env_value
-          output_key: OUTPUT_VAR1,OUTPUT_VAR2
-          output_value: output_value1,output_value2
-          
-          # 출력값을 환경 변수로 내보내기
-          export_as_env: true
-          
-          # 기타 옵션
-          delimiter: ','
-          fail_on_empty: true
-          debug_mode: true
-
-      - name: Verify Export as Environment Variables
-        run: |
-          echo "Environment Variables:"
-          echo "ENV_ONLY_VAR: ${{ env.ENV_ONLY_VAR }}"
-          echo "OUTPUT_VAR1 (as env): ${{ env.OUTPUT_VAR1 }}"
-          echo "OUTPUT_VAR2 (as env): ${{ env.OUTPUT_VAR2 }}"
-          
-          echo "Outputs:"
-          echo "OUTPUT_VAR1: ${{ steps.export_test.outputs.OUTPUT_VAR1 }}"
-          echo "OUTPUT_VAR2: ${{ steps.export_test.outputs.OUTPUT_VAR2 }}"
-
-      - name: Test Complex JSON with Multiple Levels
-        id: complex_json
-        uses: somaz94/env-output-setter@v1
-        with:
-          env_key: COMPLEX_CONFIG|API_SETTINGS
-          env_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}}|{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
-          output_key: complex_output|api_output
-          output_value: '{"server":{"host":"example.com","port":8080},"auth":{"enabled":true,"methods":["oauth","basic"]},"limits":{"requests":1000,"rate":100}}|{"endpoints":[{"name":"users","path":"/api/users"},{"name":"products","path":"/api/products"}],"version":"2.0"}'
-          
-          # 구분자 변경
-          delimiter: '|'
-          
-          # 고급 기능 활성화
-          json_support: true
-          group_prefix: APP
-          
-          # 기타 옵션
-          debug_mode: true
-
-      - name: Verify Complex JSON Processing
-        run: |
-          echo "Environment Variables from Complex JSON:"
-          echo "COMPLEX_CONFIG: ${{ env.COMPLEX_CONFIG }}"
-          echo "COMPLEX_CONFIG_server_host: ${{ env.COMPLEX_CONFIG_server_host }}"
-          echo "COMPLEX_CONFIG_server_port: ${{ env.COMPLEX_CONFIG_server_port }}"
-          echo "COMPLEX_CONFIG_auth_enabled: ${{ env.COMPLEX_CONFIG_auth_enabled }}"
-          echo "COMPLEX_CONFIG_limits_requests: ${{ env.COMPLEX_CONFIG_limits_requests }}"
-          
-          echo "API_SETTINGS: ${{ env.API_SETTINGS }}"
-          echo "API_SETTINGS_endpoints_0_name: ${{ env.API_SETTINGS_endpoints_0_name }}"
-          echo "API_SETTINGS_endpoints_1_path: ${{ env.API_SETTINGS_endpoints_1_path }}"
-          echo "API_SETTINGS_version: ${{ env.API_SETTINGS_version }}"
-
-      # 스트레스 테스트: 많은 변수와 복잡한 값 처리
-      - name: Stress Test with Many Variables
-        id: stress_test
-        uses: somaz94/env-output-setter@v1
-        with:
-          env_key: VAR1,VAR2,VAR3,VAR4,VAR5,VAR6,VAR7,VAR8,VAR9,VAR10
-          env_value: val1,val2,val3,val4,val5,val6,val7,val8,val9,val10
-          output_key: OUT1,OUT2,OUT3,OUT4,OUT5,OUT6,OUT7,OUT8,OUT9,OUT10
-          output_value: out1,out2,out3,out4,out5,out6,out7,out8,out9,out10
-          
-          # 동시에 여러 변환 옵션 활성화
-          to_upper: true
-          encode_url: true
-          max_length: 5
-          
-          # 디버그 모드 활성화
-          debug_mode: true
-
-      - name: Verify Stress Test Results
-        run: |
-          echo "First few environment variables:"
-          echo "VAR1: ${{ env.VAR1 }}"
-          echo "VAR5: ${{ env.VAR5 }}"
-          echo "VAR10: ${{ env.VAR10 }}"
-          
-          echo "First few outputs:"
-          echo "OUT1: ${{ steps.stress_test.outputs.OUT1 }}"
-          echo "OUT5: ${{ steps.stress_test.outputs.OUT5 }}"
-          echo "OUT10: ${{ steps.stress_test.outputs.OUT10 }}"
-          
-          echo "Action Results:"
-          echo "Variables Set: ${{ steps.stress_test.outputs.set_env_count }}"
-          echo "Outputs Set: ${{ steps.stress_test.outputs.set_output_count }}"
-
-      # 에러 시나리오 테스트
-      - name: Test JSON Validation Errors
-        id: json_error_test
-        uses: ./
-        continue-on-error: true
-        with:
-          env_key: INVALID_JSON
-          env_value: '{"incomplete": "json"'
-          output_key: invalid_output
-          output_value: '{"also": "incomplete'
-          
-          # 구분자 변경은 필요 없음 (단일 값이므로)
-          json_support: true
-          fail_on_empty: true
-          debug_mode: true
-
-      - name: Check JSON Error Handling
-        run: |
-          echo "Error Test Results:"
-          echo "Status: ${{ steps.json_error_test.outputs.action_status || 'N/A' }}"
-          echo "Error: ${{ steps.json_error_test.outputs.error_message || 'None' }}"
-          
-          if [[ "${{ steps.json_error_test.outcome }}" == "failure" ]]; then
-            echo "✅ JSON validation error correctly caused the action to fail"
-          else
-            echo "❌ JSON validation error didn't cause the action to fail as expected"
-          fi
+          echo "CONFIG_JSON=${{ env.CONFIG_JSON }}"
+          echo "config_data=${{ steps.json_test.outputs.config_data }}"
+          echo "✅ JSON support test passed"
