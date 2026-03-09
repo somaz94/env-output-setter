@@ -11,20 +11,25 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+// run executes the main logic and returns the exit code.
+func run() int {
 	cfg := config.Load()
-	printer.PrintSection("▶️ GitHub Environment and Output Setter")
+	printer.PrintSection("GitHub Environment and Output Setter")
 
 	// Log advanced feature status
 	if cfg.DebugMode {
-		printer.PrintInfo("📋 Advanced Features Status:")
+		printer.PrintInfo("Advanced Features Status:")
 		if cfg.GroupPrefix != "" {
-			printer.PrintInfo(fmt.Sprintf("  • Group Prefix: %s", cfg.GroupPrefix))
+			printer.PrintInfo(fmt.Sprintf("  * Group Prefix: %s", cfg.GroupPrefix))
 		}
 		if cfg.JsonSupport {
-			printer.PrintInfo("  • JSON Support: Enabled")
+			printer.PrintInfo("  * JSON Support: Enabled")
 		}
 		if cfg.ExportAsEnv {
-			printer.PrintInfo("  • Export Output as Env: Enabled")
+			printer.PrintInfo("  * Export Output as Env: Enabled")
 		}
 	}
 
@@ -36,51 +41,52 @@ func main() {
 	// Set environment variables
 	envCount, err := writer.SetEnv(cfg)
 	if err != nil {
-		errorMsg = fmt.Sprintf("❌ Error setting environment variables: %v", err)
+		errorMsg = fmt.Sprintf("Error setting environment variables: %v", err)
 		printer.PrintError(errorMsg)
-		setOutputAndExit(0, 0, "failure", errorMsg)
+		writeOutputs(0, 0, "failure", errorMsg)
+		return 1
 	}
 
 	// Set output variables
 	outputCount, err = writer.SetOutput(cfg)
 	if err != nil {
-		errorMsg = fmt.Sprintf("❌ Error setting output variables: %v", err)
+		errorMsg = fmt.Sprintf("Error setting output variables: %v", err)
 		printer.PrintError(errorMsg)
-		setOutputAndExit(envCount, outputCount, "failure", errorMsg)
+		writeOutputs(envCount, outputCount, "failure", errorMsg)
+		return 1
 	}
 
 	// Print final status
-	printer.PrintSection("✅ Execution Complete")
+	printer.PrintSection("Execution Complete")
 	if cfg.GithubEnv == "" && cfg.GithubOutput == "" {
 		printer.PrintInfo("Mode: Local Execution (Simulation)")
 	} else {
 		printer.PrintInfo("Mode: GitHub Actions")
 	}
 
-	setOutputAndExit(envCount, outputCount, status, errorMsg)
+	writeOutputs(envCount, outputCount, status, errorMsg)
+	return 0
 }
 
-func setOutputAndExit(envCount, outputCount int, status, errorMsg string) {
-	if outputFile := os.Getenv("GITHUB_OUTPUT"); outputFile != "" {
-		outputs := map[string]string{
-			"set_env_count":    strconv.Itoa(envCount),
-			"set_output_count": strconv.Itoa(outputCount),
-			"status":           status,
-			"error_message":    errorMsg,
-		}
-
-		for key, value := range outputs {
-			if err := appendToFile(outputFile, fmt.Sprintf("%s=%s", key, value)); err != nil {
-				fmt.Printf("Error writing to GITHUB_OUTPUT: %v\n", err)
-				os.Exit(1)
-			}
-		}
+// writeOutputs writes action result outputs to the GITHUB_OUTPUT file.
+func writeOutputs(envCount, outputCount int, status, errorMsg string) {
+	outputFile := os.Getenv("GITHUB_OUTPUT")
+	if outputFile == "" {
+		return
 	}
 
-	if status == "failure" {
-		os.Exit(1)
+	outputs := map[string]string{
+		"set_env_count":    strconv.Itoa(envCount),
+		"set_output_count": strconv.Itoa(outputCount),
+		"status":           status,
+		"error_message":    errorMsg,
 	}
-	os.Exit(0)
+
+	for key, value := range outputs {
+		if err := appendToFile(outputFile, fmt.Sprintf("%s=%s", key, value)); err != nil {
+			fmt.Printf("Error writing to GITHUB_OUTPUT: %v\n", err)
+		}
+	}
 }
 
 func appendToFile(filename, content string) error {

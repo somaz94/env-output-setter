@@ -40,14 +40,14 @@ jobs:
           echo "Env: GCP_REGION=${{ env.GCP_REGION }}, AWS_REGION=${{ env.AWS_REGION }}"
           echo "Out: GCP_OUTPUT=${{ steps.set_variables.outputs.GCP_OUTPUT }}, AWS_OUTPUT=${{ steps.set_variables.outputs.AWS_OUTPUT }}"
           if [ "${{ env.GCP_REGION }}" != "asia-northeast1" ] || [ "${{ env.AWS_REGION }}" != "us-east-1" ]; then
-            echo "❌ Environment variables not set correctly"
+            echo "[FAIL]Environment variables not set correctly"
             exit 1
           fi
           if [ "${{ steps.set_variables.outputs.GCP_OUTPUT }}" != "gcp_success" ]; then
-            echo "❌ Output variables not set correctly"
+            echo "[FAIL]Output variables not set correctly"
             exit 1
           fi
-          echo "✅ Basic env/output test passed"
+          echo "[PASS]Basic env/output test passed"
 
   smoke-test-options:
     name: Smoke Test (Options)
@@ -74,10 +74,10 @@ jobs:
       - name: Verify Results
         run: |
           if [ "${{ env.KEY1 }}" != "value1" ] || [ "${{ env.KEY2 }}" != "value2" ]; then
-            echo "❌ Custom delimiter test failed"
+            echo "[FAIL]Custom delimiter test failed"
             exit 1
           fi
-          echo "✅ Custom delimiter test passed"
+          echo "[PASS]Custom delimiter test passed"
 
   smoke-test-multiline:
     name: Smoke Test (Multiline)
@@ -114,7 +114,7 @@ jobs:
         run: |
           echo "MULTI_KEY1=${{ env.MULTI_KEY1 }}, MULTI_KEY2=${{ env.MULTI_KEY2 }}, MULTI_KEY3=${{ env.MULTI_KEY3 }}"
           echo "OUT_MULTI1=${{ steps.test_multi.outputs.OUT_MULTI1 }}"
-          echo "✅ Multiline input test passed"
+          echo "[PASS]Multiline input test passed"
 
   smoke-test-transform:
     name: Smoke Test (Transform)
@@ -144,7 +144,7 @@ jobs:
           echo "URL_PARAM=${{ env.URL_PARAM }}"
           echo "UPPER_VAL=${{ env.UPPER_VAL }}"
           echo "STATUS=${{ steps.set_variables.outputs.STATUS }}"
-          echo "✅ Transform test passed"
+          echo "[PASS]Transform test passed"
 
   smoke-test-json:
     name: Smoke Test (JSON)
@@ -172,4 +172,4 @@ jobs:
         run: |
           echo "CONFIG_JSON=${{ env.CONFIG_JSON }}"
           echo "config_data=${{ steps.json_test.outputs.config_data }}"
-          echo "✅ JSON support test passed"
+          echo "[PASS]JSON support test passed"

@@ -505,9 +505,9 @@ jobs:
           echo "Error: ${{ steps.json_error_test.outputs.error_message || 'None' }}"
           
           if [[ "${{ steps.json_error_test.outcome }}" == "failure" ]]; then
-            echo "✅ JSON validation error correctly caused the action to fail"
+            echo "[PASS]JSON validation error correctly caused the action to fail"
           else
-            echo "❌ JSON validation error didn't cause the action to fail as expected"
+            echo "[FAIL]JSON validation error didn't cause the action to fail as expected"
           fi
 
   ci-result:
@@ -529,7 +529,7 @@ jobs:
         run: |
           if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ] || \
              [ "${{ contains(needs.*.result, 'cancelled') }}" = "true" ]; then
-            echo "❌ Some jobs failed or were cancelled"
+            echo "[FAIL]Some jobs failed or were cancelled"
             exit 1
           fi
-          echo "✅ All CI jobs passed"
+          echo "[PASS]All CI jobs passed"

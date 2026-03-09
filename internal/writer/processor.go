@@ -82,10 +82,10 @@ func (p *Processor) LogInputValues(varType, keys, values string) {
 	}
 
 	printer.PrintDebugSection(strings.ToUpper(varType[:1]) + varType[1:])
-	printer.PrintDebugInfo("📥 Input Values:\n")
-	printer.PrintDebugInfo("  • Keys:      %q\n", keys)
-	printer.PrintDebugInfo("  • Values:    %q\n", values)
-	printer.PrintDebugInfo("  • Delimiter: %q\n\n", p.cfg.Delimiter)
+	printer.PrintDebugInfo("Input Values:\n")
+	printer.PrintDebugInfo("  * Keys:      %q\n", keys)
+	printer.PrintDebugInfo("  * Values:    %q\n", values)
+	printer.PrintDebugInfo("  * Delimiter: %q\n\n", p.cfg.Delimiter)
 }
 
 // LogProcessedValues logs the processed key-value pairs if debug mode is enabled.
@@ -94,7 +94,7 @@ func (p *Processor) LogProcessedValues(keyList, valueList []string) {
 		return
 	}
 
-	printer.PrintDebugInfo("📋 Processed Values:\n")
-	printer.PrintDebugInfo("  • Keys:   %v\n", keyList)
-	printer.PrintDebugInfo("  • Values: %v\n\n", valueList)
+	printer.PrintDebugInfo("Processed Values:\n")
+	printer.PrintDebugInfo("  * Keys:   %v\n", keyList)
+	printer.PrintDebugInfo("  * Values: %v\n\n", valueList)
 }

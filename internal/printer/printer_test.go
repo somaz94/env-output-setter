@@ -39,11 +39,11 @@ func TestPrintSection(t *testing.T) {
 			},
 		},
 		{
-			name:  "Section with emoji",
-			title: "▶️ Starting Process",
+			name:  "Section with special characters",
+			title: "Starting Process",
 			expected: []string{
 				DoubleLine,
-				"▶️ Starting Process",
+				"Starting Process",
 			},
 		},
 	}

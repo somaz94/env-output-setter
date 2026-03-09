@@ -28,12 +28,12 @@ const (
 
 // Common output symbols
 const (
-	SuccessSymbol = "✅"
-	ErrorSymbol   = "❌"
-	WarningSymbol = "⚠️"
-	InfoSymbol    = "ℹ️"
-	DebugSymbol   = "🔍"
-	BulletPoint   = "•"
+	SuccessSymbol = "[OK]"
+	ErrorSymbol   = "[ERROR]"
+	WarningSymbol = "[WARN]"
+	InfoSymbol    = "[INFO]"
+	DebugSymbol   = "[DEBUG]"
+	BulletPoint   = "*"
 )
 
 // PrintSection prints a section header with a double line border.

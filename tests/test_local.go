@@ -61,7 +61,7 @@ type TestResult struct {
 }
 
 func main() {
-	fmt.Printf("\n%s🧪 Local Test Suite for Environment/Output Setter%s\n", colorCyan, colorReset)
+	fmt.Printf("\n%sLocal Test Suite for Environment/Output Setter%s\n", colorCyan, colorReset)
 	fmt.Printf("Working directory: %s\n\n", mustGetWorkingDir())
 
 	tests := createTestSuite()
@@ -370,7 +370,7 @@ func runTests(tests []TestCase) []TestResult {
 	currentCategory := ""
 
 	fmt.Printf("%s%s\n", colorBlue, strings.Repeat("=", 50))
-	fmt.Printf("🔧 Creating Test Suite\n")
+	fmt.Printf("Creating Test Suite\n")
 	fmt.Printf("%s%s\n\n", strings.Repeat("=", 50), colorReset)
 	fmt.Printf("Created %d test cases\n", len(tests))
 
@@ -379,7 +379,7 @@ func runTests(tests []TestCase) []TestResult {
 		if test.Category != currentCategory {
 			currentCategory = test.Category
 			fmt.Printf("\n%s%s\n", colorBlue, strings.Repeat("=", 50))
-			fmt.Printf("📋 %s\n", currentCategory)
+			fmt.Printf("[Category] %s\n", currentCategory)
 			fmt.Printf("%s%s\n\n", strings.Repeat("=", 50), colorReset)
 		}
 
@@ -422,9 +422,9 @@ func runTest(test TestCase) TestResult {
 
 	// Print result
 	if passed {
-		fmt.Printf("%s✅ PASS: %s%s\n\n", colorGreen, test.Name, colorReset)
+		fmt.Printf("%sPASS: %s%s\n\n", colorGreen, test.Name, colorReset)
 	} else {
-		fmt.Printf("%s❌ FAIL: %s%s\n", colorRed, test.Name, colorReset)
+		fmt.Printf("%sFAIL: %s%s\n", colorRed, test.Name, colorReset)
 		if err != nil {
 			fmt.Printf("  Error: %v\n", err)
 		}
@@ -523,16 +523,16 @@ func printSummary(results []TestResult) {
 	}
 
 	fmt.Printf("\n%s%s\n", colorBlue, strings.Repeat("=", 50))
-	fmt.Printf("📊 Test Summary\n")
+	fmt.Printf("Test Summary\n")
 	fmt.Printf("%s%s\n", strings.Repeat("=", 50), colorReset)
 	fmt.Printf("Total Tests: %d\n", len(results))
 	fmt.Printf("%sPassed: %d%s\n", colorGreen, passed, colorReset)
 	fmt.Printf("%sFailed: %d%s\n", colorRed, failed, colorReset)
 
 	if failed == 0 {
-		fmt.Printf("\n%s✅ All tests passed!%s\n\n", colorGreen, colorReset)
+		fmt.Printf("\n%sAll tests passed!%s\n\n", colorGreen, colorReset)
 	} else {
-		fmt.Printf("\n%s❌ Some tests failed!%s\n\n", colorRed, colorReset)
+		fmt.Printf("\n%sSome tests failed!%s\n\n", colorRed, colorReset)
 	}
 }
 

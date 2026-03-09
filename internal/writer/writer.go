@@ -220,7 +220,7 @@ func (w *Writer) performWrite(filePath string, keys, values []string, varType st
 
 	// Write header in debug mode
 	if w.cfg.DebugMode {
-		fmt.Printf("✍️  Writing Values:\n")
+		fmt.Printf("Writing Values:\n")
 	}
 
 	// Write each key-value pair
