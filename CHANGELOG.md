@@ -2,6 +2,7 @@
 ### Build
 - bump golang in the docker-minor group by @dependabot[bot]
 - bump docker/build-push-action from 6 to 7 by @dependabot[bot]
+- bump docker/setup-buildx-action from 3 to 4 by @dependabot[bot]
 
 ### Refactoring
 - modernize CI/CD workflows and simplify smoke tests by @somaz94
