@@ -22,9 +22,14 @@ func NewProcessor(cfg *config.Config) *Processor {
 // ProcessInputValues processes the input strings into lists with proper formatting.
 // It handles splitting, trimming, and processing JSON values if json_support is enabled.
 func (p *Processor) ProcessInputValues(keys, values string) ([]string, []string, error) {
-	// Split input strings by delimiter
+	// Split input strings by delimiter (JSON-aware if json_support is enabled)
 	keyList := strings.Split(keys, p.cfg.Delimiter)
-	valueList := strings.Split(values, p.cfg.Delimiter)
+	var valueList []string
+	if p.cfg.JsonSupport {
+		valueList = p.splitJSONAware(values, p.cfg.Delimiter)
+	} else {
+		valueList = strings.Split(values, p.cfg.Delimiter)
+	}
 
 	// Process keys and values for whitespace
 	keyList = p.processWhitespace(keyList)
@@ -57,6 +62,64 @@ func (p *Processor) ProcessInputValues(keys, values string) ([]string, []string,
 	}
 
 	return keyList, valueList, nil
+}
+
+// splitJSONAware splits a string by delimiter while preserving JSON objects and arrays.
+// It tracks brace/bracket depth so delimiters inside JSON are not treated as separators.
+func (p *Processor) splitJSONAware(s, delimiter string) []string {
+	if delimiter == "" || !strings.Contains(s, "{") && !strings.Contains(s, "[") {
+		return strings.Split(s, delimiter)
+	}
+
+	var result []string
+	depth := 0
+	inString := false
+	escaped := false
+	start := 0
+	delimLen := len(delimiter)
+
+	for i := 0; i < len(s); i++ {
+		ch := s[i]
+
+		if escaped {
+			escaped = false
+			continue
+		}
+
+		if ch == '\\' && inString {
+			escaped = true
+			continue
+		}
+
+		if ch == '"' {
+			inString = !inString
+			continue
+		}
+
+		if inString {
+			continue
+		}
+
+		if ch == '{' || ch == '[' {
+			depth++
+			continue
+		}
+
+		if ch == '}' || ch == ']' {
+			depth--
+			continue
+		}
+
+		// Only split on delimiter when at top level (depth == 0)
+		if depth == 0 && i+delimLen <= len(s) && s[i:i+delimLen] == delimiter {
+			result = append(result, s[start:i])
+			start = i + delimLen
+			i += delimLen - 1
+		}
+	}
+
+	result = append(result, s[start:])
+	return result
 }
 
 // processWhitespace normalizes and trims whitespace from all entries in a list.

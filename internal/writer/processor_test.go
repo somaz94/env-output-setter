@@ -3,6 +3,7 @@ package writer
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/somaz94/env-output-setter/internal/config"
@@ -518,6 +519,118 @@ func TestProcessInputValuesWithFileReading(t *testing.T) {
 		if err == nil {
 			t.Error("expected error for missing file")
 		}
+	})
+}
+
+func TestSplitJSONAware(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		delimiter string
+		expected  []string
+	}{
+		{
+			name:      "Simple comma-separated",
+			input:     "a,b,c",
+			delimiter: ",",
+			expected:  []string{"a", "b", "c"},
+		},
+		{
+			name:      "JSON object preserved",
+			input:     `{"api_url":"https://api.example.com","timeout":30},value2`,
+			delimiter: ",",
+			expected:  []string{`{"api_url":"https://api.example.com","timeout":30}`, "value2"},
+		},
+		{
+			name:      "Multiple JSON objects",
+			input:     `{"a":1,"b":2},{"c":3,"d":4}`,
+			delimiter: ",",
+			expected:  []string{`{"a":1,"b":2}`, `{"c":3,"d":4}`},
+		},
+		{
+			name:      "Nested JSON",
+			input:     `{"outer":{"inner":"val","x":1}},simple`,
+			delimiter: ",",
+			expected:  []string{`{"outer":{"inner":"val","x":1}}`, "simple"},
+		},
+		{
+			name:      "JSON array preserved",
+			input:     `[1,2,3],value`,
+			delimiter: ",",
+			expected:  []string{`[1,2,3]`, "value"},
+		},
+		{
+			name:      "No JSON - plain split",
+			input:     "a,b,c",
+			delimiter: ",",
+			expected:  []string{"a", "b", "c"},
+		},
+		{
+			name:      "Single value",
+			input:     `{"key":"val"}`,
+			delimiter: ",",
+			expected:  []string{`{"key":"val"}`},
+		},
+		{
+			name:      "Escaped quotes in JSON",
+			input:     `{"msg":"hello, \"world\""},other`,
+			delimiter: ",",
+			expected:  []string{`{"msg":"hello, \"world\""}`, "other"},
+		},
+		{
+			name:      "Pipe delimiter with JSON",
+			input:     `{"a":1}|value`,
+			delimiter: "|",
+			expected:  []string{`{"a":1}`, "value"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &config.Config{Delimiter: tt.delimiter}
+			processor := NewProcessor(cfg)
+			result := processor.splitJSONAware(tt.input, tt.delimiter)
+
+			if len(result) != len(tt.expected) {
+				t.Fatalf("splitJSONAware() length = %d, want %d\ngot:  %v\nwant: %v", len(result), len(tt.expected), result, tt.expected)
+			}
+			for i, v := range result {
+				if v != tt.expected[i] {
+					t.Errorf("splitJSONAware()[%d] = %q, want %q", i, v, tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestProcessInputValuesWithJSONComma(t *testing.T) {
+	t.Run("JSON value with commas preserved", func(t *testing.T) {
+		cfg := &config.Config{
+			Delimiter:    ",",
+			AllowEmpty:   false,
+			JsonSupport:  true,
+			FileEncoding: "raw",
+		}
+		processor := NewProcessor(cfg)
+		keyList, valueList, err := processor.ProcessInputValues(
+			"CONFIG_JSON",
+			`{"api_url":"https://api.example.com","timeout":30}`,
+		)
+		if err != nil {
+			t.Fatalf("ProcessInputValues() error = %v", err)
+		}
+		// Original key + expanded nested keys
+		if len(keyList) < 1 {
+			t.Fatalf("expected at least 1 key, got %d", len(keyList))
+		}
+		if keyList[0] != "CONFIG_JSON" {
+			t.Errorf("keyList[0] = %q, want %q", keyList[0], "CONFIG_JSON")
+		}
+		// The original JSON value should be intact
+		if !strings.Contains(valueList[0], "api.example.com") {
+			t.Errorf("valueList[0] should contain api.example.com, got %q", valueList[0])
+		}
+		_ = valueList
 	})
 }
 
