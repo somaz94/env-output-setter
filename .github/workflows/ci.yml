@@ -24,7 +24,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
+          go-version: '1.26'
 
       - name: Run Go unit tests with coverage
         run: go test ./internal/... -v -cover -coverprofile=coverage.out
@@ -42,7 +42,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
+          go-version: '1.26'
 
       - name: Run Local Test Suite
         run: go run tests/test_local.go
