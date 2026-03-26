@@ -2,10 +2,6 @@
 
 GitHub Action that sets multiple key-value pairs in both `$GITHUB_ENV` and `$GITHUB_OUTPUT`.
 
-- Do not include `Co-Authored-By` lines in commit messages.
-- Do not push to remote. Only commit. The user will push manually.
-- Do not modify git config.
-
 ## Project Structure
 
 ```
@@ -86,6 +82,3 @@ test-local ──→ build-and-push-docker → test-action → ... → ci-result
 - **cliff.toml**: Skip `^Merge`, `^Update changelog`, `^Auto commit`
 - **paths-ignore**: `.github/workflows/**`, `**/*.md`, `backup/**`
 - Do NOT commit directly - recommend commit messages only
-
-- Communicate with the user in Korean.
-- All documentation and code comments must be written in English.
