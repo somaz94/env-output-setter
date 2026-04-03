@@ -2,19 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-03-16)
+## [v1.7.0](https://github.com/somaz94/env-output-setter/compare/v1.6.1...v1.7.0) (2026-04-03)
 
 ### Bug Fixes
 
 - apache license -> mit license ([6829e78](https://github.com/somaz94/env-output-setter/commit/6829e78c185170f4a4b3157021d58bfbbc03469e))
 - skip major version tag deletion on first release ([063dfc0](https://github.com/somaz94/env-output-setter/commit/063dfc0f619383631b51d5caa4cb5ac17d8e3f3f))
 
+### Code Refactoring
+
+- extract shared transform logic, remove unused groupPrefix param, and use random EOF delimiter ([455d45b](https://github.com/somaz94/env-output-setter/commit/455d45bdc3f1805427ae2e799941982f7ef66f48))
+
 ### Documentation
 
+- remove duplicate rules covered by global CLAUDE.md ([e77f407](https://github.com/somaz94/env-output-setter/commit/e77f40771259b63d6e7cbc5a9e1f7ad614dc65ee))
+- add no-push rule to CLAUDE.md ([dbfa35c](https://github.com/somaz94/env-output-setter/commit/dbfa35cac1202da04757d46a8b28f827d4bd3407))
+- update CLAUDE.md with commit guidelines and language ([a1c3ae2](https://github.com/somaz94/env-output-setter/commit/a1c3ae271a7ca43f1d7dc4004752fa5136315d2d))
 - CLAUDE.md ([ee2cc1a](https://github.com/somaz94/env-output-setter/commit/ee2cc1a59bc5e371c1480926dae1f142693af3ef))
 
 ### Continuous Integration
 
+- skip auto-generated changelog and contributors commits in release notes ([49991de](https://github.com/somaz94/env-output-setter/commit/49991de064a46d623797a5a01b53b24bf2319ff2))
+- revert to body_path RELEASE.md in release workflow ([68c8e06](https://github.com/somaz94/env-output-setter/commit/68c8e06ddb4ff2202b2239cc7f1cee38efb78a4e))
+- use generate_release_notes instead of RELEASE.md ([379d213](https://github.com/somaz94/env-output-setter/commit/379d21391cadb5d4d9e1d8f7dbd2019f2fc4fac4))
+- migrate gitlab-mirror workflow to multi-git-mirror action ([9306813](https://github.com/somaz94/env-output-setter/commit/9306813f68c1fb22924830336d671cd4e2b8e201))
+- use somaz94/contributors-action@v1 for contributors generation ([bdead1c](https://github.com/somaz94/env-output-setter/commit/bdead1c2414e480f1bb6e07f4a26ac9aec96a160))
+- use major-tag-action for version tag updates ([512ee6c](https://github.com/somaz94/env-output-setter/commit/512ee6c09aabc76c6054d48e1f8689758384afee))
 - migrate changelog generator to go-changelog-action ([a92b3ee](https://github.com/somaz94/env-output-setter/commit/a92b3eea2d7f9423237e36c8c5cfa9a0ccbe0411))
 - add contributors and dependabot auto-merge workflows ([4787dcc](https://github.com/somaz94/env-output-setter/commit/4787dcc260c6c9850d0bc3d3a359282809e543c8))
 - update Go version from 1.23 to 1.26 ([699ec24](https://github.com/somaz94/env-output-setter/commit/699ec2426f45f43eb0aa970ed384a02da2446849))
@@ -23,6 +36,9 @@ All notable changes to this project will be documented in this file.
 
 ### Chores
 
+- remove duplicate rules from CLAUDE.md (moved to global) ([920fd9f](https://github.com/somaz94/env-output-setter/commit/920fd9f9c3a053c130fafd003a4659db662af7fe))
+- add git config protection to CLAUDE.md ([d1695fc](https://github.com/somaz94/env-output-setter/commit/d1695fc55bd6fcbe33a500cab5fbc6a6cf0ebc87))
+- upgrade Go version to 1.26 ([4e56fda](https://github.com/somaz94/env-output-setter/commit/4e56fda6c947963b514df99f066e4fc9c968474f))
 - change license from MIT to Apache 2.0 ([bed0dbf](https://github.com/somaz94/env-output-setter/commit/bed0dbf48bdbafc2348f26cd0e41e3e0c85e3210))
 - remove linter workflow and config files ([b1e5c47](https://github.com/somaz94/env-output-setter/commit/b1e5c475ffb52480bb2dbf3b4cfa9d9568135278))
 - migrate devcontainer feature from devcontainers-contrib to devcontainers-extra ([c630669](https://github.com/somaz94/env-output-setter/commit/c630669d59d56bd2db47a6eaeac6235833d1085d))
@@ -33,9 +49,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Action
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.6.1](https://github.com/somaz94/env-output-setter/compare/v1.6.0...v1.6.1) (2026-03-09)
 
@@ -45,9 +61,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Action
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.6.0](https://github.com/somaz94/env-output-setter/compare/v1.5.1...v1.6.0) (2026-03-09)
 
@@ -74,9 +90,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
-- dependabot[bot]
 - somaz
+
+<br/>
 
 ## [v1.5.1](https://github.com/somaz94/env-output-setter/compare/v1.5.0...v1.5.1) (2025-11-27)
 
@@ -95,9 +111,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
-- dependabot[bot]
 - somaz
+
+<br/>
 
 ## [v1.5.0](https://github.com/somaz94/env-output-setter/compare/v1.4.1...v1.5.0) (2025-10-30)
 
@@ -120,9 +136,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
-- dependabot[bot]
 - somaz
+
+<br/>
 
 ## [v1.4.1](https://github.com/somaz94/env-output-setter/compare/v1.4.0...v1.4.1) (2025-04-15)
 
@@ -139,8 +155,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.4.0](https://github.com/somaz94/env-output-setter/compare/v1.3.1...v1.4.0) (2025-04-10)
 
@@ -156,8 +173,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.3.1](https://github.com/somaz94/env-output-setter/compare/v1.3.0...v1.3.1) (2025-03-04)
 
@@ -182,8 +200,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.3.0](https://github.com/somaz94/env-output-setter/compare/v1.2.1...v1.3.0) (2025-02-20)
 
@@ -202,8 +221,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.2.1](https://github.com/somaz94/env-output-setter/compare/v1.2.0...v1.2.1) (2025-02-19)
 
@@ -224,9 +244,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
-- dependabot[bot]
 - somaz
+
+<br/>
 
 ## [v1.2.0](https://github.com/somaz94/env-output-setter/compare/v1.1.0...v1.2.0) (2025-02-14)
 
@@ -236,8 +256,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.1.0](https://github.com/somaz94/env-output-setter/compare/v1.0.4...v1.1.0) (2025-02-13)
 
@@ -259,6 +280,8 @@ All notable changes to this project will be documented in this file.
 
 - somaz
 
+<br/>
+
 ## [v1.0.4](https://github.com/somaz94/env-output-setter/compare/v1.0.3...v1.0.4) (2025-02-13)
 
 ### Bug Fixes
@@ -271,8 +294,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.0.3](https://github.com/somaz94/env-output-setter/compare/v1.0.2...v1.0.3) (2025-02-13)
 
@@ -282,8 +306,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.0.2](https://github.com/somaz94/env-output-setter/compare/v1.0.1...v1.0.2) (2025-02-13)
 
@@ -297,8 +322,9 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Actions
 - somaz
+
+<br/>
 
 ## [v1.0.1](https://github.com/somaz94/env-output-setter/compare/v1.0.0...v1.0.1) (2025-02-07)
 
@@ -312,7 +338,9 @@ All notable changes to this project will be documented in this file.
 
 - somaz
 
-## v1.0.0 (2025-02-05)
+<br/>
+
+## [v1.0.0](https://github.com/somaz94/env-output-setter/releases/tag/v1.0.0) (2025-02-05)
 
 ### Bug Fixes
 
@@ -354,7 +382,7 @@ All notable changes to this project will be documented in this file.
 
 ### Contributors
 
-- GitHub Action
-- dependabot[bot]
 - somaz
+
+<br/>
 
