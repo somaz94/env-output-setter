@@ -1,6 +1,8 @@
 package writer
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -265,11 +267,24 @@ func (w *Writer) performWrite(filePath string, keys, values []string, varType st
 }
 
 // writeGitHubActionsFormat writes a key-value pair in GitHub Actions format.
-// Format: key<<EOF\nvalue\nEOF
+// Uses a random delimiter to avoid collisions with value content.
 func writeGitHubActionsFormat(file *os.File, key, value string) error {
-	line := fmt.Sprintf("%s<<%s\n%s\n%s\n", key, "EOF", value, "EOF")
+	delimiter, err := randomDelimiter()
+	if err != nil {
+		return fmt.Errorf("failed to generate delimiter: %w", err)
+	}
+	line := fmt.Sprintf("%s<<%s\n%s\n%s\n", key, delimiter, value, delimiter)
 	if _, err := file.WriteString(line); err != nil {
 		return fmt.Errorf("failed to write line: %w", err)
 	}
 	return nil
+}
+
+// randomDelimiter generates a unique delimiter for GitHub Actions multiline format.
+func randomDelimiter() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return "EOF_" + hex.EncodeToString(b), nil
 }

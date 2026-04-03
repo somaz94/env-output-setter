@@ -3,6 +3,7 @@ package writer
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/somaz94/env-output-setter/internal/config"
@@ -318,9 +319,12 @@ func TestWriteGitHubActionsFormat(t *testing.T) {
 		t.Fatalf("Failed to read test file: %v", err)
 	}
 
-	expected := "TEST_KEY<<EOF\nTEST_VALUE\nEOF\n"
-	if string(content) != expected {
-		t.Errorf("writeGitHubActionsFormat() content = %q, want %q", string(content), expected)
+	got := string(content)
+	if !strings.HasPrefix(got, "TEST_KEY<<EOF_") {
+		t.Errorf("writeGitHubActionsFormat() expected prefix 'TEST_KEY<<EOF_', got %q", got)
+	}
+	if !strings.Contains(got, "\nTEST_VALUE\n") {
+		t.Errorf("writeGitHubActionsFormat() expected value 'TEST_VALUE' in content, got %q", got)
 	}
 }
 

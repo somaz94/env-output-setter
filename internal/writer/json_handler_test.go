@@ -152,11 +152,10 @@ func TestProcessJSONValues(t *testing.T) {
 
 func TestExtractNestedJSON(t *testing.T) {
 	tests := []struct {
-		name        string
-		prefix      string
-		jsonObj     map[string]interface{}
-		groupPrefix string
-		minKeys     int
+		name    string
+		prefix  string
+		jsonObj map[string]interface{}
+		minKeys int
 		minValues   int
 	}{
 		{
@@ -166,7 +165,7 @@ func TestExtractNestedJSON(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			groupPrefix: "",
+
 			minKeys:     2,
 			minValues:   2,
 		},
@@ -179,7 +178,7 @@ func TestExtractNestedJSON(t *testing.T) {
 					"port": 8080,
 				},
 			},
-			groupPrefix: "",
+
 			minKeys:     2,
 			minValues:   2,
 		},
@@ -189,7 +188,7 @@ func TestExtractNestedJSON(t *testing.T) {
 			jsonObj: map[string]interface{}{
 				"items": []interface{}{"item1", "item2"},
 			},
-			groupPrefix: "",
+
 			minKeys:     2,
 			minValues:   2,
 		},
@@ -201,7 +200,7 @@ func TestExtractNestedJSON(t *testing.T) {
 				"enabled": true,
 				"count":   42,
 			},
-			groupPrefix: "",
+
 			minKeys:     3,
 			minValues:   3,
 		},
@@ -209,7 +208,7 @@ func TestExtractNestedJSON(t *testing.T) {
 			name:        "Empty object",
 			prefix:      "EMPTY",
 			jsonObj:     map[string]interface{}{},
-			groupPrefix: "",
+
 			minKeys:     0,
 			minValues:   0,
 		},
@@ -219,7 +218,7 @@ func TestExtractNestedJSON(t *testing.T) {
 			jsonObj: map[string]interface{}{
 				"setting": "value",
 			},
-			groupPrefix: "APP",
+
 			minKeys:     1,
 			minValues:   1,
 		},
@@ -228,7 +227,7 @@ func TestExtractNestedJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			handler := NewJSONHandler()
-			keys, values := handler.extractNestedJSON(tt.prefix, tt.jsonObj, tt.groupPrefix)
+			keys, values := handler.extractNestedJSON(tt.prefix, tt.jsonObj)
 
 			if len(keys) < tt.minKeys {
 				t.Errorf("extractNestedJSON() keys length = %d, want at least %d",
@@ -310,7 +309,7 @@ func TestExtractNestedJSONWithArrayOfObjects(t *testing.T) {
 		},
 	}
 
-	keys, values := handler.extractNestedJSON("APP", jsonObj, "")
+	keys, values := handler.extractNestedJSON("APP", jsonObj)
 
 	if len(keys) < 4 {
 		t.Errorf("extractNestedJSON() expected at least 4 keys for array of objects, got %d: %v", len(keys), keys)
@@ -328,7 +327,7 @@ func TestExtractNestedJSONWithGroupPrefixAlreadyPresent(t *testing.T) {
 	}
 
 	// prefix already starts with groupPrefix
-	keys, values := handler.extractNestedJSON("GRP_CONFIG", jsonObj, "GRP")
+	keys, values := handler.extractNestedJSON("GRP_CONFIG", jsonObj)
 
 	if len(keys) != 1 {
 		t.Errorf("extractNestedJSON() expected 1 key, got %d: %v", len(keys), keys)
@@ -371,7 +370,7 @@ func BenchmarkExtractNestedJSON(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		handler.extractNestedJSON("CONFIG", jsonObj, "")
+		handler.extractNestedJSON("CONFIG", jsonObj)
 	}
 }
 

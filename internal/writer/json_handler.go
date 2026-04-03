@@ -3,7 +3,6 @@ package writer
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/somaz94/env-output-setter/internal/jsonutil"
 	"github.com/somaz94/env-output-setter/internal/printer"
@@ -48,7 +47,7 @@ func (h *JSONHandler) ProcessJSONValues(keyList, valueList []string) ([]string, 
 		switch typedData := jsonData.(type) {
 		case map[string]interface{}:
 			// Handle JSON object
-			nestedKeys, nestedValues := h.extractNestedJSON(key, typedData, "")
+			nestedKeys, nestedValues := h.extractNestedJSON(key, typedData)
 			resultKeys = append(resultKeys, nestedKeys...)
 			resultValues = append(resultValues, nestedValues...)
 		case []interface{}:
@@ -60,7 +59,7 @@ func (h *JSONHandler) ProcessJSONValues(keyList, valueList []string) ([]string, 
 
 				// Process nested objects in arrays
 				if mapItem, ok := item.(map[string]interface{}); ok {
-					objKeys, objValues := h.extractNestedJSON(arrayKey, mapItem, "")
+					objKeys, objValues := h.extractNestedJSON(arrayKey, mapItem)
 					resultKeys = append(resultKeys, objKeys...)
 					resultValues = append(resultValues, objValues...)
 				}
@@ -73,25 +72,19 @@ func (h *JSONHandler) ProcessJSONValues(keyList, valueList []string) ([]string, 
 
 // extractNestedJSON flattens a nested JSON object into key-value pairs.
 // It recursively processes nested objects and arrays, creating concatenated keys.
-func (h *JSONHandler) extractNestedJSON(prefix string, jsonObj map[string]interface{}, groupPrefix string) ([]string, []string) {
+func (h *JSONHandler) extractNestedJSON(prefix string, jsonObj map[string]interface{}) ([]string, []string) {
 	var keys []string
 	var values []string
 
-	// Prepare the key prefix with group prefix if provided
-	keyPrefix := prefix
-	if groupPrefix != "" && !strings.HasPrefix(prefix, groupPrefix) {
-		keyPrefix = fmt.Sprintf("%s_%s", groupPrefix, prefix)
-	}
-
 	// Process each property in the JSON object
 	for propKey, propValue := range jsonObj {
-		nestedKey := fmt.Sprintf("%s_%s", keyPrefix, propKey)
+		nestedKey := fmt.Sprintf("%s_%s", prefix, propKey)
 
 		// Handle different value types
 		switch typedValue := propValue.(type) {
 		case map[string]interface{}:
 			// Recursively process nested objects
-			nestedKeys, nestedValues := h.extractNestedJSON(nestedKey, typedValue, "")
+			nestedKeys, nestedValues := h.extractNestedJSON(nestedKey, typedValue)
 			keys = append(keys, nestedKeys...)
 			values = append(values, nestedValues...)
 		case []interface{}:
@@ -103,7 +96,7 @@ func (h *JSONHandler) extractNestedJSON(prefix string, jsonObj map[string]interf
 
 				// Process objects within arrays
 				if mapItem, ok := item.(map[string]interface{}); ok {
-					subKeys, subValues := h.extractNestedJSON(arrayKey, mapItem, "")
+					subKeys, subValues := h.extractNestedJSON(arrayKey, mapItem)
 					keys = append(keys, subKeys...)
 					values = append(values, subValues...)
 				}

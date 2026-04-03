@@ -94,7 +94,12 @@ func (t *Transformer) TransformValue(value string, supportJSON bool) string {
 		return t.handleJSONValue(value)
 	}
 
-	// Apply transformations in sequence
+	return t.applyTransformations(value)
+}
+
+// applyTransformations applies all non-JSON transformations in sequence:
+// case conversion, URL encoding, newline escaping, and length limitation.
+func (t *Transformer) applyTransformations(value string) string {
 	result := value
 
 	// 1. Apply case conversion (mutually exclusive)
@@ -120,31 +125,15 @@ func (t *Transformer) TransformValue(value string, supportJSON bool) string {
 
 // handleJSONValue processes a value that appears to be JSON.
 // It validates the JSON and returns it unchanged if valid.
+// If JSON is invalid, it falls back to normal transformations.
 func (t *Transformer) handleJSONValue(value string) string {
-	// Verify the JSON is valid
 	var jsonObj interface{}
 	if err := json.Unmarshal([]byte(value), &jsonObj); err == nil {
-		// Valid JSON is returned as-is
 		return value
 	}
 
-	// If JSON is invalid, proceed with normal transformations
-	result := value
-	result = t.applyCaseConversion(result)
-
-	if t.encodeURL {
-		result = url.QueryEscape(result)
-	}
-
-	if t.escapeNewlines {
-		result = t.escapeNewlineCharacters(result)
-	}
-
-	if t.maxLength > 0 && len(result) > t.maxLength {
-		result = result[:t.maxLength]
-	}
-
-	return result
+	// Invalid JSON — apply normal transformations
+	return t.applyTransformations(value)
 }
 
 // applyCaseConversion applies upper or lower case conversion if enabled.
