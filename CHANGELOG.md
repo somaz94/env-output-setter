@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-04-13)
+
+### Builds
+
+- **deps:** bump dependabot/fetch-metadata from 2 to 3 ([6ad27e7](https://github.com/somaz94/env-output-setter/commit/6ad27e75b9d8cdcce633d8e8ba02bd75b09f8661))
+
+<br/>
+
 ## [v1.7.0](https://github.com/somaz94/env-output-setter/compare/v1.6.1...v1.7.0) (2026-04-03)
 
 ### Bug Fixes
