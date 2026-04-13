@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Builds
 
+- **deps:** bump softprops/action-gh-release from 2 to 3 ([e98c27d](https://github.com/somaz94/env-output-setter/commit/e98c27d8f42bc6b23883ba99f949716823728e01))
 - **deps:** bump dependabot/fetch-metadata from 2 to 3 ([6ad27e7](https://github.com/somaz94/env-output-setter/commit/6ad27e75b9d8cdcce633d8e8ba02bd75b09f8661))
 
 <br/>
