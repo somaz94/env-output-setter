@@ -2,13 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-04-13)
+## [v1.7.1](https://github.com/somaz94/env-output-setter/compare/v1.7.0...v1.7.1) (2026-05-28)
+
+### Bug Fixes
+
+- **writer:** buffer payload before append and propagate Close error ([4245dde](https://github.com/somaz94/env-output-setter/commit/4245ddef4bafd4aecb789616634c708ee1f0928e))
+- **transformer:** use rune-aware truncation and masking for UTF-8 safety ([a3d96e5](https://github.com/somaz94/env-output-setter/commit/a3d96e56103bdcb55eb9d20706f1e3e467038570))
+
+### Code Refactoring
+
+- route library warnings to stderr and guard empty varType ([a21f699](https://github.com/somaz94/env-output-setter/commit/a21f699e61d07757e40ab8da58fdb00c60ae3b83))
+- **cmd:** drop dead status var and emit action_status output key ([9d26fce](https://github.com/somaz94/env-output-setter/commit/9d26fce83b2e25a0cd79acf7bc86ed99c8f1a4ba))
+- **config:** align DEBUG_MODE input name and apply gofmt ([a0e8d4b](https://github.com/somaz94/env-output-setter/commit/a0e8d4bfe52abf32eba284a768dd85f91bdd2eee))
+- **validator:** stop mutating caller slices in ValidateInputs ([f7c277a](https://github.com/somaz94/env-output-setter/commit/f7c277abfcb0b09368896cbf94a064b44f6164f9))
 
 ### Builds
 
 - **deps:** bump actions/github-script from 8 to 9 ([4f8fb8e](https://github.com/somaz94/env-output-setter/commit/4f8fb8ec3340ec3509dfc5409c8b4aa8daf35a34))
 - **deps:** bump softprops/action-gh-release from 2 to 3 ([e98c27d](https://github.com/somaz94/env-output-setter/commit/e98c27d8f42bc6b23883ba99f949716823728e01))
 - **deps:** bump dependabot/fetch-metadata from 2 to 3 ([6ad27e7](https://github.com/somaz94/env-output-setter/commit/6ad27e75b9d8cdcce633d8e8ba02bd75b09f8661))
+
+### Continuous Integration
+
+- add concurrency guards to recurring workflows ([3492acd](https://github.com/somaz94/env-output-setter/commit/3492acd4315d2d0207e968246302dd4d75dd034d))
+- use go-docker-action-ci-action@v1 (replace inline prelude) ([01facb6](https://github.com/somaz94/env-output-setter/commit/01facb6f8e2e3c72fdda81408eb0a61f7079815f))
+
+### Contributors
+
+- somaz
 
 <br/>
 
