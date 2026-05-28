@@ -76,8 +76,8 @@ func TestWriteOutputs(t *testing.T) {
 		if !strings.Contains(content, "set_output_count=2") {
 			t.Errorf("expected 'set_output_count=2' in output, got %q", content)
 		}
-		if !strings.Contains(content, "status=success") {
-			t.Errorf("expected 'status=success' in output, got %q", content)
+		if !strings.Contains(content, "action_status=success") {
+			t.Errorf("expected 'action_status=success' in output, got %q", content)
 		}
 	})
 
@@ -100,8 +100,8 @@ func TestWriteOutputs(t *testing.T) {
 		}
 
 		content := string(data)
-		if !strings.Contains(content, "status=failure") {
-			t.Errorf("expected 'status=failure' in output, got %q", content)
+		if !strings.Contains(content, "action_status=failure") {
+			t.Errorf("expected 'action_status=failure' in output, got %q", content)
 		}
 		if !strings.Contains(content, "error_message=something went wrong") {
 			t.Errorf("expected error message in output, got %q", content)
