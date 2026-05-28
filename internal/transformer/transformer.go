@@ -4,10 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/somaz94/env-output-setter/internal/jsonutil"
+)
+
+// Masking constants used across MaskValue and CustomMask.
+const (
+	maskChar = "*"
+	fullMask = "***"
 )
 
 // TransformationError represents an error that occurs during value transformation.
@@ -61,7 +68,9 @@ func New(
 		var err error
 		pattern, err = regexp.Compile(maskPattern)
 		if err != nil {
-			fmt.Printf("Warning: Invalid mask pattern '%s': %v\n", maskPattern, err)
+			// Library code logs to stderr instead of stdout so it does not
+			// corrupt action outputs or get parsed as a key=value line.
+			fmt.Fprintf(os.Stderr, "Warning: Invalid mask pattern %q: %v\n", maskPattern, err)
 		}
 	}
 
@@ -115,9 +124,12 @@ func (t *Transformer) applyTransformations(value string) string {
 		result = t.escapeNewlineCharacters(result)
 	}
 
-	// 4. Apply length limitation if configured
-	if t.maxLength > 0 && len(result) > t.maxLength {
-		result = result[:t.maxLength]
+	// 4. Apply length limitation if configured (rune-aware to preserve UTF-8 boundaries)
+	if t.maxLength > 0 {
+		runes := []rune(result)
+		if len(runes) > t.maxLength {
+			result = string(runes[:t.maxLength])
+		}
 	}
 
 	return result
@@ -156,6 +168,7 @@ func (t *Transformer) escapeNewlineCharacters(value string) string {
 
 // MaskValue applies masking to sensitive values to hide their content.
 // It uses different masking strategies based on the configuration and value length.
+// Operates on runes to preserve UTF-8 boundaries.
 func (t *Transformer) MaskValue(value string) string {
 	// Skip masking if disabled or value is empty
 	if !t.maskSecrets || value == "" {
@@ -164,43 +177,47 @@ func (t *Transformer) MaskValue(value string) string {
 
 	// Apply regex pattern masking if configured and matched
 	if t.maskPattern != nil && t.maskPattern.MatchString(value) {
-		return "***"
+		return fullMask
 	}
 
+	runes := []rune(value)
+
 	// Apply full masking for short values
-	if len(value) <= 4 {
-		return "***"
+	if len(runes) <= 4 {
+		return fullMask
 	}
 
 	// Default masking: show first 2 characters and mask the rest
 	const visiblePrefix = 2
-	return value[:visiblePrefix] + strings.Repeat("*", len(value)-visiblePrefix)
+	return string(runes[:visiblePrefix]) + strings.Repeat(maskChar, len(runes)-visiblePrefix)
 }
 
 // CustomMask applies a custom masking pattern with configurable visible
 // prefix and suffix lengths. This allows for more precise control over
-// what parts of a value remain visible.
+// what parts of a value remain visible. Operates on runes to preserve UTF-8.
 func (t *Transformer) CustomMask(value string, visiblePrefix, visibleSuffix int) string {
+	runes := []rune(value)
+
 	// Handle empty strings or values too short for the requested visibility
-	if value == "" || len(value) <= (visiblePrefix+visibleSuffix) {
-		return "***"
+	if len(runes) == 0 || len(runes) <= (visiblePrefix+visibleSuffix) {
+		return fullMask
 	}
 
 	// Extract visible prefix if requested
 	prefix := ""
 	if visiblePrefix > 0 {
-		prefix = value[:visiblePrefix]
+		prefix = string(runes[:visiblePrefix])
 	}
 
 	// Extract visible suffix if requested
 	suffix := ""
 	if visibleSuffix > 0 {
-		suffix = value[len(value)-visibleSuffix:]
+		suffix = string(runes[len(runes)-visibleSuffix:])
 	}
 
 	// Create mask string for the middle portion
-	maskedLength := len(value) - visiblePrefix - visibleSuffix
-	maskString := strings.Repeat("*", maskedLength)
+	maskedLength := len(runes) - visiblePrefix - visibleSuffix
+	maskString := strings.Repeat(maskChar, maskedLength)
 
 	// Combine the parts
 	return prefix + maskString + suffix
