@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -297,34 +298,19 @@ func TestSetOutputWithExportAsEnv(t *testing.T) {
 	}
 }
 
-func TestWriteGitHubActionsFormat(t *testing.T) {
-	tmpDir := t.TempDir()
-	testFile := filepath.Join(tmpDir, "test_output")
+func TestAppendGitHubActionsFormat(t *testing.T) {
+	var buf bytes.Buffer
 
-	file, err := os.Create(testFile)
-	if err != nil {
-		t.Fatalf("Failed to create test file: %v", err)
-	}
-	defer file.Close()
-
-	err = writeGitHubActionsFormat(file, "TEST_KEY", "TEST_VALUE")
-	if err != nil {
-		t.Errorf("writeGitHubActionsFormat() unexpected error: %v", err)
+	if err := appendGitHubActionsFormat(&buf, "TEST_KEY", "TEST_VALUE"); err != nil {
+		t.Errorf("appendGitHubActionsFormat() unexpected error: %v", err)
 	}
 
-	file.Close()
-
-	content, err := os.ReadFile(testFile)
-	if err != nil {
-		t.Fatalf("Failed to read test file: %v", err)
-	}
-
-	got := string(content)
+	got := buf.String()
 	if !strings.HasPrefix(got, "TEST_KEY<<EOF_") {
-		t.Errorf("writeGitHubActionsFormat() expected prefix 'TEST_KEY<<EOF_', got %q", got)
+		t.Errorf("appendGitHubActionsFormat() expected prefix 'TEST_KEY<<EOF_', got %q", got)
 	}
 	if !strings.Contains(got, "\nTEST_VALUE\n") {
-		t.Errorf("writeGitHubActionsFormat() expected value 'TEST_VALUE' in content, got %q", got)
+		t.Errorf("appendGitHubActionsFormat() expected value 'TEST_VALUE' in content, got %q", got)
 	}
 }
 

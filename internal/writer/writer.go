@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -166,25 +167,32 @@ func (w *Writer) handleLocalExecution(envVar, varType string, keyList, valueList
 	return len(keyList), nil
 }
 
+// Status key names written to $GITHUB_ENV/$GITHUB_OUTPUT.
+const (
+	statusKey  = "action_status"
+	errMsgKey  = "error_message"
+	statusOK   = "success"
+	statusFail = "failure"
+)
+
 // writeToFile writes key-value pairs to a file with retry logic.
-// It attempts to write up to maxRetries times with delays between attempts.
+// It builds the full payload in a buffer first and appends atomically per attempt,
+// so a failed attempt never leaves partial lines behind for the next retry to duplicate.
 func (w *Writer) writeToFile(filePath string, keys, values []string, varType string) (int, error) {
 	maxRetries := 3
 	retryDelay := time.Second
 	var lastError error
 
-	// Attempt writing with retries
 	for retry := 0; retry < maxRetries; retry++ {
 		count, err := w.performWrite(filePath, keys, values, varType)
 		if err == nil {
-			// Success - write action status
-			if _, err := w.performWrite(filePath, []string{"action_status"}, []string{"success"}, varType); err != nil {
-				printer.PrintWarning(fmt.Sprintf("Warning: failed to write success status: %v", err))
+			// Success - write action status (best-effort)
+			if _, statusErr := w.performWrite(filePath, []string{statusKey}, []string{statusOK}, varType); statusErr != nil {
+				printer.PrintWarning(fmt.Sprintf("Warning: failed to write success status: %v", statusErr))
 			}
 			return count, nil
 		}
 
-		// Handle error
 		lastError = err
 		if retry < maxRetries-1 {
 			printer.PrintError(fmt.Sprintf("Retry %d/%d: Failed to write to file: %v",
@@ -193,10 +201,14 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 		}
 	}
 
-	// Write failure status after exhausting retries
+	// Write failure status after exhausting retries (best-effort)
+	failMsg := ""
+	if lastError != nil {
+		failMsg = lastError.Error()
+	}
 	if _, err := w.performWrite(filePath,
-		[]string{"action_status", "error_message"},
-		[]string{"failure", lastError.Error()},
+		[]string{statusKey, errMsgKey},
+		[]string{statusFail, failMsg},
 		varType); err != nil {
 		printer.PrintWarning(fmt.Sprintf("Warning: failed to write failure status: %v", err))
 	}
@@ -205,16 +217,12 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 }
 
 // performWrite writes key-value pairs to a file in GitHub Actions format.
-// It handles file opening, value transformation, and formatting.
-func (w *Writer) performWrite(filePath string, keys, values []string, varType string) (int, error) {
-	// Open the file
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return 0, fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	// Create transformer for values
+// All lines are serialized into an in-memory buffer first and flushed in a single
+// WriteString call so a partial failure leaves the file untouched (atomicity per call).
+// The file's Close error is propagated via the named return so disk-full / NFS errors
+// surface to the caller instead of being silently discarded.
+func (w *Writer) performWrite(filePath string, keys, values []string, varType string) (count int, err error) {
+	// Build the full payload in memory before opening the file.
 	valueTransformer := transformer.New(
 		w.cfg.MaskSecrets,
 		w.cfg.MaskPattern,
@@ -225,40 +233,62 @@ func (w *Writer) performWrite(filePath string, keys, values []string, varType st
 		w.cfg.MaxLength,
 	)
 
-	// Write header in debug mode
 	if w.cfg.DebugMode {
 		fmt.Printf("Writing Values:\n")
 	}
 
-	// Write each key-value pair
-	count := 0
+	var buf bytes.Buffer
+	type successMsg struct{ key, masked string }
+	var successes []successMsg
+
 	for i, key := range keys {
 		// Skip empty keys unless allowed
 		if key == "" && !w.cfg.AllowEmpty {
 			continue
 		}
 
-		// Apply whitespace trimming if configured
+		// Apply whitespace trimming if configured (non-mutating: trim local copies only)
+		k := key
+		v := values[i]
 		if w.cfg.TrimWhitespace {
-			key = strings.TrimSpace(key)
-			values[i] = strings.TrimSpace(values[i])
+			k = strings.TrimSpace(k)
+			v = strings.TrimSpace(v)
 		}
 
-		// Transform and write the value
-		transformedValue := valueTransformer.TransformValue(values[i], w.cfg.JsonSupport)
-		if err := writeGitHubActionsFormat(file, key, transformedValue); err != nil {
-			return count, err
+		transformedValue := valueTransformer.TransformValue(v, w.cfg.JsonSupport)
+		if werr := appendGitHubActionsFormat(&buf, k, transformedValue); werr != nil {
+			return 0, werr
 		}
 
-		// Print success message with masking (skip internal status variables)
-		if key != "action_status" && key != "error_message" {
-			maskedValue := valueTransformer.MaskValue(transformedValue)
-			printer.PrintSuccess(varType, key, maskedValue)
+		if k != statusKey && k != errMsgKey {
+			successes = append(successes, successMsg{k, valueTransformer.MaskValue(transformedValue)})
 		}
 		count++
 	}
 
-	// Write footer in debug mode
+	// Now open the file and flush the buffer in one write.
+	file, openErr := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if openErr != nil {
+		return 0, fmt.Errorf("failed to open file: %w", openErr)
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+			count = 0
+		}
+	}()
+
+	if _, werr := file.Write(buf.Bytes()); werr != nil {
+		return 0, fmt.Errorf("failed to write payload: %w", werr)
+	}
+	if serr := file.Sync(); serr != nil {
+		return 0, fmt.Errorf("failed to sync file: %w", serr)
+	}
+
+	for _, s := range successes {
+		printer.PrintSuccess(varType, s.key, s.masked)
+	}
+
 	if w.cfg.DebugMode {
 		fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 	}
@@ -266,17 +296,14 @@ func (w *Writer) performWrite(filePath string, keys, values []string, varType st
 	return count, nil
 }
 
-// writeGitHubActionsFormat writes a key-value pair in GitHub Actions format.
+// appendGitHubActionsFormat appends a key-value pair to buf in GitHub Actions multiline format.
 // Uses a random delimiter to avoid collisions with value content.
-func writeGitHubActionsFormat(file *os.File, key, value string) error {
+func appendGitHubActionsFormat(buf *bytes.Buffer, key, value string) error {
 	delimiter, err := randomDelimiter()
 	if err != nil {
 		return fmt.Errorf("failed to generate delimiter: %w", err)
 	}
-	line := fmt.Sprintf("%s<<%s\n%s\n%s\n", key, delimiter, value, delimiter)
-	if _, err := file.WriteString(line); err != nil {
-		return fmt.Errorf("failed to write line: %w", err)
-	}
+	fmt.Fprintf(buf, "%s<<%s\n%s\n%s\n", key, delimiter, value, delimiter)
 	return nil
 }
 
