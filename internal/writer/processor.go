@@ -67,7 +67,9 @@ func (p *Processor) ProcessInputValues(keys, values string) ([]string, []string,
 // splitJSONAware splits a string by delimiter while preserving JSON objects and arrays.
 // It tracks brace/bracket depth so delimiters inside JSON are not treated as separators.
 func (p *Processor) splitJSONAware(s, delimiter string) []string {
-	if delimiter == "" || !strings.Contains(s, "{") && !strings.Contains(s, "[") {
+	// Fast path: no JSON markers means we can use the plain splitter.
+	// Parens make the operator precedence explicit (A || (B && C)).
+	if delimiter == "" || (!strings.Contains(s, "{") && !strings.Contains(s, "[")) {
 		return strings.Split(s, delimiter)
 	}
 
@@ -162,11 +164,20 @@ func (p *Processor) LogInputValues(varType, keys, values string) {
 		return
 	}
 
-	printer.PrintDebugSection(strings.ToUpper(varType[:1]) + varType[1:])
+	printer.PrintDebugSection(titleCase(varType))
 	printer.PrintDebugInfo("Input Values:\n")
 	printer.PrintDebugInfo("  * Keys:      %q\n", keys)
 	printer.PrintDebugInfo("  * Values:    %q\n", values)
 	printer.PrintDebugInfo("  * Delimiter: %q\n\n", p.cfg.Delimiter)
+}
+
+// titleCase upper-cases the first ASCII byte of s and returns the rest unchanged.
+// Returns s unchanged when empty to avoid a slice-out-of-range panic.
+func titleCase(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
 // LogProcessedValues logs the processed key-value pairs if debug mode is enabled.
