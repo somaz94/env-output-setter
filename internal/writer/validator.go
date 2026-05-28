@@ -37,14 +37,15 @@ func (v *Validator) ValidatePairs(keys, values []string) error {
 }
 
 // ValidateInputs checks for empty values and duplicate keys based on configuration.
+// It does not mutate the caller's slices; whitespace trimming is applied to local
+// copies only (the processor pipeline already trims before this point).
 func (v *Validator) ValidateInputs(keys, values []string) error {
-	seenKeys := make(map[string]bool)
+	seenKeys := make(map[string]struct{})
 
 	for i, key := range keys {
-		// Apply trimming if configured
+		// Apply trimming if configured (local copy only — do not mutate caller slice)
 		if v.cfg.TrimWhitespace {
 			key = strings.TrimSpace(key)
-			keys[i] = key
 		}
 
 		// Prepare key for duplicate checking
@@ -60,10 +61,10 @@ func (v *Validator) ValidateInputs(keys, values []string) error {
 
 		// Check for duplicate keys if configured
 		if v.cfg.ErrorOnDuplicate {
-			if seenKeys[lookupKey] {
+			if _, ok := seenKeys[lookupKey]; ok {
 				return fmt.Errorf(errDuplicateKey, key)
 			}
-			seenKeys[lookupKey] = true
+			seenKeys[lookupKey] = struct{}{}
 		}
 	}
 
