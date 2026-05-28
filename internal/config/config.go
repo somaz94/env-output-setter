@@ -8,26 +8,26 @@ import (
 
 // Input environment variable names
 const (
-	EnvKeyInput           = "INPUT_ENV_KEY"
-	EnvValueInput         = "INPUT_ENV_VALUE"
-	OutputKeyInput        = "INPUT_OUTPUT_KEY"
-	OutputValueInput      = "INPUT_OUTPUT_VALUE"
-	DelimiterInput        = "INPUT_DELIMITER"
-	FailOnEmptyInput      = "INPUT_FAIL_ON_EMPTY"
-	TrimWhitespaceInput   = "INPUT_TRIM_WHITESPACE"
-	CaseSensitiveInput    = "INPUT_CASE_SENSITIVE"
-	ErrorOnDuplicateInput = "INPUT_ERROR_ON_DUPLICATE"
-	MaskSecretsInput      = "INPUT_MASK_SECRETS"
-	MaskPatternInput      = "INPUT_MASK_PATTERN"
-	ToUpperInput          = "INPUT_TO_UPPER"
-	ToLowerInput          = "INPUT_TO_LOWER"
-	EncodeURLInput        = "INPUT_ENCODE_URL"
-	EscapeNewlinesInput   = "INPUT_ESCAPE_NEWLINES"
-	MaxLengthInput        = "INPUT_MAX_LENGTH"
-	AllowEmptyInput       = "INPUT_ALLOW_EMPTY"
-	DebugModeInput        = "DEBUG_MODE"
-	GroupPrefixInput      = "INPUT_GROUP_PREFIX"
-	JsonSupportInput      = "INPUT_JSON_SUPPORT"
+	EnvKeyInput              = "INPUT_ENV_KEY"
+	EnvValueInput            = "INPUT_ENV_VALUE"
+	OutputKeyInput           = "INPUT_OUTPUT_KEY"
+	OutputValueInput         = "INPUT_OUTPUT_VALUE"
+	DelimiterInput           = "INPUT_DELIMITER"
+	FailOnEmptyInput         = "INPUT_FAIL_ON_EMPTY"
+	TrimWhitespaceInput      = "INPUT_TRIM_WHITESPACE"
+	CaseSensitiveInput       = "INPUT_CASE_SENSITIVE"
+	ErrorOnDuplicateInput    = "INPUT_ERROR_ON_DUPLICATE"
+	MaskSecretsInput         = "INPUT_MASK_SECRETS"
+	MaskPatternInput         = "INPUT_MASK_PATTERN"
+	ToUpperInput             = "INPUT_TO_UPPER"
+	ToLowerInput             = "INPUT_TO_LOWER"
+	EncodeURLInput           = "INPUT_ENCODE_URL"
+	EscapeNewlinesInput      = "INPUT_ESCAPE_NEWLINES"
+	MaxLengthInput           = "INPUT_MAX_LENGTH"
+	AllowEmptyInput          = "INPUT_ALLOW_EMPTY"
+	DebugModeInput           = "INPUT_DEBUG_MODE"
+	GroupPrefixInput         = "INPUT_GROUP_PREFIX"
+	JsonSupportInput         = "INPUT_JSON_SUPPORT"
 	ExportAsEnvInput         = "INPUT_EXPORT_AS_ENV"
 	EnableInterpolationInput = "INPUT_ENABLE_INTERPOLATION"
 	FileEncodingInput        = "INPUT_FILE_ENCODING"
@@ -42,22 +42,22 @@ const (
 
 // Default values for configuration parameters
 const (
-	DefaultDelimiter        = ","
-	DefaultFailOnEmpty      = true
-	DefaultTrimWhitespace   = true
-	DefaultCaseSensitive    = true
-	DefaultErrorOnDuplicate = true
-	DefaultMaskSecrets      = false
-	DefaultMaskPattern      = ""
-	DefaultToUpper          = false
-	DefaultToLower          = false
-	DefaultEncodeURL        = false
-	DefaultEscapeNewlines   = true
-	DefaultMaxLength        = 0
-	DefaultAllowEmpty       = false
-	DefaultDebugMode        = false
-	DefaultGroupPrefix      = ""
-	DefaultJsonSupport      = false
+	DefaultDelimiter           = ","
+	DefaultFailOnEmpty         = true
+	DefaultTrimWhitespace      = true
+	DefaultCaseSensitive       = true
+	DefaultErrorOnDuplicate    = true
+	DefaultMaskSecrets         = false
+	DefaultMaskPattern         = ""
+	DefaultToUpper             = false
+	DefaultToLower             = false
+	DefaultEncodeURL           = false
+	DefaultEscapeNewlines      = true
+	DefaultMaxLength           = 0
+	DefaultAllowEmpty          = false
+	DefaultDebugMode           = false
+	DefaultGroupPrefix         = ""
+	DefaultJsonSupport         = false
 	DefaultExportAsEnv         = false
 	DefaultEnableInterpolation = false
 	DefaultFileEncoding        = "raw"
@@ -146,8 +146,8 @@ func Load() *Config {
 		DebugMode: getBoolEnv(DebugModeInput, DefaultDebugMode),
 
 		// Advanced Options
-		GroupPrefix: getEnvWithDefault(GroupPrefixInput, DefaultGroupPrefix),
-		JsonSupport: getBoolEnv(JsonSupportInput, DefaultJsonSupport),
+		GroupPrefix:         getEnvWithDefault(GroupPrefixInput, DefaultGroupPrefix),
+		JsonSupport:         getBoolEnv(JsonSupportInput, DefaultJsonSupport),
 		ExportAsEnv:         getBoolEnv(ExportAsEnvInput, DefaultExportAsEnv),
 		EnableInterpolation: getBoolEnv(EnableInterpolationInput, DefaultEnableInterpolation),
 		FileEncoding:        getEnvWithDefault(FileEncodingInput, DefaultFileEncoding),

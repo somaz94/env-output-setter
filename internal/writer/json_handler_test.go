@@ -152,11 +152,11 @@ func TestProcessJSONValues(t *testing.T) {
 
 func TestExtractNestedJSON(t *testing.T) {
 	tests := []struct {
-		name    string
-		prefix  string
-		jsonObj map[string]interface{}
-		minKeys int
-		minValues   int
+		name      string
+		prefix    string
+		jsonObj   map[string]interface{}
+		minKeys   int
+		minValues int
 	}{
 		{
 			name:   "Simple flat object",
@@ -166,8 +166,8 @@ func TestExtractNestedJSON(t *testing.T) {
 				"key2": "value2",
 			},
 
-			minKeys:     2,
-			minValues:   2,
+			minKeys:   2,
+			minValues: 2,
 		},
 		{
 			name:   "Nested object",
@@ -179,8 +179,8 @@ func TestExtractNestedJSON(t *testing.T) {
 				},
 			},
 
-			minKeys:     2,
-			minValues:   2,
+			minKeys:   2,
+			minValues: 2,
 		},
 		{
 			name:   "Object with array",
@@ -189,8 +189,8 @@ func TestExtractNestedJSON(t *testing.T) {
 				"items": []interface{}{"item1", "item2"},
 			},
 
-			minKeys:     2,
-			minValues:   2,
+			minKeys:   2,
+			minValues: 2,
 		},
 		{
 			name:   "Mixed types",
@@ -201,16 +201,16 @@ func TestExtractNestedJSON(t *testing.T) {
 				"count":   42,
 			},
 
-			minKeys:     3,
-			minValues:   3,
+			minKeys:   3,
+			minValues: 3,
 		},
 		{
-			name:        "Empty object",
-			prefix:      "EMPTY",
-			jsonObj:     map[string]interface{}{},
+			name:    "Empty object",
+			prefix:  "EMPTY",
+			jsonObj: map[string]interface{}{},
 
-			minKeys:     0,
-			minValues:   0,
+			minKeys:   0,
+			minValues: 0,
 		},
 		{
 			name:   "With group prefix",
@@ -219,8 +219,8 @@ func TestExtractNestedJSON(t *testing.T) {
 				"setting": "value",
 			},
 
-			minKeys:     1,
-			minValues:   1,
+			minKeys:   1,
+			minValues: 1,
 		},
 	}
 
