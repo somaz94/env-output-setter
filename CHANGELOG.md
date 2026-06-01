@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.8.0](https://github.com/somaz94/env-output-setter/compare/v1.7.3...v1.8.0) (2026-06-01)
+
+### Features
+
+- apply group_prefix to generated key names ([658c346](https://github.com/somaz94/env-output-setter/commit/658c346001e49d8b1f6bf273d1da9f79cd3ce8f7))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v1.7.3](https://github.com/somaz94/env-output-setter/compare/v1.7.2...v1.7.3) (2026-06-01)
 
 ### Documentation
