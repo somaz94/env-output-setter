@@ -58,11 +58,8 @@ This action supports value transformation and masking of sensitive data:
 
 ## Group Prefix and Variable Organization
 
-> **Note:** `group_prefix` is currently a reserved input. It is accepted and shown in
-> debug output, but it is **not** prepended to generated key names yet. Key names derive
-> from `env_key` / `output_key` (and JSON flattening), as the examples below show.
-
-The `group_prefix` option documents grouping intent for related variables:
+The `group_prefix` option namespaces related variables by prepending the prefix
+(plus an underscore separator) to **every** generated key name:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
@@ -72,7 +69,13 @@ The `group_prefix` option documents grouping intent for related variables:
     group_prefix: 'SYS'
 ```
 
-When combined with JSON support, the JSON properties are flattened under the original key:
+This creates the keys:
+- `SYS_DATABASE`
+- `SYS_API`
+- `SYS_CACHE`
+
+When combined with JSON support, the prefix is also applied to the
+JSON-flattened sub-keys:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
@@ -83,10 +86,14 @@ When combined with JSON support, the JSON properties are flattened under the ori
     group_prefix: 'APP'
 ```
 
-This creates variables named after `env_key` (the `group_prefix` is not applied):
-- `CONFIG_DATA`
-- `CONFIG_DATA_server_host`
-- `CONFIG_DATA_server_port`
+This creates the keys:
+- `APP_CONFIG_DATA`
+- `APP_CONFIG_DATA_server_host`
+- `APP_CONFIG_DATA_server_port`
+
+> **Note:** The status keys `action_status` and `error_message` are written
+> separately and are **never** prefixed, so downstream steps reading
+> `steps.<id>.outputs.action_status` keep working unchanged.
 
 <br/>
 

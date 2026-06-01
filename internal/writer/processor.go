@@ -61,7 +61,37 @@ func (p *Processor) ProcessInputValues(keys, values string) ([]string, []string,
 		keyList, valueList = jsonHandler.ProcessJSONValues(keyList, valueList)
 	}
 
+	// Prepend the group prefix to every generated key name (including
+	// JSON-flattened sub-keys) once the final key list is known.
+	if p.cfg.GroupPrefix != "" {
+		keyList = p.applyGroupPrefix(keyList)
+	}
+
 	return keyList, valueList, nil
+}
+
+// applyGroupPrefix prepends the configured group prefix and an underscore
+// separator to every non-empty key (e.g. prefix "APP" turns "DATABASE" into
+// "APP_DATABASE" and the JSON-flattened "CONFIG_server_host" into
+// "APP_CONFIG_server_host"). Empty keys are left untouched so an allow_empty
+// placeholder never becomes a bare "APP_" key. Status keys (action_status /
+// error_message) are written separately by the Writer and never pass through
+// here, so they keep their fixed downstream contract.
+func (p *Processor) applyGroupPrefix(keys []string) []string {
+	prefix := strings.TrimSpace(p.cfg.GroupPrefix)
+	if prefix == "" {
+		return keys
+	}
+
+	result := make([]string, len(keys))
+	for i, key := range keys {
+		if key == "" {
+			result[i] = key
+			continue
+		}
+		result[i] = prefix + "_" + key
+	}
+	return result
 }
 
 // splitJSONAware splits a string by delimiter while preserving JSON objects and arrays.

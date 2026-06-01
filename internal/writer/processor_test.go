@@ -36,6 +36,7 @@ func TestProcessInputValues(t *testing.T) {
 		allowEmpty     bool
 		trimWhitespace bool
 		jsonSupport    bool
+		groupPrefix    string
 		expectedKeys   []string
 		expectedValues []string
 	}{
@@ -116,6 +117,54 @@ func TestProcessInputValues(t *testing.T) {
 			expectedKeys:   []string{"KEY1", "KEY2"},
 			expectedValues: []string{"VALUE1 line2", "VALUE2"},
 		},
+		{
+			name:           "Group prefix applied to plain keys",
+			keys:           "DATABASE,API",
+			values:         "postgres,graphql",
+			delimiter:      ",",
+			allowEmpty:     false,
+			trimWhitespace: true,
+			jsonSupport:    false,
+			groupPrefix:    "APP",
+			expectedKeys:   []string{"APP_DATABASE", "APP_API"},
+			expectedValues: []string{"postgres", "graphql"},
+		},
+		{
+			name:           "Group prefix applied to JSON-flattened keys",
+			keys:           "CONFIG",
+			values:         `{"server":{"host":"example.com"}}`,
+			delimiter:      ",",
+			allowEmpty:     false,
+			trimWhitespace: true,
+			jsonSupport:    true,
+			groupPrefix:    "APP",
+			expectedKeys:   []string{"APP_CONFIG", "APP_CONFIG_server_host"},
+			expectedValues: []string{`{"server":{"host":"example.com"}}`, "example.com"},
+		},
+		{
+			name:           "Group prefix is trimmed before use",
+			keys:           "KEY1",
+			values:         "VALUE1",
+			delimiter:      ",",
+			allowEmpty:     false,
+			trimWhitespace: true,
+			jsonSupport:    false,
+			groupPrefix:    "  APP  ",
+			expectedKeys:   []string{"APP_KEY1"},
+			expectedValues: []string{"VALUE1"},
+		},
+		{
+			name:           "Group prefix skips empty allow_empty key",
+			keys:           "KEY1,,KEY3",
+			values:         "VALUE1,,VALUE3",
+			delimiter:      ",",
+			allowEmpty:     true,
+			trimWhitespace: true,
+			jsonSupport:    false,
+			groupPrefix:    "APP",
+			expectedKeys:   []string{"APP_KEY1", "", "APP_KEY3"},
+			expectedValues: []string{"VALUE1", "", "VALUE3"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -125,6 +174,7 @@ func TestProcessInputValues(t *testing.T) {
 				AllowEmpty:     tt.allowEmpty,
 				TrimWhitespace: tt.trimWhitespace,
 				JsonSupport:    tt.jsonSupport,
+				GroupPrefix:    tt.groupPrefix,
 			}
 
 			processor := NewProcessor(cfg)
@@ -671,4 +721,61 @@ func cleanupEnv() {
 	os.Unsetenv("INPUT_OUTPUT_VALUE")
 	os.Unsetenv("GITHUB_ENV")
 	os.Unsetenv("GITHUB_OUTPUT")
+}
+
+func TestApplyGroupPrefix(t *testing.T) {
+	tests := []struct {
+		name     string
+		prefix   string
+		keys     []string
+		expected []string
+	}{
+		{
+			name:     "Empty prefix returns keys unchanged",
+			prefix:   "",
+			keys:     []string{"KEY1", "KEY2"},
+			expected: []string{"KEY1", "KEY2"},
+		},
+		{
+			name:     "Whitespace-only prefix returns keys unchanged",
+			prefix:   "   ",
+			keys:     []string{"KEY1"},
+			expected: []string{"KEY1"},
+		},
+		{
+			name:     "Prefix prepended with underscore separator",
+			prefix:   "APP",
+			keys:     []string{"DATABASE", "CONFIG_server_host"},
+			expected: []string{"APP_DATABASE", "APP_CONFIG_server_host"},
+		},
+		{
+			name:     "Empty key left untouched",
+			prefix:   "APP",
+			keys:     []string{"KEY1", "", "KEY3"},
+			expected: []string{"APP_KEY1", "", "APP_KEY3"},
+		},
+		{
+			name:     "Prefix is used verbatim (no normalization)",
+			prefix:   "My_App",
+			keys:     []string{"KEY1"},
+			expected: []string{"My_App_KEY1"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &config.Config{GroupPrefix: tt.prefix}
+			processor := NewProcessor(cfg)
+			got := processor.applyGroupPrefix(tt.keys)
+
+			if len(got) != len(tt.expected) {
+				t.Fatalf("applyGroupPrefix() length = %d, want %d", len(got), len(tt.expected))
+			}
+			for i := range got {
+				if got[i] != tt.expected[i] {
+					t.Errorf("applyGroupPrefix()[%d] = %q, want %q", i, got[i], tt.expected[i])
+				}
+			}
+		})
+	}
 }

@@ -73,7 +73,7 @@ inputs:
     required: false
     default: 'false'
   group_prefix:
-    description: 'Reserved: grouping hint for related variables. Currently logged in debug mode only and not applied to key names.'
+    description: 'Prefix prepended (with an underscore separator) to every generated key name, including JSON-flattened sub-keys. Status keys (action_status/error_message) are not prefixed. Empty by default (no prefix).'
     required: false
     default: ''
   json_support:

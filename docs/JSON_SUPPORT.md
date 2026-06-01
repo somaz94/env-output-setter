@@ -64,7 +64,9 @@ This will create:
 
 ## Working with JSON and Group Prefix
 
-The `group_prefix` option documents grouping intent. Note that it is currently a reserved input and is **not** prepended to variable names — names keep their original structure:
+The `group_prefix` option namespaces related variables by prepending the prefix
+(plus an underscore separator) to every generated key, **including** the
+JSON-flattened sub-keys:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
@@ -76,16 +78,17 @@ The `group_prefix` option documents grouping intent. Note that it is currently a
     group_prefix: 'APP'
 ```
 
-When using `group_prefix`, variable names will include the prefix, but the JSON property extraction will maintain the original structure:
+The JSON property extraction preserves the original nested structure, and the
+prefix is applied on top of it:
 
-- `COMPLEX_CONFIG`: The full JSON object
-- `COMPLEX_CONFIG_server_host`: "example.com"
-- `COMPLEX_CONFIG_server_port`: "8080"
-
-Rather than:
+- `APP_COMPLEX_CONFIG`: The full JSON object
 - `APP_COMPLEX_CONFIG_server_host`: "example.com"
+- `APP_COMPLEX_CONFIG_server_port`: "8080"
+- `APP_API_SETTINGS`: The full JSON object
+- `APP_API_SETTINGS_version`: "2.0"
 
-This change makes variable naming more intuitive and consistent with other environment variables.
+Omit `group_prefix` (the default) to keep the original, unprefixed names such as
+`COMPLEX_CONFIG_server_host`.
 
 <br/>
 

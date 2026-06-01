@@ -183,6 +183,50 @@ func TestSetEnvWithFile(t *testing.T) {
 	}
 }
 
+func TestSetEnvWithGroupPrefix(t *testing.T) {
+	tmpDir := t.TempDir()
+	envFile := filepath.Join(tmpDir, "github_env")
+
+	os.Setenv(githubEnvVar, envFile)
+	defer os.Unsetenv(githubEnvVar)
+
+	cfg := &config.Config{
+		EnvKeys:        "DATABASE,API",
+		EnvValues:      "postgres,graphql",
+		Delimiter:      ",",
+		FailOnEmpty:    true,
+		TrimWhitespace: true,
+		GroupPrefix:    "APP",
+		GithubEnv:      envFile,
+	}
+
+	if _, err := SetEnv(cfg); err != nil {
+		t.Fatalf("SetEnv() unexpected error: %v", err)
+	}
+
+	content, err := os.ReadFile(envFile)
+	if err != nil {
+		t.Fatalf("Failed to read env file: %v", err)
+	}
+	contentStr := string(content)
+
+	// User keys must carry the prefix.
+	for _, key := range []string{"APP_DATABASE", "APP_API"} {
+		if !contains(contentStr, key) {
+			t.Errorf("SetEnv() file missing prefixed key %q", key)
+		}
+	}
+
+	// The status key is written separately and must NOT be prefixed,
+	// so downstream steps reading steps.X.outputs.action_status keep working.
+	if contains(contentStr, "APP_"+statusKey) {
+		t.Errorf("SetEnv() must not prefix the status key, found APP_%s", statusKey)
+	}
+	if !contains(contentStr, statusKey) {
+		t.Errorf("SetEnv() file missing unprefixed status key %q", statusKey)
+	}
+}
+
 func TestSetOutputWithFile(t *testing.T) {
 	// Create temporary file
 	tmpDir := t.TempDir()

@@ -24,7 +24,7 @@
 | `max_length`       | No       | Maximum allowed length for values (0 for unlimited) | `0`     | `"10"`                        |
 | `allow_empty`      | No       | Allow empty values even when fail_on_empty is true  | `false` | `"true"`                      |
 | `debug_mode`       | No       | Enable debug logging for troubleshooting           | `false` | `"true"`                      |
-| `group_prefix`     | No       | Reserved grouping hint; not yet applied to key names | `""`    | `"CONFIG"`                    |
+| `group_prefix`     | No       | Prefix (plus `_`) prepended to every generated key name | `""`    | `"CONFIG"`                    |
 | `json_support`     | No       | Enable JSON parsing for complex values             | `false` | `"true"`                      |
 | `export_as_env`    | No       | Export output variables as environment variables   | `false` | `"true"`                      |
 
