@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.7.3](https://github.com/somaz94/env-output-setter/compare/v1.7.2...v1.7.3) (2026-06-01)
+
+### Documentation
+
+- clarify group_prefix is a reserved input not applied to key names ([9977c40](https://github.com/somaz94/env-output-setter/commit/9977c4062ebec746e1b648968ef261280ba56d75))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v1.7.2](https://github.com/somaz94/env-output-setter/compare/v1.7.1...v1.7.2) (2026-06-01)
 
 ### Code Refactoring
