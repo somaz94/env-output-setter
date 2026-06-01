@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.7.2](https://github.com/somaz94/env-output-setter/compare/v1.7.1...v1.7.2) (2026-06-01)
+
+### Code Refactoring
+
+- dedupe github env var literals and align file-close error handling ([86c0b98](https://github.com/somaz94/env-output-setter/commit/86c0b985329bde2d5de1f8425835e694ecf39291))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v1.7.1](https://github.com/somaz94/env-output-setter/compare/v1.7.0...v1.7.1) (2026-05-28)
 
 ### Bug Fixes
