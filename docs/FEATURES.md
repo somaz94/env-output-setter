@@ -58,7 +58,11 @@ This action supports value transformation and masking of sensitive data:
 
 ## Group Prefix and Variable Organization
 
-The `group_prefix` option helps organize related variables:
+> **Note:** `group_prefix` is currently a reserved input. It is accepted and shown in
+> debug output, but it is **not** prepended to generated key names yet. Key names derive
+> from `env_key` / `output_key` (and JSON flattening), as the examples below show.
+
+The `group_prefix` option documents grouping intent for related variables:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
@@ -68,7 +72,7 @@ The `group_prefix` option helps organize related variables:
     group_prefix: 'SYS'
 ```
 
-When combined with JSON support, it intelligently groups JSON properties under common prefixes:
+When combined with JSON support, the JSON properties are flattened under the original key:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
@@ -79,7 +83,7 @@ When combined with JSON support, it intelligently groups JSON properties under c
     group_prefix: 'APP'
 ```
 
-This creates variables with consistent naming:
+This creates variables named after `env_key` (the `group_prefix` is not applied):
 - `CONFIG_DATA`
 - `CONFIG_DATA_server_host`
 - `CONFIG_DATA_server_port`

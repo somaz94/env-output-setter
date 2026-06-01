@@ -73,7 +73,7 @@ inputs:
     required: false
     default: 'false'
   group_prefix:
-    description: 'Prefix to group related environment variables'
+    description: 'Reserved: grouping hint for related variables. Currently logged in debug mode only and not applied to key names.'
     required: false
     default: ''
   json_support:

@@ -64,7 +64,7 @@ This will create:
 
 ## Working with JSON and Group Prefix
 
-The `group_prefix` option can be used to add a prefix to all environment variables:
+The `group_prefix` option documents grouping intent. Note that it is currently a reserved input and is **not** prepended to variable names — names keep their original structure:
 
 ```yaml
 - uses: somaz94/env-output-setter@v1
