@@ -153,7 +153,8 @@ func (t *Transformer) handleJSONValue(value string) string {
 func (t *Transformer) applyCaseConversion(value string) string {
 	if t.toUpper {
 		return strings.ToUpper(value)
-	} else if t.toLower {
+	}
+	if t.toLower {
 		return strings.ToLower(value)
 	}
 	return value

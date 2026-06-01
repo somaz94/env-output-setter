@@ -27,10 +27,10 @@ const (
 	outputFileType = "output"
 )
 
-// GitHub environment variables
+// GitHub environment variables (aliased to the config package to avoid literal divergence)
 const (
-	githubEnvVar    = "GITHUB_ENV"
-	githubOutputVar = "GITHUB_OUTPUT"
+	githubEnvVar    = config.GithubEnvVar
+	githubOutputVar = config.GithubOutputVar
 )
 
 // Writer handles writing environment variables and outputs to GitHub Actions files.

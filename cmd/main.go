@@ -82,7 +82,7 @@ func logAdvancedFeatures(cfg *config.Config) {
 // Failures are reported to stderr (not stdout) so they do not pollute the
 // action's regular log stream.
 func writeOutputs(envCount, outputCount int, status, errorMsg string) {
-	outputFile := os.Getenv("GITHUB_OUTPUT")
+	outputFile := os.Getenv(config.GithubOutputVar)
 	if outputFile == "" {
 		return
 	}
@@ -94,6 +94,8 @@ func writeOutputs(envCount, outputCount int, status, errorMsg string) {
 		outputErrorMessage:   errorMsg,
 	}
 
+	// These status keys are written in the plain key=value form on purpose;
+	// the writer package emits user-provided values via the multiline EOF form.
 	for key, value := range outputs {
 		if err := appendToFile(outputFile, fmt.Sprintf("%s=%s", key, value)); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing to GITHUB_OUTPUT: %v\n", err)
@@ -101,15 +103,19 @@ func writeOutputs(envCount, outputCount int, status, errorMsg string) {
 	}
 }
 
-func appendToFile(filename, content string) error {
+func appendToFile(filename, content string) (err error) {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
-	if _, err := fmt.Fprintln(f, content); err != nil {
-		return fmt.Errorf("failed to write content: %w", err)
+	if _, werr := fmt.Fprintln(f, content); werr != nil {
+		return fmt.Errorf("failed to write content: %w", werr)
 	}
 	return nil
 }
