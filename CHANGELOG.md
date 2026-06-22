@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-06-22)
+
+### Builds
+
+- **deps:** bump actions/checkout from 6 to 7 ([6bcb4fd](https://github.com/somaz94/env-output-setter/commit/6bcb4fde2f6e226460b0313057c307085da26ea9))
+
+### Continuous Integration
+
+- add DCO check via shared reusable workflow ([bc5eb1d](https://github.com/somaz94/env-output-setter/commit/bc5eb1dd41d0118c32208710849958fce6c9c2a7))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v1.8.0](https://github.com/somaz94/env-output-setter/compare/v1.7.3...v1.8.0) (2026-06-01)
 
 ### Features
