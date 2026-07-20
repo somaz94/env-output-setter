@@ -2,14 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-06-22)
+## Unreleased (2026-07-20)
 
 ### Builds
 
+- **deps:** bump actions/setup-go from 6 to 7 ([e8b5f59](https://github.com/somaz94/env-output-setter/commit/e8b5f591e673aca86cebefb5918094f8e8ca4fa9))
 - **deps:** bump actions/checkout from 6 to 7 ([6bcb4fd](https://github.com/somaz94/env-output-setter/commit/6bcb4fde2f6e226460b0313057c307085da26ea9))
 
 ### Continuous Integration
 
+- remove DCO workflow ([cf40982](https://github.com/somaz94/env-output-setter/commit/cf409825ea1fccb6bcf934b9352c9979c94f3ee0))
+- adopt semantic-pr, labels, lock-threads, PR size, and auto-assign reusables ([cab3e63](https://github.com/somaz94/env-output-setter/commit/cab3e63fcb9a02d9262371c187e4cf5d11f2b40a))
+- use reusable stale-issues workflow ([a0273e1](https://github.com/somaz94/env-output-setter/commit/a0273e179caab3066de1bdd4caf4a643e0762bed))
+- use reusable issue-greeting workflow ([2daaa16](https://github.com/somaz94/env-output-setter/commit/2daaa162ef95d098d36851502f543aa81449acc3))
+- use reusable dependabot-auto-merge workflow ([20a3c0d](https://github.com/somaz94/env-output-setter/commit/20a3c0d45c68ecb5af13f5be5c4c761696404226))
+- use reusable contributors workflow ([9d2a32c](https://github.com/somaz94/env-output-setter/commit/9d2a32cd97485ff0897e55dcf7acd810e35654df))
+- add ok-to-test workflow stub ([5bbae93](https://github.com/somaz94/env-output-setter/commit/5bbae937c4f64f53935d9b8c911528ba3deeb784))
+- add PR welcome workflow stub ([b9a2cbb](https://github.com/somaz94/env-output-setter/commit/b9a2cbbdf55d617c13066599af6dfeb2960f3c36))
 - add DCO check via shared reusable workflow ([bc5eb1d](https://github.com/somaz94/env-output-setter/commit/bc5eb1dd41d0118c32208710849958fce6c9c2a7))
 
 ### Contributors
