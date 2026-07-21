@@ -223,15 +223,15 @@ func (w *Writer) writeToFile(filePath string, keys, values []string, varType str
 // surface to the caller instead of being silently discarded.
 func (w *Writer) performWrite(filePath string, keys, values []string, varType string) (count int, err error) {
 	// Build the full payload in memory before opening the file.
-	valueTransformer := transformer.New(
-		w.cfg.MaskSecrets,
-		w.cfg.MaskPattern,
-		w.cfg.ToUpper,
-		w.cfg.ToLower,
-		w.cfg.EncodeURL,
-		w.cfg.EscapeNewlines,
-		w.cfg.MaxLength,
-	)
+	valueTransformer := transformer.New(transformer.Options{
+		MaskSecrets:    w.cfg.MaskSecrets,
+		MaskPattern:    w.cfg.MaskPattern,
+		ToUpper:        w.cfg.ToUpper,
+		ToLower:        w.cfg.ToLower,
+		EncodeURL:      w.cfg.EncodeURL,
+		EscapeNewlines: w.cfg.EscapeNewlines,
+		MaxLength:      w.cfg.MaxLength,
+	})
 
 	if w.cfg.DebugMode {
 		fmt.Printf("Writing Values:\n")

@@ -52,36 +52,42 @@ type Transformer struct {
 	maxLength int
 }
 
+// Options holds the configuration for constructing a Transformer. Using a
+// struct with named fields avoids silent transposition of the adjacent bool
+// arguments (toUpper/toLower, encodeURL/escapeNewlines). It intentionally does
+// not reuse config.Config so the transformer package stays decoupled from config.
+type Options struct {
+	MaskSecrets    bool
+	MaskPattern    string
+	ToUpper        bool
+	ToLower        bool
+	EncodeURL      bool
+	EscapeNewlines bool
+	MaxLength      int
+}
+
 // New creates a new Transformer with the specified configuration options.
 // It handles the compilation of regular expression patterns for masking.
-func New(
-	maskSecrets bool,
-	maskPattern string,
-	toUpper bool,
-	toLower bool,
-	encodeURL bool,
-	escapeNewlines bool,
-	maxLength int,
-) *Transformer {
+func New(opts Options) *Transformer {
 	var pattern *regexp.Regexp
-	if maskPattern != "" {
+	if opts.MaskPattern != "" {
 		var err error
-		pattern, err = regexp.Compile(maskPattern)
+		pattern, err = regexp.Compile(opts.MaskPattern)
 		if err != nil {
 			// Library code logs to stderr instead of stdout so it does not
 			// corrupt action outputs or get parsed as a key=value line.
-			fmt.Fprintf(os.Stderr, "Warning: Invalid mask pattern %q: %v\n", maskPattern, err)
+			fmt.Fprintf(os.Stderr, "Warning: Invalid mask pattern %q: %v\n", opts.MaskPattern, err)
 		}
 	}
 
 	return &Transformer{
-		maskSecrets:    maskSecrets,
+		maskSecrets:    opts.MaskSecrets,
 		maskPattern:    pattern,
-		toUpper:        toUpper,
-		toLower:        toLower,
-		encodeURL:      encodeURL,
-		escapeNewlines: escapeNewlines,
-		maxLength:      maxLength,
+		toUpper:        opts.ToUpper,
+		toLower:        opts.ToLower,
+		encodeURL:      opts.EncodeURL,
+		escapeNewlines: opts.EscapeNewlines,
+		maxLength:      opts.MaxLength,
 	}
 }
 

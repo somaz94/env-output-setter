@@ -68,7 +68,15 @@ func TestNew(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(tt.maskSecrets, tt.maskPattern, tt.toUpper, tt.toLower, tt.encodeURL, tt.escapeNewlines, tt.maxLength)
+			tr := New(Options{
+				MaskSecrets:    tt.maskSecrets,
+				MaskPattern:    tt.maskPattern,
+				ToUpper:        tt.toUpper,
+				ToLower:        tt.toLower,
+				EncodeURL:      tt.encodeURL,
+				EscapeNewlines: tt.escapeNewlines,
+				MaxLength:      tt.maxLength,
+			})
 
 			if tr == nil {
 				t.Fatal("New() returned nil")
@@ -226,7 +234,13 @@ func TestTransformValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", tt.toUpper, tt.toLower, tt.encodeURL, tt.escapeNewlines, tt.maxLength)
+			tr := New(Options{
+				ToUpper:        tt.toUpper,
+				ToLower:        tt.toLower,
+				EncodeURL:      tt.encodeURL,
+				EscapeNewlines: tt.escapeNewlines,
+				MaxLength:      tt.maxLength,
+			})
 			result := tr.TransformValue(tt.value, tt.supportJSON)
 
 			if result != tt.expected {
@@ -304,7 +318,10 @@ func TestMaskValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(tt.maskSecrets, tt.maskPattern, false, false, false, false, 0)
+			tr := New(Options{
+				MaskSecrets: tt.maskSecrets,
+				MaskPattern: tt.maskPattern,
+			})
 			result := tr.MaskValue(tt.value)
 
 			if result != tt.expected {
@@ -368,7 +385,7 @@ func TestCustomMask(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", false, false, false, false, 0)
+			tr := New(Options{})
 			result := tr.CustomMask(tt.value, tt.visiblePrefix, tt.visibleSuffix)
 
 			if result != tt.expected {
@@ -431,7 +448,7 @@ func TestTransformJSON(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", false, false, false, false, 0)
+			tr := New(Options{})
 			result, err := tr.TransformJSON(tt.value)
 
 			if tt.wantErr {
@@ -524,7 +541,10 @@ func TestApplyCaseConversion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", tt.toUpper, tt.toLower, false, false, 0)
+			tr := New(Options{
+				ToUpper: tt.toUpper,
+				ToLower: tt.toLower,
+			})
 			result := tr.applyCaseConversion(tt.value)
 
 			if result != tt.expected {
@@ -564,7 +584,7 @@ func TestEscapeNewlineCharacters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", false, false, false, false, 0)
+			tr := New(Options{})
 			result := tr.escapeNewlineCharacters(tt.value)
 
 			if result != tt.expected {
@@ -663,7 +683,12 @@ func TestHandleJSONValueInvalidWithAllTransforms(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := New(false, "", tt.toUpper, false, tt.encode, tt.escape, tt.maxLen)
+			tr := New(Options{
+				ToUpper:        tt.toUpper,
+				EncodeURL:      tt.encode,
+				EscapeNewlines: tt.escape,
+				MaxLength:      tt.maxLen,
+			})
 			result := tr.TransformValue(tt.value, true)
 			if result != tt.expected {
 				t.Errorf("TransformValue() = %q, want %q", result, tt.expected)
@@ -673,7 +698,7 @@ func TestHandleJSONValueInvalidWithAllTransforms(t *testing.T) {
 }
 
 func BenchmarkTransformValue(b *testing.B) {
-	tr := New(false, "", false, false, false, true, 0)
+	tr := New(Options{EscapeNewlines: true})
 	value := "This is a test value\nwith newlines\rand other content"
 
 	b.ResetTimer()
@@ -683,7 +708,7 @@ func BenchmarkTransformValue(b *testing.B) {
 }
 
 func BenchmarkMaskValue(b *testing.B) {
-	tr := New(true, "^secret_", false, false, false, false, 0)
+	tr := New(Options{MaskSecrets: true, MaskPattern: "^secret_"})
 	value := "secret_api_key_1234567890"
 
 	b.ResetTimer()
@@ -693,7 +718,7 @@ func BenchmarkMaskValue(b *testing.B) {
 }
 
 func BenchmarkTransformJSON(b *testing.B) {
-	tr := New(false, "", false, false, false, false, 0)
+	tr := New(Options{})
 	value := `{"key": "value", "nested": {"inner": "data"}}`
 
 	b.ResetTimer()
