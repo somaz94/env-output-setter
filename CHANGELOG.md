@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-07-20)
+## [v1.8.1](https://github.com/somaz94/env-output-setter/compare/v1.8.0...v1.8.1) (2026-07-21)
+
+### Code Refactoring
+
+- replace transformer.New positional args with Options struct ([88d2683](https://github.com/somaz94/env-output-setter/commit/88d26832eddd82cd40d56c9756ad0b57364e6c0e))
 
 ### Builds
 
