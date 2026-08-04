@@ -410,7 +410,7 @@ func runTest(test TestCase) TestResult {
 	}
 
 	// Check result
-	passed := true
+	var passed bool
 	if test.ShouldFail {
 		passed = (err != nil)
 	} else {
@@ -445,19 +445,21 @@ func setupTestEnv(test TestCase) {
 	envFile := fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid())
 	outputFile := fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid())
 
-	os.WriteFile(envFile, []byte{}, 0644)
-	os.WriteFile(outputFile, []byte{}, 0644)
+	// Fixture setup: a failure here surfaces as a failing test case below.
+	_ = os.WriteFile(envFile, []byte{}, 0644)
+	_ = os.WriteFile(outputFile, []byte{}, 0644)
 
-	os.Setenv("GITHUB_ENV", envFile)
-	os.Setenv("GITHUB_OUTPUT", outputFile)
+	_ = os.Setenv("GITHUB_ENV", envFile)
+	_ = os.Setenv("GITHUB_OUTPUT", outputFile)
 }
 
 func cleanupTestEnv() {
 	tmpDir := os.TempDir()
-	os.Remove(fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid()))
-	os.Remove(fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid()))
-	os.Unsetenv("GITHUB_ENV")
-	os.Unsetenv("GITHUB_OUTPUT")
+	// Best-effort cleanup of the fixture files and environment.
+	_ = os.Remove(fmt.Sprintf("%s/test_github_env_%d", tmpDir, os.Getpid()))
+	_ = os.Remove(fmt.Sprintf("%s/test_github_output_%d", tmpDir, os.Getpid()))
+	_ = os.Unsetenv("GITHUB_ENV")
+	_ = os.Unsetenv("GITHUB_OUTPUT")
 }
 
 func createTestConfig(test TestCase) *config.Config {

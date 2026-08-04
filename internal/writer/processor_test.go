@@ -713,16 +713,6 @@ func BenchmarkNormalizeWhitespace(b *testing.B) {
 	}
 }
 
-// Test helper to clean up environment
-func cleanupEnv() {
-	os.Unsetenv("INPUT_ENV_KEY")
-	os.Unsetenv("INPUT_ENV_VALUE")
-	os.Unsetenv("INPUT_OUTPUT_KEY")
-	os.Unsetenv("INPUT_OUTPUT_VALUE")
-	os.Unsetenv("GITHUB_ENV")
-	os.Unsetenv("GITHUB_OUTPUT")
-}
-
 func TestApplyGroupPrefix(t *testing.T) {
 	tests := []struct {
 		name     string
