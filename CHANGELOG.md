@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-08-07)
+
+### Performance Improvements
+
+- ship a prebuilt multi-arch image instead of building per run ([17c9ad5](https://github.com/somaz94/env-output-setter/commit/17c9ad5a0b9b64ede12932c6e890169fdcfb4af5))
+
+### Continuous Integration
+
+- add a golangci-lint config scoped to defect-finding linters ([65299ac](https://github.com/somaz94/env-output-setter/commit/65299ac95d928e1f88bf59c511eaf21a5f2851e4))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v1.8.1](https://github.com/somaz94/env-output-setter/compare/v1.8.0...v1.8.1) (2026-07-21)
 
 ### Code Refactoring
