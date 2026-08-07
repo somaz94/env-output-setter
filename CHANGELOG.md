@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-08-07)
+## [v1.9.0](https://github.com/somaz94/env-output-setter/compare/v1.8.1...v1.9.0) (2026-08-07)
 
 ### Performance Improvements
 
