@@ -19,9 +19,15 @@ jobs:
   smoke-test-basic:
     name: Smoke Test (Basic)
     runs-on: ubuntu-latest
+    # `Create release` fires twice per release: once as workflow_dispatch, which
+    # only seeds the container image while the tag does not exist yet, and once
+    # on the tag push that actually publishes the release. Smoke-testing the
+    # first one resolves the released tag to the PREVIOUS version, so every
+    # release left a failing run behind.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -52,9 +58,15 @@ jobs:
   smoke-test-options:
     name: Smoke Test (Options)
     runs-on: ubuntu-latest
+    # `Create release` fires twice per release: once as workflow_dispatch, which
+    # only seeds the container image while the tag does not exist yet, and once
+    # on the tag push that actually publishes the release. Smoke-testing the
+    # first one resolves the released tag to the PREVIOUS version, so every
+    # release left a failing run behind.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -82,9 +94,15 @@ jobs:
   smoke-test-multiline:
     name: Smoke Test (Multiline)
     runs-on: ubuntu-latest
+    # `Create release` fires twice per release: once as workflow_dispatch, which
+    # only seeds the container image while the tag does not exist yet, and once
+    # on the tag push that actually publishes the release. Smoke-testing the
+    # first one resolves the released tag to the PREVIOUS version, so every
+    # release left a failing run behind.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -119,9 +137,15 @@ jobs:
   smoke-test-transform:
     name: Smoke Test (Transform)
     runs-on: ubuntu-latest
+    # `Create release` fires twice per release: once as workflow_dispatch, which
+    # only seeds the container image while the tag does not exist yet, and once
+    # on the tag push that actually publishes the release. Smoke-testing the
+    # first one resolves the released tag to the PREVIOUS version, so every
+    # release left a failing run behind.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -149,9 +173,15 @@ jobs:
   smoke-test-json:
     name: Smoke Test (JSON)
     runs-on: ubuntu-latest
+    # `Create release` fires twice per release: once as workflow_dispatch, which
+    # only seeds the container image while the tag does not exist yet, and once
+    # on the tag push that actually publishes the release. Smoke-testing the
+    # first one resolves the released tag to the PREVIOUS version, so every
+    # release left a failing run behind.
     if: >
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
