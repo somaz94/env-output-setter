@@ -16,7 +16,7 @@ internal/
   filereader/                # File encoding handling
 tests/test_local.go          # Local integration test suite
 Makefile                     # Build, test, lint commands
-Dockerfile                   # Multi-stage (golang:1.26-alpine → alpine:latest)
+Dockerfile                   # Multi-stage (golang alpine builder → alpine runtime)
 action.yml                   # GitHub Action definition (23 inputs, 4 outputs)
 cliff.toml                   # git-cliff config for release notes
 ```
