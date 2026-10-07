@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -o /env-output-setter ./cmd/main.go
 
 # Final stage
-FROM alpine:latest
+FROM alpine:3.24
 
 WORKDIR /app
 
