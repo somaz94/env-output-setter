@@ -7,9 +7,8 @@ FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS builder
 
 WORKDIR /app
 
-# Supplied per target platform. The defaults keep a plain `docker build` (a
-# local one-off, no --platform) working: TARGETARCH resolves empty there, and
-# an empty GOARCH means "host default", which is what that build wants anyway.
+# BuildKit sets both for the target platform, the host's for a plain
+# `docker build` without --platform; the TARGETOS default just restates linux.
 #
 # BuildKit is required either way — `$BUILDPLATFORM` on the FROM above is a
 # BuildKit-only variable, and the legacy builder fails to parse the line rather
